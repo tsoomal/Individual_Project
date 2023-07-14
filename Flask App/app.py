@@ -21,21 +21,15 @@ class Test(db.Model):
 
 @app.route("/")
 def index():
-    tabTitle = "Home"
-    pageHeading = "BookArbitrage4U"
-    return render_template("index.html", tabTitle=tabTitle, pageHeading=pageHeading)
+    return render_template("index.html")
 
 @app.route("/about")
 def about():
-    tabTitle = "About BookArbitrage4U"
-    pageHeading = tabTitle
-    return render_template("about.html", tabTitle=tabTitle, pageHeading=pageHeading)
+    return render_template("about.html")
 
 @app.route("/queryDatabase")
 def queryDatabase():
-    tabTitle = "Query the Database!"
-    pageHeading = tabTitle
-    return render_template("queryDatabase.html", tabTitle=tabTitle, pageHeading=pageHeading)
+    return render_template("queryDatabase.html")
 
 # @app.route("/showdb")
 # def testdb():
