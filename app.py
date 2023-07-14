@@ -94,6 +94,7 @@ def form():
 
     server = smtplib.SMTP("smtp.gmail.com", 587)
     server.starttls()
+    # Environmental Variable has to be configured in run-time environment
     server.login("bookarbitragedevteam@gmail.com",os.getenv('gmail_password'))
 
     # https://stackoverflow.com/questions/7232088/python-subject-not-shown-when-sending-email-using-smtplib-module
