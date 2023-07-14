@@ -35,7 +35,7 @@ def scroll_to_bottom(driver):
                  " window.pageYOffset : (document.documentElement ||"
                  " document.body.parentNode || document.body);"))
 
-def setup_list_one_page(URL=None):
+def setup_list_one_page(fileNameComponent, URL=None):
     service = Service("..\chromedriver_win32")
     options = webdriver.ChromeOptions()
     options.add_argument("--headless=new")
@@ -96,18 +96,19 @@ def setup_list_one_page(URL=None):
         print(link)
 
         data = [title, link]
-        with open("./Web Scraping/BeautifulSoup/ScraperAmazonDataset100Prices.csv", "a+", newline="", encoding="UTF8") as f:
-            writer = csv.writer(f)
-            writer.writerow(data)
+
+        with open("./Web Scraping/BeautifulSoup/ScraperAmazonDataset" + fileNameComponent + "Prices.csv", "a+", newline="", encoding="UTF8") as f:
+                writer = csv.writer(f)
+                writer.writerow(data)
 
 
 def setup_list(URL = None):
     # Uses Amazon's Best Selling 100 Book list to setup a list of books to track
     # Book Title, Link, ISBN
     create_blank_csv("./Web Scraping/BeautifulSoup/ScraperAmazonDataset100Prices.csv", createHeader=True)
-    setup_list_one_page()
-    setup_list_one_page("https://www.amazon.co.uk/best-sellers-books-Amazon/zgbs/books/ref=zg_bs_pg_2?_encoding=UTF8&pg=2")
-    get_ISBN_from_list()
+    setup_list_one_page("100")
+    setup_list_one_page("100","https://www.amazon.co.uk/best-sellers-books-Amazon/zgbs/books/ref=zg_bs_pg_2?_encoding=UTF8&pg=2")
+    get_ISBN_from_list("100")
 
     create_blank_csv("./Web Scraping/BeautifulSoup/ScraperEbayDataset100Prices.csv")
     df = pd.read_csv("./Web Scraping/BeautifulSoup/ScraperAmazonDataset100Prices.csv")
@@ -117,11 +118,47 @@ def setup_list(URL = None):
     df = pd.read_csv("./Web Scraping/BeautifulSoup/ScraperAmazonDataset100Prices.csv")
     df.to_csv("./Web Scraping/BeautifulSoup/ScraperAmazonDataset100Rankings.csv",index=False)
 
+def setup_list_modular(fileNameComponent):
+    # Uses Amazon's Best Selling 100 Book list to setup a list of books to track
+    # Book Title, Link, ISBN
+    create_blank_csv("./Web Scraping/BeautifulSoup/ScraperAmazonDataset" + fileNameComponent + "Prices.csv", createHeader=True)
 
-def get_ISBN_from_list():
+    # Role-Playing and War Games
+    setup_list_one_page(fileNameComponent,
+                        "https://www.amazon.co.uk/Best-Sellers-Books-Role-Playing-War-Games/zgbs/books/270509/ref=zg_bs_nav_books_3_270453")
+    setup_list_one_page(fileNameComponent,
+                        "https://www.amazon.co.uk/best-sellers-books-Amazon/zgbs/books/270509/ref=zg_bs_pg_2_books?_encoding=UTF8&pg=2")
+
+    # Cult graphic novels
+    setup_list_one_page(fileNameComponent,
+                        "https://www.amazon.co.uk/gp/bestsellers/books/503400/ref=pd_zg_hrsr_books")
+    setup_list_one_page(fileNameComponent,
+                        "https://www.amazon.co.uk/best-sellers-books-Amazon/zgbs/books/503400/ref=zg_bs_pg_2_books?_encoding=UTF8&pg=2")
+
+    # Legal histories
+    setup_list_one_page(fileNameComponent,
+                        "https://www.amazon.co.uk/gp/bestsellers/books/14909604031/ref=pd_zg_hrsr_books")
+    setup_list_one_page(fileNameComponent,
+                        "https://www.amazon.co.uk/best-sellers-books-Amazon/zgbs/books/14909604031/ref=zg_bs_pg_2_books?_encoding=UTF8&pg=2")
+
+    get_ISBN_from_list(fileNameComponent)
+
+    create_blank_csv("./Web Scraping/BeautifulSoup/ScraperEbayDataset" + fileNameComponent + "Prices.csv")
+    df = pd.read_csv("./Web Scraping/BeautifulSoup/ScraperAmazonDataset" + fileNameComponent + "Prices.csv")
+    df.to_csv("./Web Scraping/BeautifulSoup/ScraperEbayDataset" + fileNameComponent + "Prices.csv", index=False)
+
+    #create_blank_csv("./Web Scraping/BeautifulSoup/ScraperAmazonDataset" + fileNameComponent + "Rankings.csv")
+    #df = pd.read_csv("./Web Scraping/BeautifulSoup/ScraperAmazonDataset" + fileNameComponent + "Prices.csv")
+    #df.to_csv("./Web Scraping/BeautifulSoup/ScraperAmazonDataset" + fileNameComponent + "Rankings.csv",index=False)
+
+
+def get_ISBN_from_list(fileNameComponent):
     pd.set_option('display.max_rows', 1000)
     pd.options.display.width = 0
-    df = pd.read_csv("./Web Scraping/BeautifulSoup/ScraperAmazonDataset100Prices.csv")
+    df = None
+
+    df = pd.read_csv("./Web Scraping/BeautifulSoup/ScraperAmazonDataset" + fileNameComponent + "Prices.csv")
+
     links_column = df.iloc[:,[1]]
     number_of_rows = df.shape[0]
     isbn_list = []
@@ -135,17 +172,17 @@ def get_ISBN_from_list():
         isbn_list.append(isbn_number)
 
     df["ISBN"] = isbn_list
-    df.to_csv("./Web Scraping/BeautifulSoup/ScraperAmazonDataset100Prices.csv", index=False)
+    df.to_csv("./Web Scraping/BeautifulSoup/ScraperAmazonDataset" + fileNameComponent + "Prices.csv", index=False)
 
 
-def check_amazon_prices_today(URL=None):
+def check_amazon_prices_today(fileNameComponent, URL=None):
     now = datetime.now()
     current_date = now.strftime("%d/%m/%Y")
 
     prices_list = []
     amazon_ranking = []
 
-    df = pd.read_csv("./Web Scraping/BeautifulSoup/ScraperAmazonDataset100Prices.csv")
+    df = pd.read_csv("./Web Scraping/BeautifulSoup/ScraperAmazonDataset" + fileNameComponent + "Prices.csv")
     number_of_rows = df.shape[0]
 
     service = Service("..\chromedriver_win32")
@@ -159,6 +196,7 @@ def check_amazon_prices_today(URL=None):
 
     #with chrome_driver as driver:
     for row_number in range(number_of_rows):
+    #for row_number in range(100):
         time1 = datetime.now()
         print("Item: " + str(row_number))
         URL_raw = df.iloc[row_number, [1]]
@@ -207,11 +245,11 @@ def check_amazon_prices_today(URL=None):
 
     #driver.quit()
     df[current_date] = prices_list
-    df.to_csv("./Web Scraping/BeautifulSoup/ScraperAmazonDataset100Prices.csv", index=False)
+    df.to_csv("./Web Scraping/BeautifulSoup/ScraperAmazonDataset" + fileNameComponent + "Prices.csv", index=False)
 
-    df2 = pd.read_csv("./Web Scraping/BeautifulSoup/ScraperAmazonDataset100Rankings.csv")
-    df2[current_date] = amazon_ranking
-    df2.to_csv("./Web Scraping/BeautifulSoup/ScraperAmazonDataset100Rankings.csv", index=False)
+    #df2 = pd.read_csv("./Web Scraping/BeautifulSoup/ScraperAmazonDataset" + fileNameComponent + "Rankings.csv")
+    #df2[current_date] = amazon_ranking
+    #df2.to_csv("./Web Scraping/BeautifulSoup/ScraperAmazonDataset" + fileNameComponent + "Rankings.csv", index=False)
 
 
 def check_ebay_prices_today_selenium():
@@ -250,12 +288,12 @@ def check_ebay_prices_today_selenium():
               index=False)
 
 
-def check_ebay_prices_today():
+def check_ebay_prices_today(fileNameComponent):
     # MAKE SURE ISBN-10s WITHIN SOURCE CSV ARE FORMATTED WITH LEADING ZEROES INCLUDED
     now = datetime.now()
     current_date = now.strftime("%d/%m/%Y")
 
-    df = pd.read_csv("./Web Scraping/BeautifulSoup/ScraperEbayDataset100Prices.csv")
+    df = pd.read_csv("./Web Scraping/BeautifulSoup/ScraperEbayDataset" + fileNameComponent + "Prices.csv")
     number_of_rows = df.shape[0]
     isbn_col = df.iloc[:, [2]]
     ebay_price_list = []
@@ -270,16 +308,16 @@ def check_ebay_prices_today():
         page = requests.get(URL)
         html = page.text
         soup = BeautifulSoup(html, features="lxml")
-        results = soup.find("ul", class_="srp-results")
-        books_html = results.findAll("span", class_="s-item__price")
-        if len(books_html) == 0:
-            print("FAIL")
-            ebay_price_list.append(999999)
-        else:
+        try:
+            results = soup.find("ul", class_="srp-results")
+            books_html = results.findAll("span", class_="s-item__price")
             lowest_price_with_sign = books_html[0].get_text()
             lowest_price = lowest_price_with_sign[1:]
             print(lowest_price_with_sign)
             ebay_price_list.append(lowest_price)
+        except:
+            print("FAIL")
+            ebay_price_list.append(999999)
 
     # for row_count, price in enumerate(ebay_price_list):
     #     if price == 999999:
@@ -314,7 +352,7 @@ def check_ebay_prices_today():
     #             ebay_price_list[row_number] = lowest_price
 
     df[current_date] = ebay_price_list
-    df.to_csv("./Web Scraping/BeautifulSoup/ScraperEbayDataset100Prices.csv", index=False)
+    df.to_csv("./Web Scraping/BeautifulSoup/ScraperEbayDataset" + fileNameComponent + "Prices.csv", index=False)
 
 def create_blank_csv(file_name, createHeader=False):
     if createHeader==True:
@@ -430,14 +468,16 @@ def get_all_best_seller_books(second_tranche = False):
     delete_invalid_ISBN()
 
 
-def remove_duplicate_rows():
-    df = pd.read_csv("./Web Scraping/BeautifulSoup/ScraperAmazonDataset100Prices.csv")
+def remove_duplicate_rows(fileNameComponent):
+    df = pd.read_csv("./Web Scraping/BeautifulSoup/ScraperAmazonDataset" + fileNameComponent + "Prices.csv")
     df.drop_duplicates(subset=["ISBN"], inplace=True, keep='first')
-    df.to_csv("./Web Scraping/BeautifulSoup/ScraperAmazonDataset100Prices.csv",
+    df.to_csv("./Web Scraping/BeautifulSoup/ScraperAmazonDataset" + fileNameComponent + "Prices.csv",
+              index=False)
+    df.to_csv("./Web Scraping/BeautifulSoup/ScraperEbayDataset" + fileNameComponent + "Prices.csv",
               index=False)
 
-def delete_invalid_ISBN():
-    df = pd.read_csv("./Web Scraping/BeautifulSoup/ScraperAmazonDataset100Prices.csv")
+def delete_invalid_ISBN(fileNameComponent):
+    df = pd.read_csv("./Web Scraping/BeautifulSoup/ScraperAmazonDataset" + fileNameComponent + "Prices.csv")
     ISBN_column = df.iloc[:, [2]]
     number_of_rows = df.shape[0]
     rows_to_delete = []
@@ -458,7 +498,9 @@ def delete_invalid_ISBN():
         for row in rows_to_delete:
             df = df.drop(row)
 
-    df.to_csv("./Web Scraping/BeautifulSoup/ScraperAmazonDataset100Prices.csv",
+    df.to_csv("./Web Scraping/BeautifulSoup/ScraperAmazonDataset" + fileNameComponent + "Prices.csv",
+              index=False)
+    df.to_csv("./Web Scraping/BeautifulSoup/ScraperEbayDataset" + fileNameComponent + "Prices.csv",
               index=False)
 
 def main():
@@ -468,18 +510,15 @@ def main():
     #     print(df)
     #     time.sleep(86400)
 
-    #create_blank_csv("./Web Scraping/BeautifulSoup/ScraperEbayDataset100Prices.csv", createHeader=True)
-    #setup_list()
-    #setup_list_one_page("https://www.amazon.co.uk/Best-Sellers-Books-Business-Finance-Law/zgbs/books/68/ref=zg_bs_nav_books_1")
+    # TARGETED SCRAPING
+    #setup_list_modular("Targeted")
 
-    #get_all_best_seller_books(second_tranche=True)
+    #get_ISBN_from_list("Targeted")
+    #remove_duplicate_rows("Targeted")
+    #delete_invalid_ISBN("Targeted")
 
-    #get_ISBN_from_list()
-    #remove_duplicate_rows()
-    #delete_invalid_ISBN()
-
-    #check_amazon_prices_today()
-    check_ebay_prices_today()
+    check_amazon_prices_today("Targeted")
+    check_ebay_prices_today("Targeted")
 
     # pd.set_option('display.max_rows', 1000)
     # pd.set_option('display.max_columns', 1000)
