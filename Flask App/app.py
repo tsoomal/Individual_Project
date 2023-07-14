@@ -1,6 +1,9 @@
 from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+import smtplib
+from email.message import EmailMessage
+import os
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///test.db"
@@ -36,16 +39,29 @@ def contact():
 
 @app.route("/form", methods=["POST"])
 def form():
-    first_name = request.form.get("first_name")
-    last_name = request.form.get("surname")
+    name = request.form.get("name")
     email_address = request.form.get("email_address")
+    message = request.form.get("message")
 
-    if not first_name or not last_name or not email_address:
+    # Error-handling
+    if not name or not email_address or not message:
         error_statement = "All form fields required!"
-        return render_template("contact.html", error_statement=error_statement, first_name=first_name,
-                               last_name=last_name, email_address=email_address)
+        return render_template("contact.html", error_statement=error_statement, name=name,
+                               email_address=email_address, message=message)
 
-    return render_template("form.html", first_name=first_name, last_name=last_name, email_address=email_address)
+    server = smtplib.SMTP("smtp.gmail.com", 587)
+    server.starttls()
+    server.login("bookarbitragedevteam@gmail.com",os.getenv('BookArbitrage'))
+
+    # https://stackoverflow.com/questions/7232088/python-subject-not-shown-when-sending-email-using-smtplib-module
+    msg = EmailMessage()
+    msg.set_content("Name:\n" + name + "\n\n" + "Email address:\n" + email_address + "\n\n" + "Message:\n" + message)
+    msg['Subject'] = "BookArbitrage Contact Form Submission"
+    msg['From'] = "bookarbitragedevteam@gmail.com"
+    msg['To'] = "tsoomal@hotmail.co.uk"
+    server.send_message(msg)
+
+    return render_template("form.html", name=name, email_address=email_address, message=message)
 
 if __name__ == "__main__":
     app.run()

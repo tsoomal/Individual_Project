@@ -12,22 +12,22 @@
 </div>
     {% endif %}
 
-    <h1>Contact Form</h1>
+    <h1>Contact Us</h1>
 
     <br/>
 
     <form action="/form" method="POST">
         <div class="mb-3">
         <input type="text" class="form-control" id="first_name" aria-describedby="emailHelp"
-               placeholder="First Name" name="first_name" value={{first_name}}>
+               placeholder="Name" name="name" value={{name}}>
       </div>
         <div class="mb-3">
-        <input type="text" class="form-control" id="surname" aria-describedby="emailHelp"
-               placeholder="Last Name" name="surname" value={{last_name}}>
+        <input type="email" class="form-control" id="surname" aria-describedby="emailHelp"
+               placeholder="Email Address" name="email_address" value={{email_address}}>
       </div>
       <div class="mb-3">
-        <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
-            placeholder="Email Address" name="email_address" value={{email_address}}>
+        <input type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
+            placeholder="Message" name="message" value={{message}}>
       </div>
         <br/>
       <button type="submit" class="btn btn-primary">Submit</button>
