@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Contact Us{% endblock %}
+
+{% block content %}
+    <div class="container">
+
+    {% if error_statement %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+  <strong>{{error_statement}}</strong> Please fill in all fields below.
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+    {% endif %}
+
+    <h1>Contact Form</h1>
+
+    <br/>
+
+    <form action="/form" method="POST">
+        <div class="mb-3">
+        <input type="text" class="form-control" id="first_name" aria-describedby="emailHelp"
+               placeholder="First Name" name="first_name" value={{first_name}}>
+      </div>
+        <div class="mb-3">
+        <input type="text" class="form-control" id="surname" aria-describedby="emailHelp"
+               placeholder="Last Name" name="surname" value={{last_name}}>
+      </div>
+      <div class="mb-3">
+        <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
+            placeholder="Email Address" name="email_address" value={{email_address}}>
+      </div>
+        <br/>
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+
+	</div>
+{% endblock %}

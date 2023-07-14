@@ -29,13 +29,17 @@
           <a class="nav-link" href="{{ url_for('about')}}">About</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{{ url_for('queryDatabase')}}">Query the Database</a>
+          <a class="nav-link" href="{{ url_for('query_database')}}">Query the Database</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('contact')}}">Contact Us</a>
         </li>
       </ul>
     </div>
   </div>
 </nav>
 
+    <br/>
 {% block content %}
 {% endblock %}
 
