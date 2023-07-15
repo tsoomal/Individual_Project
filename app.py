@@ -31,9 +31,9 @@ class Amazon(db.Model):
     book_name = db.Column(db.String(200), nullable=False)
     amazon_link = db.Column(db.String(200), nullable=False)
     isbn = db.Column(db.String(13), primary_key=True)
-    product_price = db.Column(db.Numeric(2), nullable=False)
-    delivery_price = db.Column(db.Numeric(2), nullable=False)
-    total_price = db.Column(db.Numeric(2), nullable=False)
+    product_price = db.Column(db.Numeric(5,2), nullable=False)
+    delivery_price = db.Column(db.Numeric(5,2), nullable=False)
+    total_price = db.Column(db.Numeric(5,2), nullable=False)
 
     def __init__(self, book_name, amazon_link, isbn, product_price, delivery_price, total_price):
         self.book_name = book_name
@@ -51,9 +51,9 @@ class Ebay(db.Model):
     book_name = db.Column(db.String(200), nullable=False)
     ebay_link = db.Column(db.String(200), nullable=False)
     isbn = db.Column(db.String(13), primary_key=True)
-    product_price = db.Column(db.Numeric(2), nullable=False)
-    delivery_price = db.Column(db.Numeric(2), nullable=False)
-    total_price = db.Column(db.Numeric(2), nullable=False)
+    product_price = db.Column(db.Numeric(5,2), nullable=False)
+    delivery_price = db.Column(db.Numeric(5,2), nullable=False)
+    total_price = db.Column(db.Numeric(5,2), nullable=False)
 
     def __init__(self, book_name, ebay_link, isbn, product_price, delivery_price, total_price):
         self.book_name = book_name
@@ -84,6 +84,15 @@ def contact():
 @app.route("/books", methods =['POST','GET'])
 def books():
     if request.method == "POST":
+        books = Amazon.query.order_by(Amazon.book_name)
+        return render_template("books.html", books=books)
+    else:
+        books = Amazon.query.order_by(Amazon.book_name)
+        return render_template("books.html", books=books)
+
+@app.route("/add_books", methods =['POST','GET'])
+def add_books():
+    if request.method == "POST":
         book_name = request.form['book_name']
         isbn = request.form['isbn']
         ebay_link = request.form['ebay_link']
@@ -98,9 +107,7 @@ def books():
         # Validate Book Name
         if len(book_name) == 0:
             error_statement = "Please enter a book name!"
-            books = Amazon.query.order_by(Amazon.book_name)
-            return render_template("books.html", error_statement=error_statement, books=books, book_name=book_name,
-                                   isbn=isbn,
+            return render_template("add_books.html", error_statement=error_statement, book_name=book_name, isbn=isbn,
                                    ebay_link=ebay_link, ebay_product_price=ebay_product_price,
                                    ebay_delivery_price=ebay_delivery_price, ebay_total_price=ebay_total_price,
                                    amazon_link=amazon_link, amazon_product_price=amazon_product_price,
@@ -109,13 +116,13 @@ def books():
         # Validate ISBN
         try:
             if len(isbn) == 10 or len(isbn) == 13:
-                if len(isbn)==10:
-                    if isbnlib.is_isbn10(isbn)==True:
+                if len(isbn) == 10:
+                    if isbnlib.is_isbn10(isbn) == True:
                         pass
                     else:
                         raise Exception
-                elif len(isbn)==13:
-                    if isbnlib.is_isbn13(isbn)==True:
+                elif len(isbn) == 13:
+                    if isbnlib.is_isbn13(isbn) == True:
                         pass
                     else:
                         raise Exception
@@ -124,8 +131,7 @@ def books():
         except:
             error_statement = "ISBN has to be in either ISBN-10 or ISBN-13 format!"
             books = Amazon.query.order_by(Amazon.book_name)
-            return render_template("books.html", error_statement=error_statement, books=books, book_name=book_name,
-                                   isbn=isbn,
+            return render_template("add_books.html", error_statement=error_statement, book_name=book_name, isbn=isbn,
                                    ebay_link=ebay_link, ebay_product_price=ebay_product_price,
                                    ebay_delivery_price=ebay_delivery_price, ebay_total_price=ebay_total_price,
                                    amazon_link=amazon_link, amazon_product_price=amazon_product_price,
@@ -139,7 +145,7 @@ def books():
             db.session.commit()
 
             new_book = Ebay(book_name=book_name, isbn=isbn, ebay_link="placeholder_link", product_price=5.00,
-                              delivery_price=0.00, total_price=5.00)
+                            delivery_price=0.00, total_price=5.00)
             db.session.add(new_book)
             db.session.commit()
             return redirect('/books')
@@ -148,21 +154,15 @@ def books():
             error_statement = "That book already exists in the database, " \
                               "or there is another cause for an integrity error."
             books = Amazon.query.order_by(Amazon.book_name)
-            return render_template("books.html", error_statement=error_statement, books=books)
+            return render_template("add_books.html", error_statement=error_statement)
         except:
             db.session.rollback()
             error_statement = "There was an error adding that book to the database."
             books = Amazon.query.order_by(Amazon.book_name)
-            return render_template("books.html", error_statement=error_statement, books=books)
+            return render_template("add_books.html", error_statement=error_statement)
 
+    return render_template("add_books.html")
 
-
-
-        # NEED SCRIPT TO FIND AMAZON PRICE.
-
-    else:
-        books = Amazon.query.order_by(Amazon.book_name)
-        return render_template("books.html", books=books)
 
 @app.route("/update/<string:isbn>", methods =['POST','GET'])
 def update(isbn):
@@ -194,10 +194,25 @@ def update(isbn):
         if request.form.get('isbn'):
             book_to_update_amazon.isbn=request.form['isbn']
             book_to_update_ebay.isbn = request.form['isbn']
+
+        if request.form.get('amazon_link'):
+            book_to_update_amazon.total_price=request.form['amazon_link']
+        if request.form.get('amazon_product_price'):
+            book_to_update_amazon.total_price=request.form['amazon_product_price']
+        if request.form.get('amazon_delivery_price'):
+            book_to_update_amazon.total_price=request.form['amazon_delivery_price']
         if request.form.get('amazon_total_price'):
             book_to_update_amazon.total_price=request.form['amazon_total_price']
+
+        if request.form.get('ebay_link'):
+            book_to_update_ebay.total_price=request.form['ebay_link']
+        if request.form.get('ebay_product_price'):
+            book_to_update_ebay.total_price=request.form['ebay_product_price']
+        if request.form.get('ebay_delivery_price'):
+            book_to_update_ebay.total_price=request.form['ebay_delivery_price']
         if request.form.get('ebay_total_price'):
             book_to_update_ebay.total_price=request.form['ebay_total_price']
+
         # Push to database
         try:
             db.session.commit()

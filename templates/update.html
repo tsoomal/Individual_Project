@@ -4,13 +4,20 @@
 
 {% block content %}
     <div class="container">
-    <h1>Update Book</h1>
+    <h1>Update Book in Database</h1>
+
+        {% if error_statement %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <strong>{{error_statement}}</strong>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
         <br/>
         <form action="/update/{{book_to_update.isbn}}" METHOD="POST">
             <span class="label">Book Name:</span> &nbsp <input type="text" placeholder="Name" name="book_name" value="{{book_to_update.book_name}}"> <br/>
 			<!-- https://stackoverflow.com/questions/5601647/html5-email-input-pattern-attribute -->
-            <span class="label">ISBN:</span> &nbsp <input type="text" placeholder="ISBN" name="isbn" value="{{book_to_update.isbn}}" pattern="([0-9]{10})|([0-9]{9}[xX]{1})"
-														  oninvalid="setCustomValidity('Please use either ISBN-10 or ISBN-13 format.')" oninput="setCustomValidity('')"> <br/><br/>
+            <span class="label">ISBN:</span> &nbsp <input type="text" placeholder="ISBN" name="isbn" value="{{book_to_update.isbn}}" pattern="([0-9]{10})|([0-9]{9}[X]{1})|([0-9]{13})" oninvalid="this.setCustomValidity('Please use either ISBN-10 or ISBN-13 format. Capitalise any \'X\' character.')" oninput="setCustomValidity('')"/> <br/><br/>
 
             <span class="label">Amazon link:</span> &nbsp <input type="text" placeholder="amazon_link" name="amazon_link" value="{{book_to_update_amazon.amazon_link}}"> <br/>
             <span class="label">Amazon product price:</span> &nbsp <input type="text" placeholder="amazon_product_price" name="amazon_product_price" value="{{book_to_update_amazon.product_price}}"> <br/>

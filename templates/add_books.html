@@ -13,12 +13,11 @@
     </div>
     {% endif %}
 
-    <h1>Books List</h1>
         <br/>
-        <form action="/books" METHOD="POST">
+        <form action="/add_books" METHOD="POST">
             <input type="text" placeholder="Book Name" name="book_name" value={{book_name}}>
             <br/>
-            <input type="text" placeholder="ISBN" name="isbn" value={{isbn}}>
+            <input type="text" placeholder="ISBN" name="isbn" value="{{isbn}}" pattern="([0-9]{10})|([0-9]{9}[X]{1})|([0-9]{13})" oninvalid="this.setCustomValidity('Please use either ISBN-10 or ISBN-13 format. Capitalise any \'X\' character.')" oninput="setCustomValidity('')">
             <br/><br/>
             <input type="text" placeholder="Ebay Link" name="ebay_link" value={{ebay_link}}>
             <br/>
@@ -38,13 +37,6 @@
             <br/><br/>
             <input type="submit" value="Add Book" class="btn btn-primary">
         </form>
-
-
-
-
-
-
-
 
 
 
