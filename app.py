@@ -1,4 +1,9 @@
+# Tutorial on creating Python Flask app from scratch, using html, bootstrap and css for frontend. SQLlite for frontend.
 # https://www.youtube.com/playlist?list=PLCC34OHNcOtqJBOLjXTd5xC0e-VD3siPn
+
+# Using Postgresql
+# https://stackabuse.com/using-sqlalchemy-with-flask-and-postgresql/
+
 
 from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
@@ -6,23 +11,60 @@ from datetime import datetime
 import smtplib
 from email.message import EmailMessage
 import os
+from flask_migrate import Migrate
+from sqlalchemy.exc import IntegrityError
+# https://stackoverflow.com/questions/38111620/python-isbn-13-digit-validate
+import isbnlib
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///friends.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:password@localhost:5432/BookArbitrage"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.secret_key = 'secret string'
 # Initialising the database
 db = SQLAlchemy(app)
 app.app_context().push()
+migrate = Migrate(app,db)
 
 # Creating the database model
-class Friends(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(200), nullable=False)
-    date_created = db.Column(db.DateTime, default=datetime.utcnow)
+class Amazon(db.Model):
+    __tablename__ = 'Amazon'
+    book_name = db.Column(db.String(200), nullable=False)
+    amazon_link = db.Column(db.String(200), nullable=False)
+    isbn = db.Column(db.String(13), primary_key=True)
+    product_price = db.Column(db.Numeric(2), nullable=False)
+    delivery_price = db.Column(db.Numeric(2), nullable=False)
+    total_price = db.Column(db.Numeric(2), nullable=False)
 
-    # Create function to return string when we add something
+    def __init__(self, book_name, amazon_link, isbn, product_price, delivery_price, total_price):
+        self.book_name = book_name
+        self.amazon_link = amazon_link
+        self.isbn = isbn
+        self.product_price = product_price
+        self.delivery_price = delivery_price
+        self.total_price = total_price
+
     def __repr__(self):
-        return "<Name %r>" % self.id
+        return f"<Book: {self.book_name}>"
 
+class Ebay(db.Model):
+    __tablename__ = 'Ebay'
+    book_name = db.Column(db.String(200), nullable=False)
+    ebay_link = db.Column(db.String(200), nullable=False)
+    isbn = db.Column(db.String(13), primary_key=True)
+    product_price = db.Column(db.Numeric(2), nullable=False)
+    delivery_price = db.Column(db.Numeric(2), nullable=False)
+    total_price = db.Column(db.Numeric(2), nullable=False)
+
+    def __init__(self, book_name, ebay_link, isbn, product_price, delivery_price, total_price):
+        self.book_name = book_name
+        self.ebay_link = ebay_link
+        self.isbn = isbn
+        self.product_price = product_price
+        self.delivery_price = delivery_price
+        self.total_price = total_price
+
+    def __repr__(self):
+        return f"<Book: {self.book_name}>"
 
 @app.route("/")
 def index():
@@ -39,45 +81,151 @@ def query_database():
 def contact():
     return render_template("contact.html")
 
-@app.route("/friends", methods =['POST','GET'])
-def friends():
+@app.route("/books", methods =['POST','GET'])
+def books():
     if request.method == "POST":
-        friend_name = request.form['name']
-        new_friend = Friends(name=friend_name)
+        book_name = request.form['book_name']
+        isbn = request.form['isbn']
+        ebay_link = request.form['ebay_link']
+        ebay_product_price = request.form['ebay_product_price']
+        ebay_delivery_price = request.form['ebay_delivery_price']
+        ebay_total_price = request.form['ebay_total_price']
+        amazon_link = request.form['amazon_link']
+        amazon_product_price = request.form['amazon_product_price']
+        amazon_delivery_price = request.form['amazon_delivery_price']
+        amazon_total_price = request.form['amazon_total_price']
+
+        # Validate Book Name
+        if len(book_name) == 0:
+            error_statement = "Please enter a book name!"
+            books = Amazon.query.order_by(Amazon.book_name)
+            return render_template("books.html", error_statement=error_statement, books=books, book_name=book_name,
+                                   isbn=isbn,
+                                   ebay_link=ebay_link, ebay_product_price=ebay_product_price,
+                                   ebay_delivery_price=ebay_delivery_price, ebay_total_price=ebay_total_price,
+                                   amazon_link=amazon_link, amazon_product_price=amazon_product_price,
+                                   amazon_delivery_price=amazon_delivery_price, amazon_total_price=amazon_total_price)
+
+        # Validate ISBN
+        try:
+            if len(isbn) == 10 or len(isbn) == 13:
+                if len(isbn)==10:
+                    if isbnlib.is_isbn10(isbn)==True:
+                        pass
+                    else:
+                        raise Exception
+                elif len(isbn)==13:
+                    if isbnlib.is_isbn13(isbn)==True:
+                        pass
+                    else:
+                        raise Exception
+            else:
+                raise Exception
+        except:
+            error_statement = "ISBN has to be in either ISBN-10 or ISBN-13 format!"
+            books = Amazon.query.order_by(Amazon.book_name)
+            return render_template("books.html", error_statement=error_statement, books=books, book_name=book_name,
+                                   isbn=isbn,
+                                   ebay_link=ebay_link, ebay_product_price=ebay_product_price,
+                                   ebay_delivery_price=ebay_delivery_price, ebay_total_price=ebay_total_price,
+                                   amazon_link=amazon_link, amazon_product_price=amazon_product_price,
+                                   amazon_delivery_price=amazon_delivery_price, amazon_total_price=amazon_total_price)
+
         # Push to database
         try:
-            db.session.add(new_friend)
+            new_book = Amazon(book_name=book_name, isbn=isbn, amazon_link="placeholder_link", product_price=5.00,
+                              delivery_price=0.00, total_price=5.00)
+            db.session.add(new_book)
             db.session.commit()
-            return redirect('/friends')
-        except:
-            return "There was an error adding the friend to the database"
-    else:
-        friends = Friends.query.order_by(Friends.date_created)
-        return render_template("friends.html", friends=friends)
 
-@app.route("/update/<int:id>", methods =['POST','GET'])
-def update(id):
-    friend_to_update = Friends.query.get_or_404(id)
-    if request.method == "POST":
-        friend_to_update.name=request.form['name']
-        # Push to database
-        try:
+            new_book = Ebay(book_name=book_name, isbn=isbn, ebay_link="placeholder_link", product_price=5.00,
+                              delivery_price=0.00, total_price=5.00)
+            db.session.add(new_book)
             db.session.commit()
-            return redirect('/friends')
+            return redirect('/books')
+        except IntegrityError:
+            db.session.rollback()
+            error_statement = "That book already exists in the database, " \
+                              "or there is another cause for an integrity error."
+            books = Amazon.query.order_by(Amazon.book_name)
+            return render_template("books.html", error_statement=error_statement, books=books)
         except:
-            return "There was an error updating that friend in the database"
-    else:
-        return render_template("update.html", friend_to_update=friend_to_update)
+            db.session.rollback()
+            error_statement = "There was an error adding that book to the database."
+            books = Amazon.query.order_by(Amazon.book_name)
+            return render_template("books.html", error_statement=error_statement, books=books)
 
-@app.route("/delete/<int:id>")
-def delete(id):
-    friend_to_delete = Friends.query.get_or_404(id)
+
+
+
+        # NEED SCRIPT TO FIND AMAZON PRICE.
+
+    else:
+        books = Amazon.query.order_by(Amazon.book_name)
+        return render_template("books.html", books=books)
+
+@app.route("/update/<string:isbn>", methods =['POST','GET'])
+def update(isbn):
+    book_to_update_amazon = Amazon.query.get_or_404(isbn)
+    book_to_update_ebay = Ebay.query.get_or_404(isbn)
+
     try:
-        db.session.delete(friend_to_delete)
-        db.session.commit()
-        return redirect('/friends')
+        if request.form.get('isbn'):
+            isbn = request.form.get('isbn')
+            if len(isbn) == 10:
+                if isbnlib.is_isbn10(isbn) == True:
+                    pass
+                else:
+                    raise Exception
+            elif len(isbn) == 13:
+                if isbnlib.is_isbn13(isbn) == True:
+                    pass
+                else:
+                    raise Exception
     except:
-        return "There was a problem deleting that friend"
+        books = Amazon.query.order_by(Amazon.book_name)
+        error_statement = "Update should include valid ISBN-10/ISBN-13 number"
+        return render_template("books.html", error_statement=error_statement, books=books)
+
+    if request.method == "POST":
+        if request.form.get('book_name'):
+            book_to_update_amazon.book_name=request.form['book_name']
+            book_to_update_ebay.book_name = request.form['book_name']
+        if request.form.get('isbn'):
+            book_to_update_amazon.isbn=request.form['isbn']
+            book_to_update_ebay.isbn = request.form['isbn']
+        if request.form.get('amazon_total_price'):
+            book_to_update_amazon.total_price=request.form['amazon_total_price']
+        if request.form.get('ebay_total_price'):
+            book_to_update_ebay.total_price=request.form['ebay_total_price']
+        # Push to database
+        try:
+            db.session.commit()
+        except:
+            return "There was an error updating that book in the database"
+    else:
+        return render_template("update.html", book_to_update=book_to_update_amazon,
+                               book_to_update_ebay=book_to_update_ebay, book_to_update_amazon=book_to_update_amazon)
+
+    return redirect('/books')
+
+@app.route("/delete/<string:isbn>")
+def delete(isbn):
+    book_to_delete = Amazon.query.get_or_404(isbn)
+    try:
+        db.session.delete(book_to_delete)
+        db.session.commit()
+    except:
+        return "There was a problem deleting that book from the Amazon table."
+
+    book_to_delete = Ebay.query.get_or_404(isbn)
+    try:
+        db.session.delete(book_to_delete)
+        db.session.commit()
+    except:
+        return "There was a problem deleting that book from the Ebay table."
+
+    return redirect('/books')
 
 
 @app.route("/form", methods=["POST"])
@@ -108,4 +256,5 @@ def form():
     return render_template("form.html", name=name, email_address=email_address, message=message)
 
 if __name__ == "__main__":
+    db.create_all()
     app.run()

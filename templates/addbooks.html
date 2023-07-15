@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Books to Database{% endblock %}
+
+{% block content %}
+    <div class="container">
+      <h1>Add Books to Database</h1>
+
+      {% if error_statement %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <strong>{{error_statement}}</strong>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
+    <h1>Books List</h1>
+        <br/>
+        <form action="/books" METHOD="POST">
+            <input type="text" placeholder="Book Name" name="book_name" value={{book_name}}>
+            <br/>
+            <input type="text" placeholder="ISBN" name="isbn" value={{isbn}}>
+            <br/><br/>
+            <input type="text" placeholder="Ebay Link" name="ebay_link" value={{ebay_link}}>
+            <br/>
+            <input type="text" placeholder="Ebay Product Price" name="ebay_product_price" value={{ebay_product_price}}>
+            <br/>
+            <input type="text" placeholder="Ebay Delivery Price" name="ebay_delivery_price" value={{ebay_delivery_price}}>
+            <br/>
+            <input type="text" placeholder="Ebay Total Price" name="ebay_total_price" value={{ebay_total_price}}>
+             <br/><br/>
+            <input type="text" placeholder="Amazon Link" name="amazon_link" value={{amazon_link}}>
+            <br/>
+            <input type="text" placeholder="Amazon Product Price" name="amazon_product_price" value={{amazon_product_price}}>
+            <br/>
+            <input type="text" placeholder="Amazon Delivery Price" name="amazon_delivery_price" value={{amazon_delivery_price}}>
+            <br/>
+            <input type="text" placeholder="Amazon Total Price" name="amazon_total_price" value={{amazon_total_price}}>
+            <br/><br/>
+            <input type="submit" value="Add Book" class="btn btn-primary">
+        </form>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	</div>
+{% endblock %}

@@ -1,8 +1,7 @@
 h1 {
-    color:black;
+    color:grey;
     font-size: 46px;
-     text-align: left;
-     margin-left: 20px;
+    text-align: left;
 }
 
 body {
@@ -13,4 +12,9 @@ body {
 .navbar-nav > li{
   padding-left:10px;
   padding-right:10px;
+}
+
+.label, label.inline {
+    display: inline-block;
+    width: 164px;
 }

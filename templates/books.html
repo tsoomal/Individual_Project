@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Books List{% endblock %}
+
+{% block content %}
+    <div class="container">
+
+    {% if error_statement %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <strong>{{error_statement}}</strong>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
+    <h1>Books List</h1>
+        <br/>
+        <form action="/books" METHOD="POST">
+            <input type="text" placeholder="Book Name" name="book_name" value={{book_name}}>
+            <br/>
+            <input type="text" placeholder="ISBN" name="isbn" value={{isbn}}>
+            <br/><br/>
+            <input type="text" placeholder="Ebay Link" name="ebay_link" value={{ebay_link}}>
+            <br/>
+            <input type="text" placeholder="Ebay Product Price" name="ebay_product_price" value={{ebay_product_price}}>
+            <br/>
+            <input type="text" placeholder="Ebay Delivery Price" name="ebay_delivery_price" value={{ebay_delivery_price}}>
+            <br/>
+            <input type="text" placeholder="Ebay Total Price" name="ebay_total_price" value={{ebay_total_price}}>
+             <br/><br/>
+            <input type="text" placeholder="Amazon Link" name="amazon_link" value={{amazon_link}}>
+            <br/>
+            <input type="text" placeholder="Amazon Product Price" name="amazon_product_price" value={{amazon_product_price}}>
+            <br/>
+            <input type="text" placeholder="Amazon Delivery Price" name="amazon_delivery_price" value={{amazon_delivery_price}}>
+            <br/>
+            <input type="text" placeholder="Amazon Total Price" name="amazon_total_price" value={{amazon_total_price}}>
+            <br/><br/>
+            <input type="submit" value="Add Book" class="btn btn-primary">
+        </form>
+
+        <br/><br/>
+        <h3> Book Name || ISBN </h3>
+        {% for book in books %}
+        <h4>
+            {{book.book_name}}
+            ||
+            {{book.isbn}}
+            <a href="/update/{{book.isbn}}" class="btn btn-outline-secondary btn-sm">Update</a>
+            <a href="/delete/{{book.isbn}}" class="btn btn-outline-danger btn-sm">Delete</a>
+        </h4>
+        {% endfor %}
+	</div>
+{% endblock %}
