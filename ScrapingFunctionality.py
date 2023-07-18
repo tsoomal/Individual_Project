@@ -326,28 +326,34 @@ def test_check_amazon_prices_today(file_name):
             soup = BeautifulSoup(html, features="lxml")
 
             # New Product Price
-            results = soup.find("span", id="price")
-            if results is not None:
-                price = results.get_text()
-                price_without_sign = price[1:]
-                new_product_prices_list.append(price_without_sign)
-                print("New Product Price: ", price_without_sign)
-            else:
+            try:
+                results = soup.find("span", id="price")
+                if results is not None:
+                    price = results.get_text()
+                    price_without_sign = price[1:]
+                    new_product_prices_list.append(price_without_sign)
+                    print("New Product Price: ", price_without_sign)
+                else:
+                    new_product_prices_list.append(999999)
+                    print("New Product Price: FAIL")
+            except:
+                pass
+
+
+            # New Delivery Price
+            try:
+                pass
+            except:
                 new_product_prices_list.append(999999)
-                print("New Product Price: FAIL")
+                print("New Delivery Price: FAIL")
+
         except:
             pass
 
 
-        # New Delivery Price
-        try:
-            pass
-        except:
-            new_product_prices_list.append(999999)
-            print("New Delivery Price: FAIL")
 
 
-        # Used Product Price
+        # Used Products
         try:
             if edition_format=="Paperback" or edition_format=="paperback":
                 URL = "https://www.amazon.co.uk/gp/offer-listing/" + str(isbn) + "ref=tmm_pap_used_olp_0?ie=UTF8&amp;condition=used"
@@ -360,18 +366,24 @@ def test_check_amazon_prices_today(file_name):
             html = driver.page_source
             driver.quit()
             soup = BeautifulSoup(html, features="lxml")
-            results = soup.find("span", id="price")
+
+            # Used Product Price
+            try:
+                results = soup.find("span", id="price")
+            except:
+                new_product_prices_list.append(999999)
+                print("Used Product Price: FAIL")
+
+            # Used Delivery Price
+            try:
+                pass
+            except:
+                new_product_prices_list.append(999999)
+                print("Used Delivery Price: FAIL")
+
         except:
-            new_product_prices_list.append(999999)
-            print("Used Product Price: FAIL")
-
-
-        # Used Delivery Price
-        try:
             pass
-        except:
-            new_product_prices_list.append(999999)
-            print("Used Delivery Price: FAIL")
+
 
 
         time2 = datetime.now()
