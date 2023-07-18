@@ -31,14 +31,16 @@ class Amazon(db.Model):
     book_name = db.Column(db.String(200), nullable=False)
     amazon_link = db.Column(db.String(200), nullable=False)
     isbn = db.Column(db.String(13), primary_key=True)
+    edition_format = db.Column(db.String(40), nullable=False)
     product_price = db.Column(db.Numeric(5,2), nullable=False)
     delivery_price = db.Column(db.Numeric(5,2), nullable=False)
     total_price = db.Column(db.Numeric(5,2), nullable=False)
 
-    def __init__(self, book_name, amazon_link, isbn, product_price, delivery_price, total_price):
+    def __init__(self, book_name, amazon_link, isbn, edition_format, product_price, delivery_price, total_price):
         self.book_name = book_name
         self.amazon_link = amazon_link
         self.isbn = isbn
+        self.edition_format = edition_format
         self.product_price = product_price
         self.delivery_price = delivery_price
         self.total_price = total_price
@@ -51,14 +53,16 @@ class Ebay(db.Model):
     book_name = db.Column(db.String(200), nullable=False)
     ebay_link = db.Column(db.String(200), nullable=False)
     isbn = db.Column(db.String(13), primary_key=True)
+    edition_format = db.Column(db.String(40), nullable=False)
     product_price = db.Column(db.Numeric(5,2), nullable=False)
     delivery_price = db.Column(db.Numeric(5,2), nullable=False)
     total_price = db.Column(db.Numeric(5,2), nullable=False)
 
-    def __init__(self, book_name, ebay_link, isbn, product_price, delivery_price, total_price):
+    def __init__(self, book_name, ebay_link, isbn, edition_format, product_price, delivery_price, total_price):
         self.book_name = book_name
         self.ebay_link = ebay_link
         self.isbn = isbn
+        self.edition_format = edition_format
         self.product_price = product_price
         self.delivery_price = delivery_price
         self.total_price = total_price
