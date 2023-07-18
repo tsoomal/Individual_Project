@@ -117,12 +117,14 @@ def setup_list_one_page_from_amazon(file_name, URL=None):
         edition_format_text = edition_element.get_text()
         print(edition_format_text)
 
-        data = [title, link, edition_format_text]
+        if edition_format_text=="Paperback" or edition_format_text=="Hardcover":
+            data = [title, link, edition_format_text]
 
-        with open(file_name, "a+", newline="", encoding="UTF8") as f:
-                writer = csv.writer(f)
-                writer.writerow(data)
-
+            with open(file_name, "a+", newline="", encoding="UTF8") as f:
+                    writer = csv.writer(f)
+                    writer.writerow(data)
+        else:
+            print("Book not saved to list of books.")
 
 
 # Get ISBN from the second column of a CSV.
@@ -289,19 +291,14 @@ def test_check_amazon_prices_today(file_name):
     options.add_experimental_option("prefs", prefs)
 
     for row_number in range(1):
-        isbn = df.iloc[row_number,[2]]
+        edition_format = df.iloc[row_number, [2]]
+        isbn = df.iloc[row_number,[3]]
         time1 = datetime.now()
         print("Item: " + str(row_number))
         URL_raw = df.iloc[row_number, [1]]
         URL = "https://www." + URL_raw[0]
         print(URL)
-
         driver = webdriver.Chrome(service=service, options=options)
-        driver.get(URL)
-        html = driver.page_source
-
-        soup = BeautifulSoup(html, features="lxml")
-
 
         # New paperback
         # https://www.amazon.co.uk/gp/offer-listing/1472223888/ref=tmm_pap_new_olp_0?ie=UTF8&amp;condition=new
@@ -309,24 +306,38 @@ def test_check_amazon_prices_today(file_name):
         # Used paperback
         # https://www.amazon.co.uk/gp/offer-listing/1472223888/ref=tmm_pap_used_olp_0?ie=UTF8&amp;condition=used
 
-        #New Hardcover
-        # https://www.amazon.co.uk//gp/offer-listing/0786965606/ref=tmm_hrd_new_olp_0?ie=UTF8&amp;condition=new
+        # New Hardcover
+        # https://www.amazon.co.uk/gp/offer-listing/0786965606/ref=tmm_hrd_new_olp_0?ie=UTF8&amp;condition=new
 
         # Used Hardcover
         # https://www.amazon.co.uk/gp/offer-listing/0857528122/ref=tmm_hrd_used_olp_0?ie=UTF8&amp;condition=used
 
 
+        # New Products
+        try:
+            if edition_format=="Paperback" or edition_format=="paperback":
+                URL = "https://www.amazon.co.uk/gp/offer-listing/" + str(isbn) + "/ref=tmm_pap_new_olp_0?ie=UTF8&amp;condition=new"
+            elif edition_format=="Hardcover" or edition_format=="hardcover":
+                URL = "https://www.amazon.co.uk/gp/offer-listing/" + str(isbn) + "/ref=tmm_hrd_new_olp_0?ie=UTF8&amp;condition=new"
+            else:
+                URL = URL
+            driver.get(URL)
+            html = driver.page_source
+            soup = BeautifulSoup(html, features="lxml")
 
-        # New Product Price
-        results = soup.find("span", id="price")
-        if results is not None:
-            price = results.get_text()
-            price_without_sign = price[1:]
-            new_product_prices_list.append(price_without_sign)
-            print("New Product Price: ", price_without_sign)
-        else:
-            new_product_prices_list.append(999999)
-            print("New Product Price: FAIL")
+            # New Product Price
+            results = soup.find("span", id="price")
+            if results is not None:
+                price = results.get_text()
+                price_without_sign = price[1:]
+                new_product_prices_list.append(price_without_sign)
+                print("New Product Price: ", price_without_sign)
+            else:
+                new_product_prices_list.append(999999)
+                print("New Product Price: FAIL")
+        except:
+            pass
+
 
         # New Delivery Price
         try:
@@ -335,19 +346,25 @@ def test_check_amazon_prices_today(file_name):
             new_product_prices_list.append(999999)
             print("New Delivery Price: FAIL")
 
+
         # Used Product Price
         try:
-            URL = "https://www.amazon.co.uk/dp/" + str(isbn) + "/ref=olp-opf-redir?aod=1&ie=UTF8&condition=used"
+            if edition_format=="Paperback" or edition_format=="paperback":
+                URL = "https://www.amazon.co.uk/gp/offer-listing/" + str(isbn) + "ref=tmm_pap_used_olp_0?ie=UTF8&amp;condition=used"
+            elif edition_format=="Hardcover" or edition_format=="hardcover":
+                URL = "https://www.amazon.co.uk/gp/offer-listing/" + str(isbn) + "/ref=tmm_hrd_used_olp_0?ie=UTF8&amp;condition=used"
+            else:
+                URL = URL
             driver.get(URL)
             print("Used product price URL reached")
             html = driver.page_source
             driver.quit()
             soup = BeautifulSoup(html, features="lxml")
             results = soup.find("span", id="price")
-
         except:
             new_product_prices_list.append(999999)
             print("Used Product Price: FAIL")
+
 
         # Used Delivery Price
         try:
@@ -355,6 +372,7 @@ def test_check_amazon_prices_today(file_name):
         except:
             new_product_prices_list.append(999999)
             print("Used Delivery Price: FAIL")
+
 
         time2 = datetime.now()
         time_diff = time2 - time1
@@ -397,6 +415,7 @@ def setup_database(links,base_file_name="scraped_database_data", URL=None):
 def main():
     #test_check_amazon_prices_today("./Web Scraping/BeautifulSoup/ScraperAmazonDatasetTargetedPrices.csv")
     #check_ebay_prices_today("Targeted")
+    create_blank_csv("./scraped_database_data.csv", createHeader=True)
     setup_list_one_page_from_amazon("./scraped_database_data.csv")
 
 
