@@ -1,6 +1,8 @@
 import csv
 from datetime import datetime
 import time
+
+import numpy as np
 import pandas as pd
 # https://www.youtube.com/watch?v=HiOtQMcI5wg
 from bs4 import BeautifulSoup
@@ -291,8 +293,9 @@ def test_check_amazon_prices_today(file_name):
     options.add_experimental_option("prefs", prefs)
 
     for row_number in range(1):
-        edition_format = df.iloc[row_number, [2]]
-        isbn = df.iloc[row_number,[3]]
+        edition_format = df.iloc[row_number, [2]][0]
+        # https://stackoverflow.com/questions/27387415/how-would-i-get-everything-before-a-in-a-string-python
+        isbn = str((df.iloc[row_number,[3]])[0]).split(".")[0]
         time1 = datetime.now()
         print("Item: " + str(row_number))
         URL_raw = df.iloc[row_number, [1]]
@@ -316,62 +319,79 @@ def test_check_amazon_prices_today(file_name):
         # New Products
         try:
             if edition_format=="Paperback" or edition_format=="paperback":
-                URL = "https://www.amazon.co.uk/gp/offer-listing/" + str(isbn) + "/ref=tmm_pap_new_olp_0?ie=UTF8&amp;condition=new"
+                URL = "https://www.amazon.co.uk/gp/offer-listing/" + str(isbn) + "/ref=tmm_pap_new_olp_0?ie=UTF8&condition=new"
             elif edition_format=="Hardcover" or edition_format=="hardcover":
-                URL = "https://www.amazon.co.uk/gp/offer-listing/" + str(isbn) + "/ref=tmm_hrd_new_olp_0?ie=UTF8&amp;condition=new"
+                URL = "https://www.amazon.co.uk/gp/offer-listing/" + str(isbn) + "/ref=tmm_hrd_new_olp_0?ie=UTF8&condition=new"
             else:
                 URL = URL
+            print(URL)
             driver.get(URL)
             html = driver.page_source
             soup = BeautifulSoup(html, features="lxml")
 
             # New Product Price
             try:
-                results = soup.find("span", id="price")
+                results = soup.find("span", class_="a-offscreen")
                 if results is not None:
                     price = results.get_text()
                     price_without_sign = price[1:]
                     new_product_prices_list.append(price_without_sign)
                     print("New Product Price: ", price_without_sign)
                 else:
-                    new_product_prices_list.append(999999)
+                    new_product_prices_list.append(-999999)
                     print("New Product Price: FAIL")
             except:
-                pass
+                print("Except: New Product price")
 
 
             # New Delivery Price
             try:
-                pass
+                results1 = soup.find("div", id="mir-layout-DELIVERY_BLOCK-slot-PRIMARY_DELIVERY_MESSAGE_LARGE")
+                results2 = results1.find("span", attrs={'data-csa-c-delivery-price': True})
+                print("New delivery price: " + results2["data-csa-c-delivery-price"])
+                if (results2["data-csa-c-delivery-price"]=="FREE"):
+                    new_delivery_prices_list.append(0)
+                else:
+                    new_delivery_prices_list.append(results2["data-csa-c-delivery-price"])
             except:
-                new_product_prices_list.append(999999)
+                new_delivery_prices_list.append(-999999)
                 print("New Delivery Price: FAIL")
 
-        except:
-            pass
-
-
-
+        except Exception as e:
+            print("Except: Whole try-catch block for new products")
+            print(e)
 
         # Used Products
         try:
             if edition_format=="Paperback" or edition_format=="paperback":
-                URL = "https://www.amazon.co.uk/gp/offer-listing/" + str(isbn) + "ref=tmm_pap_used_olp_0?ie=UTF8&amp;condition=used"
+                URL = "https://www.amazon.co.uk/gp/offer-listing/" + str(isbn) + "/ref=tmm_pap_used_olp_0?ie=UTF8&condition=used"
             elif edition_format=="Hardcover" or edition_format=="hardcover":
-                URL = "https://www.amazon.co.uk/gp/offer-listing/" + str(isbn) + "/ref=tmm_hrd_used_olp_0?ie=UTF8&amp;condition=used"
+                URL = "https://www.amazon.co.uk/gp/offer-listing/" + str(isbn) + "/ref=tmm_hrd_used_olp_0?ie=UTF8&condition=used"
             else:
                 URL = URL
+            print(URL)
             driver.get(URL)
-            print("Used product price URL reached")
             html = driver.page_source
             driver.quit()
             soup = BeautifulSoup(html, features="lxml")
 
+            # https://www.amazon.co.uk/gp/offer-listing/1472223888/ref=tmm_pap_used_olp_0?ie=UTF8&condition=used
+            # https://www.amazon.co.uk/gp/offer-listing/1472223888/ref=tmm_pap_used_olp_0?ie=UTF8&condition=used
+            # https://www.amazon.co.uk/gp/offer-listing/1472223888/ref=tmm_pap_new_olp_0?ie=UTF8&condition=new
+
             # Used Product Price
             try:
-                results = soup.find("span", id="price")
+                results = soup.find("span", class_="a-offscreen")
+                if results is not None:
+                    price = results.get_text()
+                    price_without_sign = price[1:]
+                    used_product_prices_list.append(price_without_sign)
+                    print("Used Product Price: ", price_without_sign)
+                else:
+                    used_product_prices_list.append(-999999)
+                    print("Used Product Price: FAIL")
             except:
-                new_product_prices_list.append(999999)
+                used_product_prices_list.append(-999999)
                 print("Used Product Price: FAIL")
 
             # Used Delivery Price
@@ -391,7 +411,9 @@ def test_check_amazon_prices_today(file_name):
         print("Time: ", time_diff.seconds)
         print()
 
-    driver.quit()
+        exit(1)
+
+        driver.quit()
     #df["New Product Price"] = new_product_prices_list
     #df["New Delivery Price"] = new_delivery_prices_list
     #df["New Total Price"] = new_product_prices_list + new_delivery_prices_list
@@ -427,8 +449,9 @@ def setup_database(links,base_file_name="scraped_database_data", URL=None):
 def main():
     #test_check_amazon_prices_today("./Web Scraping/BeautifulSoup/ScraperAmazonDatasetTargetedPrices.csv")
     #check_ebay_prices_today("Targeted")
-    create_blank_csv("./scraped_database_data.csv", createHeader=True)
-    setup_list_one_page_from_amazon("./scraped_database_data.csv")
+    #create_blank_csv("./scraped_database_data.csv", createHeader=True)
+    #setup_list_one_page_from_amazon("./scraped_database_data.csv")
+    test_check_amazon_prices_today("scraped_database_data.csv")
 
 
 if __name__ == "__main__":
