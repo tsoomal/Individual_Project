@@ -287,7 +287,7 @@ def test_check_amazon_prices_today(file_name):
 
     service = Service("..\chromedriver_win32")
     options = webdriver.ChromeOptions()
-    options.add_argument("--headless=new")
+    #options.add_argument("--headless=new")
     options.add_argument('--blink-settings=imagesEnabled=false')
     prefs = {"profile.managed_default_content_settings.images": 2}
     options.add_experimental_option("prefs", prefs)
@@ -313,17 +313,19 @@ def test_check_amazon_prices_today(file_name):
         # https://www.amazon.co.uk/gp/offer-listing/0786965606/ref=tmm_hrd_new_olp_0?ie=UTF8&amp;condition=new
 
         # Used Hardcover
-        # https://www.amazon.co.uk/gp/offer-listing/0857528122/ref=tmm_hrd_used_olp_0?ie=UTF8&amp;condition=used
+        # https://www.amazon.co.uk/gp/offer-listing/0857528122/ref=tmm_hrd_used_olp_0?ie=UTF8&condition=used
 
 
         # New Products
         try:
-            if edition_format=="Paperback" or edition_format=="paperback":
-                URL = "https://www.amazon.co.uk/gp/offer-listing/" + str(isbn) + "/ref=tmm_pap_new_olp_0?ie=UTF8&condition=new"
-            elif edition_format=="Hardcover" or edition_format=="hardcover":
-                URL = "https://www.amazon.co.uk/gp/offer-listing/" + str(isbn) + "/ref=tmm_hrd_new_olp_0?ie=UTF8&condition=new"
-            else:
-                URL = URL
+            # if edition_format=="Paperback" or edition_format=="paperback":
+            #     URL = "https://www.amazon.co.uk/gp/offer-listing/" + str(isbn) + "/ref=tmm_pap_new_olp_0?ie=UTF8&condition=new"
+            # elif edition_format=="Hardcover" or edition_format=="hardcover":
+            #     URL = "https://www.amazon.co.uk/gp/offer-listing/" + str(isbn) + "/ref=tmm_hrd_new_olp_0?ie=UTF8&condition=new"
+            # else:
+            #     URL = URL
+            URL = "https://www.amazon.co.uk/dp/" + str(isbn)
+            URL = "https://www.amazon.co.uk/gp/offer-listing/1472223888/ref=tmm_pap_new_olp_0?ie=UTF8&condition=new"
             print(URL)
             driver.get(URL)
             html = driver.page_source
@@ -331,6 +333,10 @@ def test_check_amazon_prices_today(file_name):
 
             # New Product Price
             try:
+                WebDriverWait(driver, 20000).until(
+                    EC.element_to_be_clickable((By.XPATH, "//*[contains(@href, 'ref=tmm_pap_used_olp_0?ie=UTF8&condition=used')]"))).click()
+                #all_href = driver.find_elements(By.XPATH,  "//*[contains(@href, 'ref=tmm_pap_used_olp_0?ie=UTF8&condition=used')]")
+                #all_href[0].click()
                 results = soup.find("span", class_="a-offscreen")
                 if results is not None:
                     price = results.get_text()
@@ -340,8 +346,9 @@ def test_check_amazon_prices_today(file_name):
                 else:
                     new_product_prices_list.append(-999999)
                     print("New Product Price: FAIL")
-            except:
+            except Exception as e:
                 print("Except: New Product price")
+                print(e)
 
 
             # New Delivery Price
