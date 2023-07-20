@@ -299,25 +299,13 @@ def test_check_amazon_prices_today(file_name):
         edition_format = df.iloc[row_number, [2]][0]
         # https://stackoverflow.com/questions/27387415/how-would-i-get-everything-before-a-in-a-string-python
         isbn = str((df.iloc[row_number,[3]])[0]).split(".")[0]
+        isbn = isbn.zfill(10)
         time1 = datetime.now()
         print("Item: " + str(row_number))
         URL_raw = df.iloc[row_number, [1]]
         URL = "https://www." + URL_raw[0]
         print(URL)
         driver = webdriver.Chrome(service=service, options=options)
-
-        # New paperback
-        # https://www.amazon.co.uk/gp/offer-listing/1472223888/ref=tmm_pap_new_olp_0?ie=UTF8&amp;condition=new
-
-        # Used paperback
-        # https://www.amazon.co.uk/gp/offer-listing/1472223888/ref=tmm_pap_used_olp_0?ie=UTF8&amp;condition=used
-
-        # New Hardcover
-        # https://www.amazon.co.uk/gp/offer-listing/0786965606/ref=tmm_hrd_new_olp_0?ie=UTF8&amp;condition=new
-
-        # Used Hardcover
-        # https://www.amazon.co.uk/gp/offer-listing/0857528122/ref=tmm_hrd_used_olp_0?ie=UTF8&condition=used
-
 
 
         # New Products
@@ -364,22 +352,9 @@ def test_check_amazon_prices_today(file_name):
 
         # Used Products
         try:
-            if edition_format=="Paperback" or edition_format=="paperback":
-                URL = "https://www.amazon.co.uk/gp/offer-listing/" + str(isbn) + "/ref=tmm_pap_used_olp_0?ie=UTF8&condition=used"
-            elif edition_format=="Hardcover" or edition_format=="hardcover":
-                URL = "https://www.amazon.co.uk/gp/offer-listing/" + str(isbn) + "/ref=tmm_hrd_used_olp_0?ie=UTF8&condition=used"
-            else:
-                URL = URL
-
-            URL = "https://www.amazon.co.uk/dp/" + str(isbn)
-
-
-            # https://www.amazon.co.uk/gp/offer-listing/1472223888/ref=tmm_pap_used_olp_0?ie=UTF8&condition=used
-            # https://www.amazon.co.uk/gp/offer-listing/1472223888/ref=tmm_pap_used_olp_0?ie=UTF8&condition=used
-            # https://www.amazon.co.uk/gp/offer-listing/1472223888/ref=tmm_pap_new_olp_0?ie=UTF8&condition=new
-
             # Used Product Price
             try:
+                URL = "https://www.amazon.co.uk/dp/" + str(isbn)
                 print(URL)
                 driver.get(URL)
                 # Accept Cookies https://stackoverflow.com/questions/65056154/handling-accept-cookies-popup-with-selenium-in-python
@@ -399,6 +374,8 @@ def test_check_amazon_prices_today(file_name):
                     WebDriverWait(driver, 20000).until(
                         EC.element_to_be_clickable(
                             (By.XPATH, "//*[@id='tmmSwatches']/ul/li[3]/span/span[3]/span[1]/span/a"))).click()
+
+                    # //*[@id="tmmSwatches"]/ul/li/span/span[3]/span[1]/span/a
                     time.sleep(4)
 
                 driver.get_screenshot_as_file("./screenshot3.png")
