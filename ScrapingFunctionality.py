@@ -1,6 +1,9 @@
 import csv
 from datetime import datetime
 import time
+
+import werkzeug
+
 from app import Amazon, db
 from sqlalchemy.exc import IntegrityError
 
@@ -335,15 +338,18 @@ def test_check_amazon_prices_today(file_name, only_create_new_books=False):
         isbn = isbn.zfill(10)
 
         if only_create_new_books==True:
-            book_in_amazon_db = Amazon.query.get_or_404(isbn)
-            print()
-            print(row_number)
-            print(book_in_amazon_db)
-            if book_in_amazon_db:
-                print("continue")
-                continue
-            else:
-                print("pass")
+            try:
+                book_in_amazon_db = Amazon.query.get_or_404(isbn)
+                print(row_number)
+                print(book_in_amazon_db)
+                if book_in_amazon_db.new_product_price==-999 and book_in_amazon_db.new_delivery_price==-999 and \
+                        book_in_amazon_db.new_total_price==-999 and book_in_amazon_db.used_product_price==-999 and \
+                        book_in_amazon_db.used_delivery_price==-999 and book_in_amazon_db.used_total_price==-999:
+                    db.session.delete(book_in_amazon_db)
+                    db.session.commit()
+                else:
+                    continue
+            except werkzeug.exceptions.NotFound:
                 pass
 
         time1 = datetime.now()
@@ -416,7 +422,7 @@ def test_check_amazon_prices_today(file_name, only_create_new_books=False):
                 URL = "https://www.amazon.co.uk/dp/" + str(isbn)
                 driver.get(URL)
                 # Accept Cookies https://stackoverflow.com/questions/65056154/handling-accept-cookies-popup-with-selenium-in-python
-                WebDriverWait(driver, 20000).until(
+                WebDriverWait(driver, 10).until(
                     EC.element_to_be_clickable((By.XPATH, "// *[ @ id = 'sp-cc-accept']"))).click()
                 # https://stackoverflow.com/questions/20986631/how-can-i-scroll-a-web-page-using-selenium-webdriver-in-python
                 driver.execute_script("window.scrollTo(document.body.scrollHeight, 0);")
@@ -437,32 +443,30 @@ def test_check_amazon_prices_today(file_name, only_create_new_books=False):
                 if found_selected_button==True:
                     #print(counter)
                     if counter ==0:
-                        WebDriverWait(driver, 20000).until(
+                        WebDriverWait(driver, 10).until(
                             EC.element_to_be_clickable(
                                 (By.XPATH, "//*[@id='tmmSwatches']/ul/li[1]/span/span[3]/span[1]/span/a"))).click()
                     if counter ==1:
-                        WebDriverWait(driver, 20000).until(
+                        WebDriverWait(driver, 10).until(
                             EC.element_to_be_clickable(
                                 (By.XPATH, "//*[@id='tmmSwatches']/ul/li[2]/span/span[3]/span[1]/span/a"))).click()
                     elif counter == 2:
-                        print("HERE")
                         driver.get_screenshot_as_file("./screenshot_ts1.png")
-                        WebDriverWait(driver, 20000).until(
+                        WebDriverWait(driver, 10).until(
                             EC.element_to_be_clickable(
                                 (By.XPATH, "//*[@id='tmmSwatches']/ul/li[3]/span/span[3]/span[1]/span/a"))).click()
-                        print("DONE")
                     elif counter == 3:
-                        WebDriverWait(driver, 20000).until(
+                        WebDriverWait(driver, 10).until(
                             EC.element_to_be_clickable(
                                 (By.XPATH, "//*[@id='tmmSwatches']/ul/li[4]/span/span[3]/span[1]/span/a"))).click()
                     elif counter == 4:
-                        WebDriverWait(driver, 20000).until(
+                        WebDriverWait(driver, 10).until(
                             EC.element_to_be_clickable(
                                 (By.XPATH, "//*[@id='tmmSwatches']/ul/li[5]/span/span[3]/span[1]/span/a"))).click()
                 else:
                     raise Exception
 
-                time.sleep(4)
+                time.sleep(3)
 
                 driver.get_screenshot_as_file("./screenshot3.png")
                 html = driver.page_source
@@ -534,6 +538,7 @@ def test_check_amazon_prices_today(file_name, only_create_new_books=False):
         if used_total_price_raw <= -1000 or used_total_price_raw >= 1000:
             used_total_price_raw = -999
 
+
         try:
             new_book = Amazon(book_name=book_name, amazon_link=amazon_link, isbn=isbn, edition_format=edition_format, new_product_price=new_product_price, new_delivery_price=new_delivery_price, new_total_price=new_total_price_raw,
                               used_product_price=used_product_price, used_delivery_price=used_delivery_price, used_total_price=used_total_price_raw)
@@ -566,7 +571,7 @@ def setup_database(links,base_file_name="scraped_database_data", new_list=False,
     #df = pd.read_csv("./" + base_file_name + "_amazon.csv")
     #df.to_csv("./" + base_file_name + "_ebay.csv", index=False)
 
-    test_check_amazon_prices_today("./" + base_file_name + "_amazon.csv", only_create_new_books=False)
+    test_check_amazon_prices_today("./" + base_file_name + "_amazon.csv", only_create_new_books=True)
     #check_ebay_prices_today("./" + base_file_name + "_ebay.csv")
 
 
