@@ -2,6 +2,7 @@ import csv
 from datetime import datetime
 import time
 from app import Amazon, db
+from sqlalchemy.exc import IntegrityError
 
 import numpy as np
 import pandas as pd
@@ -468,10 +469,21 @@ def test_check_amazon_prices_today(file_name):
         print("Time: ", time_diff.seconds)
         print()
 
-        new_book = Amazon(book_name=book_name, amazon_link=amazon_link, isbn=isbn, edition_format=edition_format, new_product_price=new_product_price, new_delivery_price=new_delivery_price, new_total_price=float(new_product_price)+float(new_delivery_price),
-                          used_product_price=used_product_price, used_delivery_price=used_delivery_price, used_total_price=float(used_product_price)+float(used_delivery_price))
-        db.session.add(new_book)
-        db.session.commit()
+        try:
+            new_book = Amazon(book_name=book_name, amazon_link=amazon_link, isbn=isbn, edition_format=edition_format, new_product_price=new_product_price, new_delivery_price=new_delivery_price, new_total_price=float(new_product_price)+float(new_delivery_price),
+                              used_product_price=used_product_price, used_delivery_price=used_delivery_price, used_total_price=float(used_product_price)+float(used_delivery_price))
+            db.session.add(new_book)
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            book_to_update_amazon = Amazon.query.get_or_404(isbn)
+            book_to_update_amazon.new_product_price = new_product_price
+            book_to_update_amazon.new_delivery_price = new_delivery_price
+            book_to_update_amazon.new_total_price = float(new_product_price)+float(new_delivery_price)
+            book_to_update_amazon.used_product_price = used_product_price
+            book_to_update_amazon.used_delivery_price = used_delivery_price
+            book_to_update_amazon.used_total_price = float(used_product_price)+float(used_delivery_price)
+            db.session.commit()
 
         exit(1)
 
