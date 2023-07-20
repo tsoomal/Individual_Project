@@ -571,7 +571,7 @@ def setup_database(links,base_file_name="scraped_database_data", new_list=False,
     #df = pd.read_csv("./" + base_file_name + "_amazon.csv")
     #df.to_csv("./" + base_file_name + "_ebay.csv", index=False)
 
-    test_check_amazon_prices_today("./" + base_file_name + "_amazon.csv", only_create_new_books=True)
+    test_check_amazon_prices_today("./" + base_file_name + "_amazon.csv", only_create_new_books=False)
     #check_ebay_prices_today("./" + base_file_name + "_ebay.csv")
 
 
