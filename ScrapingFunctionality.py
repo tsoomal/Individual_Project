@@ -185,132 +185,7 @@ def get_ISBN_from_list(file_name):
     df.to_csv(file_name,
               index=False)
 
-
-def check_amazon_prices_today(file_name, URL=None):
-    now = datetime.now()
-    current_date = now.strftime("%d/%m/%Y")
-
-    new_product_prices_list = []
-    new_delivery_prices_list = []
-    used_product_prices_list = []
-    used_delivery_prices_list = []
-
-    df = pd.read_csv(file_name)
-    number_of_rows = df.shape[0]
-
-    service = Service("..\chromedriver_win32")
-    options = webdriver.ChromeOptions()
-    options.add_argument("--headless=new")
-    options.add_argument('--blink-settings=imagesEnabled=false')
-    prefs = {"profile.managed_default_content_settings.images": 2}
-    options.add_experimental_option("prefs", prefs)
-
-    for row_number in range(number_of_rows):
-        isbn = df.shape[row_number][1]
-        time1 = datetime.now()
-        print("Item: " + str(row_number))
-        URL_raw = df.iloc[row_number, [1]]
-        URL = "https://www." + URL_raw[0]
-
-        print(URL)
-
-        driver = webdriver.Chrome(service=service, options=options)
-        driver.get(URL)
-        html = driver.page_source
-        driver.quit()
-        soup = BeautifulSoup(html, features="lxml")
-
-        # New Product Price
-        results = soup.find("span", id="price")
-        if results is not None:
-            price = results.get_text()
-            price_without_sign = price[1:]
-            new_product_prices_list.append(price_without_sign)
-            print("New Product Price: ", price_without_sign)
-        else:
-            new_product_prices_list.append(-999)
-            print("New Product Price: FAIL")
-
-
-        # New Delivery Price
-        try:
-            pass
-        except:
-            new_product_prices_list.append(-999)
-            print("New Delivery Price: FAIL")
-
-
-        # Used Product Price
-        try:
-            URL = "https://www.amazon.co.uk/dp/" + isbn + "/ref=olp-opf-redir?aod=1&ie=UTF8&condition=used"
-            driver.get(URL)
-            html = driver.page_source
-            driver.quit()
-            soup = BeautifulSoup(html, features="lxml")
-            results = soup.find("span", id="price")
-
-        except:
-            new_product_prices_list.append(-999)
-            print("Used Product Price: FAIL")
-
-
-        # Used Delivery Price
-        try:
-            pass
-        except:
-            new_product_prices_list.append(-999)
-            print("Used Delivery Price: FAIL")
-
-        time2 = datetime.now()
-        time_diff = time2 - time1
-        print("Time: ", time_diff.seconds)
-        print()
-
-    df["New Product Price"] = new_product_prices_list
-    df["New Delivery Price"] = new_delivery_prices_list
-    df["New Total Price"] = new_product_prices_list + new_delivery_prices_list
-    df["Used Product Price"] = used_product_prices_list
-    df["Used Delivery Price"] = used_delivery_prices_list
-    df["Used Total Price"] = used_product_prices_list + used_delivery_prices_list
-    df.to_csv(file_name, index=False)
-
-
-def check_ebay_prices_today(file_name):
-    # MAKE SURE ISBN-10s WITHIN SOURCE CSV ARE FORMATTED WITH LEADING ZEROES INCLUDED
-    now = datetime.now()
-    current_date = now.strftime("%d/%m/%Y")
-
-    df = pd.read_csv(file_name)
-    number_of_rows = df.shape[0]
-    isbn_col = df.iloc[:, [2]]
-    ebay_price_list = []
-
-    for row_number in range(number_of_rows):
-        isbn_for_row = (df.iloc[row_number, [2]])[0]
-        full_isbn = isbn_for_row.zfill(10)
-
-        URL = "https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw=" + str(
-            full_isbn) + "&_sacat=0&_sop=15&LH_ItemCondition=3&LH_PrefLoc=2&rt=nc&LH_BIN=1"
-        print(URL)
-        page = requests.get(URL)
-        html = page.text
-        soup = BeautifulSoup(html, features="lxml")
-        try:
-            results = soup.find("ul", class_="srp-results")
-            books_html = results.findAll("span", class_="s-item__price")
-            lowest_price_with_sign = books_html[0].get_text()
-            lowest_price = lowest_price_with_sign[1:]
-            print(lowest_price_with_sign)
-            ebay_price_list.append(lowest_price)
-        except:
-            print("FAIL")
-            ebay_price_list.append(-999)
-
-    df[current_date] = ebay_price_list
-    df.to_csv(file_name)
-
-
-def test_check_amazon_prices_today(file_name, only_create_new_books=False):
+def check_amazon_prices_today(file_name, only_create_new_books=False):
     new_product_prices_list = []
     new_delivery_prices_list = []
     used_product_prices_list = []
@@ -571,7 +446,7 @@ def setup_database(links,base_file_name="scraped_database_data", new_list=False,
     #df = pd.read_csv("./" + base_file_name + "_amazon.csv")
     #df.to_csv("./" + base_file_name + "_ebay.csv", index=False)
 
-    test_check_amazon_prices_today("./" + base_file_name + "_amazon.csv", only_create_new_books=False)
+    check_amazon_prices_today("./" + base_file_name + "_amazon.csv", only_create_new_books=False)
     #check_ebay_prices_today("./" + base_file_name + "_ebay.csv")
 
 
@@ -584,12 +459,12 @@ def main():
         "https://www.amazon.co.uk/best-sellers-books-Amazon/zgbs/books/503400/ref=zg_bs_pg_2_books?_encoding=UTF8&pg=2",
         "https://www.amazon.co.uk/gp/bestsellers/books/14909604031/ref=pd_zg_hrsr_books",
         "https://www.amazon.co.uk/best-sellers-books-Amazon/zgbs/books/14909604031/ref=zg_bs_pg_2_books?_encoding=UTF8&pg=2"]
-    setup_database(links)
-    #test_check_amazon_prices_today("./Web Scraping/BeautifulSoup/ScraperAmazonDatasetTargetedPrices.csv")
+    setup_database(links,new_list=False)
+    #check_amazon_prices_today("./Web Scraping/BeautifulSoup/ScraperAmazonDatasetTargetedPrices.csv")
     #check_ebay_prices_today("Targeted")
     #create_blank_csv("./scraped_database_data.csv", createHeader=True)
     #setup_list_one_page_from_amazon("./scraped_database_data.csv")
-    #test_check_amazon_prices_today("scraped_database_data.csv")
+    #check_amazon_prices_today("scraped_database_data.csv")
 
 
 if __name__ == "__main__":
