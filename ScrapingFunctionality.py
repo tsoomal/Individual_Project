@@ -288,8 +288,9 @@ def test_check_amazon_prices_today(file_name):
     service = Service("..\chromedriver_win32")
     options = webdriver.ChromeOptions()
     # https://stackoverflow.com/questions/12211781/how-to-maximize-window-in-chrome-using-webdriver-python
-    options.add_argument("--start-maximized")
-    #options.add_argument("--headless=new")
+    #options.add_argument("--start-maximized")
+    options.add_argument("--window-size=1920,1080")
+    options.add_argument("--headless=new")
     options.add_argument('--blink-settings=imagesEnabled=false')
     prefs = {"profile.managed_default_content_settings.images": 2}
     options.add_experimental_option("prefs", prefs)
@@ -328,7 +329,7 @@ def test_check_amazon_prices_today(file_name):
             # else:
             #     URL = URL
             URL = "https://www.amazon.co.uk/dp/" + str(isbn)
-            URL = "https://www.amazon.co.uk/gp/offer-listing/1472223888/ref=tmm_pap_new_olp_0?ie=UTF8&condition=new"
+            URL = "https://www.amazon.co.uk/gp/offer-listing/1804990922/ref=tmm_pap_new_olp_0?ie=UTF8&condition=new"
             print(URL)
             driver.get(URL)
             html = driver.page_source
@@ -377,7 +378,7 @@ def test_check_amazon_prices_today(file_name):
             else:
                 URL = URL
             URL = "https://www.amazon.co.uk/gp/offer-listing/1472223888/ref=tmm_pap_used_olp_0?ie=UTF8&condition=used"
-            URL = "https://www.amazon.co.uk/dp/1472223888"
+            URL = "https://www.amazon.co.uk/dp/1804990922"
 
 
             # https://www.amazon.co.uk/gp/offer-listing/1472223888/ref=tmm_pap_used_olp_0?ie=UTF8&condition=used
@@ -390,28 +391,23 @@ def test_check_amazon_prices_today(file_name):
                 driver.get(URL)
                 # Accept Cookies https://stackoverflow.com/questions/65056154/handling-accept-cookies-popup-with-selenium-in-python
                 WebDriverWait(driver, 20000).until(
-                    EC.element_to_be_clickable(
-                        (
-                        By.XPATH, "// *[ @ id = 'sp-cc-accept']"))).click()
-
+                    EC.element_to_be_clickable((By.XPATH, "// *[ @ id = 'sp-cc-accept']"))).click()
                 # https://stackoverflow.com/questions/20986631/how-can-i-scroll-a-web-page-using-selenium-webdriver-in-python
+                #driver.get_screenshot_as_file("./screenshot1.png")
                 driver.execute_script("window.scrollTo(document.body.scrollHeight, 0);")
+                #driver.get_screenshot_as_file("./screenshot2.png")
                 WebDriverWait(driver, 20000).until(
-                    EC.element_to_be_clickable(
-                        (By.XPATH, "//*[@id='tmmSwatches']/ul/li[4]/span/span[3]/span[1]/span/a"))).click()
-                WebDriverWait(driver, 20000).until(
-                    EC.element_to_be_clickable(
-                        (By.XPATH, "//*[contains(@href, 'ref=tmm_pap_used_olp_0?ie=UTF8&condition=used')]"))).click()
+                    EC.element_to_be_clickable((By.XPATH, "//*[@id='tmmSwatches']/ul/li[4]/span/span[3]/span[1]/span/a"))).click()
+                time.sleep(4)
 
-                # /html/body/div[1]/div[2]/div[4]/div[1]/div[6]/div[7]/div[2]/div[2]/ul/li[4]/span/span[3]/span[1]/span/a
-                # //*[@id='tmmSwatches']/ul/li[4]/span/span[3]/span[1]/span/a
-
+                driver.get_screenshot_as_file("./screenshot3.png")
                 html = driver.page_source
                 soup = BeautifulSoup(html, features="lxml")
-                results = soup.find("span", class_="a-offscreen")
+                results = soup.find("div", id="aod-offer")
+                price_text = results.find("span", class_="a-offscreen").get_text()
+
                 if results is not None:
-                    price = results.get_text()
-                    price_without_sign = price[1:]
+                    price_without_sign = price_text[1:]
                     used_product_prices_list.append(price_without_sign)
                     print("Used Product Price: ", price_without_sign)
                 else:
@@ -421,15 +417,31 @@ def test_check_amazon_prices_today(file_name):
                 used_product_prices_list.append(-999999)
                 print("Used Product Price: FAIL")
 
+
             # Used Delivery Price
             try:
-                pass
-            except:
-                new_product_prices_list.append(999999)
+                driver.get_screenshot_as_file("./screenshot_used_paperback.png")
+
+                results1 = soup.find("div", class_="a-section a-spacing-none a-padding-base aod-information-block aod-clear-float")
+                results2 = results1.find("span", attrs={'data-csa-c-delivery-price': True})
+                print("Used delivery price: " + results2["data-csa-c-delivery-price"])
+                if (results2["data-csa-c-delivery-price"] == "FREE"):
+                    used_delivery_prices_list.append(0)
+                else:
+                    delivery_price_without_sign = results2["data-csa-c-delivery-price"][1:]
+                    used_delivery_prices_list.append(float(delivery_price_without_sign))
+
+                # WebDriverWait(driver, 20000).until(
+                #     EC.element_to_be_clickable(
+                #         (By.XPATH, "//*[contains(@href, 'ref=tmm_pap_used_olp_0?ie=UTF8&condition=used')]"))).click()
+
+            except Exception as e:
+                print(e)
+                new_product_prices_list.append(-999999)
                 print("Used Delivery Price: FAIL")
 
         except:
-            pass
+            print("EXCEPTION: Try-catch block for Delivery Price")
 
 
 
@@ -448,6 +460,8 @@ def test_check_amazon_prices_today(file_name):
     #df["Used Delivery Price"] = used_delivery_prices_list
     #df["Used Total Price"] = used_product_prices_list + used_delivery_prices_list
     #df.to_csv(file_name, index=False)
+
+
 
 
 
