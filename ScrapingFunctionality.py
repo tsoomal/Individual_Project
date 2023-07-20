@@ -322,14 +322,7 @@ def test_check_amazon_prices_today(file_name):
 
         # New Products
         try:
-            # if edition_format=="Paperback" or edition_format=="paperback":
-            #     URL = "https://www.amazon.co.uk/gp/offer-listing/" + str(isbn) + "/ref=tmm_pap_new_olp_0?ie=UTF8&condition=new"
-            # elif edition_format=="Hardcover" or edition_format=="hardcover":
-            #     URL = "https://www.amazon.co.uk/gp/offer-listing/" + str(isbn) + "/ref=tmm_hrd_new_olp_0?ie=UTF8&condition=new"
-            # else:
-            #     URL = URL
             URL = "https://www.amazon.co.uk/dp/" + str(isbn)
-            URL = "https://www.amazon.co.uk/gp/offer-listing/1804990922/ref=tmm_pap_new_olp_0?ie=UTF8&condition=new"
             print(URL)
             driver.get(URL)
             html = driver.page_source
@@ -377,8 +370,8 @@ def test_check_amazon_prices_today(file_name):
                 URL = "https://www.amazon.co.uk/gp/offer-listing/" + str(isbn) + "/ref=tmm_hrd_used_olp_0?ie=UTF8&condition=used"
             else:
                 URL = URL
-            URL = "https://www.amazon.co.uk/gp/offer-listing/1472223888/ref=tmm_pap_used_olp_0?ie=UTF8&condition=used"
-            URL = "https://www.amazon.co.uk/dp/1804990922"
+
+            URL = "https://www.amazon.co.uk/dp/" + str(isbn)
 
 
             # https://www.amazon.co.uk/gp/offer-listing/1472223888/ref=tmm_pap_used_olp_0?ie=UTF8&condition=used
@@ -396,9 +389,17 @@ def test_check_amazon_prices_today(file_name):
                 #driver.get_screenshot_as_file("./screenshot1.png")
                 driver.execute_script("window.scrollTo(document.body.scrollHeight, 0);")
                 #driver.get_screenshot_as_file("./screenshot2.png")
-                WebDriverWait(driver, 20000).until(
-                    EC.element_to_be_clickable((By.XPATH, "//*[@id='tmmSwatches']/ul/li[4]/span/span[3]/span[1]/span/a"))).click()
-                time.sleep(4)
+
+                if edition_format == "Paperback" or edition_format == "paperback":
+                    WebDriverWait(driver, 20000).until(
+                        EC.element_to_be_clickable(
+                            (By.XPATH, "//*[@id='tmmSwatches']/ul/li[4]/span/span[3]/span[1]/span/a"))).click()
+                    time.sleep(4)
+                elif edition_format == "Hardcover" or edition_format == "hardcover":
+                    WebDriverWait(driver, 20000).until(
+                        EC.element_to_be_clickable(
+                            (By.XPATH, "//*[@id='tmmSwatches']/ul/li[3]/span/span[3]/span[1]/span/a"))).click()
+                    time.sleep(4)
 
                 driver.get_screenshot_as_file("./screenshot3.png")
                 html = driver.page_source
