@@ -361,22 +361,53 @@ def test_check_amazon_prices_today(file_name):
                 WebDriverWait(driver, 20000).until(
                     EC.element_to_be_clickable((By.XPATH, "// *[ @ id = 'sp-cc-accept']"))).click()
                 # https://stackoverflow.com/questions/20986631/how-can-i-scroll-a-web-page-using-selenium-webdriver-in-python
-                #driver.get_screenshot_as_file("./screenshot1.png")
                 driver.execute_script("window.scrollTo(document.body.scrollHeight, 0);")
-                #driver.get_screenshot_as_file("./screenshot2.png")
 
-                if edition_format == "Paperback" or edition_format == "paperback":
-                    WebDriverWait(driver, 20000).until(
-                        EC.element_to_be_clickable(
-                            (By.XPATH, "//*[@id='tmmSwatches']/ul/li[4]/span/span[3]/span[1]/span/a"))).click()
-                    time.sleep(4)
-                elif edition_format == "Hardcover" or edition_format == "hardcover":
-                    WebDriverWait(driver, 20000).until(
-                        EC.element_to_be_clickable(
-                            (By.XPATH, "//*[@id='tmmSwatches']/ul/li[3]/span/span[3]/span[1]/span/a"))).click()
+                html = driver.page_source
+                soup = BeautifulSoup(html, features="lxml")
+                results = soup.find("div", id="tmmSwatches")
+                results2 = results.findAll("li")
+                counter=0
+                found_selected_button = False
+                for list_item in results2:
+                    if list_item.get("class")[1] == "selected":
+                        found_selected_button = True
+                        break
+                    else:
+                        counter+=1
 
-                    # //*[@id="tmmSwatches"]/ul/li/span/span[3]/span[1]/span/a
-                    time.sleep(4)
+                if found_selected_button==True:
+                    print(counter)
+                    if counter ==0:
+                        WebDriverWait(driver, 20000).until(
+                            EC.element_to_be_clickable(
+                                (By.XPATH, "//*[@id='tmmSwatches']/ul/li[1]/span/span[3]/span[1]/span/a"))).click()
+                    if counter ==1:
+                        WebDriverWait(driver, 20000).until(
+                            EC.element_to_be_clickable(
+                                (By.XPATH, "//*[@id='tmmSwatches']/ul/li[2]/span/span[3]/span[1]/span/a"))).click()
+                    elif counter == 2:
+                        print("HERE")
+                        driver.get_screenshot_as_file("./screenshot_ts1.png")
+                        WebDriverWait(driver, 20000).until(
+                            EC.element_to_be_clickable(
+                                (By.XPATH, "//*[@id='tmmSwatches']/ul/li[3]/span/span[3]/span[1]/span/a"))).click()
+                        print("DONE")
+                    elif counter == 3:
+                        WebDriverWait(driver, 20000).until(
+                            EC.element_to_be_clickable(
+                                (By.XPATH, "//*[@id='tmmSwatches']/ul/li[4]/span/span[3]/span[1]/span/a"))).click()
+                    elif counter == 4:
+                        WebDriverWait(driver, 20000).until(
+                            EC.element_to_be_clickable(
+                                (By.XPATH, "//*[@id='tmmSwatches']/ul/li[5]/span/span[3]/span[1]/span/a"))).click()
+
+
+                else:
+                    raise Exception
+
+
+                time.sleep(4)
 
                 driver.get_screenshot_as_file("./screenshot3.png")
                 html = driver.page_source
