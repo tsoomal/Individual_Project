@@ -287,6 +287,8 @@ def test_check_amazon_prices_today(file_name):
 
     service = Service("..\chromedriver_win32")
     options = webdriver.ChromeOptions()
+    # https://stackoverflow.com/questions/12211781/how-to-maximize-window-in-chrome-using-webdriver-python
+    options.add_argument("--start-maximized")
     #options.add_argument("--headless=new")
     options.add_argument('--blink-settings=imagesEnabled=false')
     prefs = {"profile.managed_default_content_settings.images": 2}
@@ -316,6 +318,7 @@ def test_check_amazon_prices_today(file_name):
         # https://www.amazon.co.uk/gp/offer-listing/0857528122/ref=tmm_hrd_used_olp_0?ie=UTF8&condition=used
 
 
+
         # New Products
         try:
             # if edition_format=="Paperback" or edition_format=="paperback":
@@ -333,10 +336,6 @@ def test_check_amazon_prices_today(file_name):
 
             # New Product Price
             try:
-                WebDriverWait(driver, 20000).until(
-                    EC.element_to_be_clickable((By.XPATH, "//*[contains(@href, 'ref=tmm_pap_used_olp_0?ie=UTF8&condition=used')]"))).click()
-                #all_href = driver.find_elements(By.XPATH,  "//*[contains(@href, 'ref=tmm_pap_used_olp_0?ie=UTF8&condition=used')]")
-                #all_href[0].click()
                 results = soup.find("span", class_="a-offscreen")
                 if results is not None:
                     price = results.get_text()
@@ -349,7 +348,6 @@ def test_check_amazon_prices_today(file_name):
             except Exception as e:
                 print("Except: New Product price")
                 print(e)
-
 
             # New Delivery Price
             try:
@@ -368,6 +366,8 @@ def test_check_amazon_prices_today(file_name):
             print("Except: Whole try-catch block for new products")
             print(e)
 
+
+
         # Used Products
         try:
             if edition_format=="Paperback" or edition_format=="paperback":
@@ -376,11 +376,9 @@ def test_check_amazon_prices_today(file_name):
                 URL = "https://www.amazon.co.uk/gp/offer-listing/" + str(isbn) + "/ref=tmm_hrd_used_olp_0?ie=UTF8&condition=used"
             else:
                 URL = URL
-            print(URL)
-            driver.get(URL)
-            html = driver.page_source
-            driver.quit()
-            soup = BeautifulSoup(html, features="lxml")
+            URL = "https://www.amazon.co.uk/gp/offer-listing/1472223888/ref=tmm_pap_used_olp_0?ie=UTF8&condition=used"
+            URL = "https://www.amazon.co.uk/dp/1472223888"
+
 
             # https://www.amazon.co.uk/gp/offer-listing/1472223888/ref=tmm_pap_used_olp_0?ie=UTF8&condition=used
             # https://www.amazon.co.uk/gp/offer-listing/1472223888/ref=tmm_pap_used_olp_0?ie=UTF8&condition=used
@@ -388,6 +386,28 @@ def test_check_amazon_prices_today(file_name):
 
             # Used Product Price
             try:
+                print(URL)
+                driver.get(URL)
+                # Accept Cookies https://stackoverflow.com/questions/65056154/handling-accept-cookies-popup-with-selenium-in-python
+                WebDriverWait(driver, 20000).until(
+                    EC.element_to_be_clickable(
+                        (
+                        By.XPATH, "// *[ @ id = 'sp-cc-accept']"))).click()
+
+                # https://stackoverflow.com/questions/20986631/how-can-i-scroll-a-web-page-using-selenium-webdriver-in-python
+                driver.execute_script("window.scrollTo(document.body.scrollHeight, 0);")
+                WebDriverWait(driver, 20000).until(
+                    EC.element_to_be_clickable(
+                        (By.XPATH, "//*[@id='tmmSwatches']/ul/li[4]/span/span[3]/span[1]/span/a"))).click()
+                WebDriverWait(driver, 20000).until(
+                    EC.element_to_be_clickable(
+                        (By.XPATH, "//*[contains(@href, 'ref=tmm_pap_used_olp_0?ie=UTF8&condition=used')]"))).click()
+
+                # /html/body/div[1]/div[2]/div[4]/div[1]/div[6]/div[7]/div[2]/div[2]/ul/li[4]/span/span[3]/span[1]/span/a
+                # //*[@id='tmmSwatches']/ul/li[4]/span/span[3]/span[1]/span/a
+
+                html = driver.page_source
+                soup = BeautifulSoup(html, features="lxml")
                 results = soup.find("span", class_="a-offscreen")
                 if results is not None:
                     price = results.get_text()
@@ -463,6 +483,5 @@ def main():
 
 if __name__ == "__main__":
     main()
-
 
 
