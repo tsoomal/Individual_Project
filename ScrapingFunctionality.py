@@ -149,6 +149,39 @@ def get_ISBN_from_list(file_name):
     df["ISBN"] = isbn_list
     df.to_csv(file_name, index=False)
 
+    # Remove Duplicate Rows
+    df = pd.read_csv(file_name)
+    df.drop_duplicates(subset=["ISBN"], inplace=True, keep='first')
+    df.to_csv(file_name, index=False)
+    df.to_csv(file_name, index=False)
+
+    # Delete alleged ISBNs not in ISBN format
+    df = pd.read_csv(file_name)
+    ISBN_column = df.iloc[:, [2]]
+    number_of_rows = df.shape[0]
+    rows_to_delete = []
+
+    for row_number in range(number_of_rows):
+        ISBN_chosen_row = df.iloc[row_number, [2]]
+        ISBN_chosen = ISBN_chosen_row[0]
+        print(ISBN_chosen)
+        for char in ISBN_chosen:
+            if char.isnumeric() or char == "x" or char == "X":
+                pass
+            else:
+                print("CHAR: " + char)
+                rows_to_delete.append(row_number)
+                break
+
+    if len(rows_to_delete) != 0:
+        for row in rows_to_delete:
+            df = df.drop(row)
+
+    df.to_csv(file_name,
+              index=False)
+    df.to_csv(file_name,
+              index=False)
+
 
 def check_amazon_prices_today(file_name, URL=None):
     now = datetime.now()
@@ -274,7 +307,7 @@ def check_ebay_prices_today(file_name):
     df.to_csv(file_name)
 
 
-def test_check_amazon_prices_today(file_name):
+def test_check_amazon_prices_today(file_name, only_create_new_books=False):
     new_product_prices_list = []
     new_delivery_prices_list = []
     used_product_prices_list = []
@@ -294,21 +327,35 @@ def test_check_amazon_prices_today(file_name):
     options.add_experimental_option("prefs", prefs)
 
     for row_number in range(number_of_rows):
+        book_name = df.iloc[row_number, [0]][0]
+        amazon_link = df.iloc[row_number, [1]][0]
+        edition_format = df.iloc[row_number, [2]][0]
+        # https://stackoverflow.com/questions/27387415/how-would-i-get-everything-before-a-in-a-string-python
+        isbn = str((df.iloc[row_number,[3]])[0]).split(".")[0]
+        isbn = isbn.zfill(10)
+
+        if only_create_new_books==True:
+            book_in_amazon_db = Amazon.query.get_or_404(isbn)
+            print()
+            print(row_number)
+            print(book_in_amazon_db)
+            if book_in_amazon_db:
+                print("continue")
+                continue
+            else:
+                print("pass")
+                pass
+
+        time1 = datetime.now()
+        print("Item: " + str(row_number))
+        URL_raw = df.iloc[row_number, [1]]
+        URL = "https://www." + URL_raw[0]
+        print(book_name)
+        print(amazon_link)
+        print(edition_format)
+        print(URL)
+
         try:
-            book_name = df.iloc[row_number, [0]][0]
-            amazon_link = df.iloc[row_number, [1]][0]
-            edition_format = df.iloc[row_number, [2]][0]
-            # https://stackoverflow.com/questions/27387415/how-would-i-get-everything-before-a-in-a-string-python
-            isbn = str((df.iloc[row_number,[3]])[0]).split(".")[0]
-            isbn = isbn.zfill(10)
-            time1 = datetime.now()
-            print("Item: " + str(row_number))
-            URL_raw = df.iloc[row_number, [1]]
-            URL = "https://www." + URL_raw[0]
-            print(book_name)
-            print(amazon_link)
-            print(edition_format)
-            print(URL)
             driver = webdriver.Chrome(service=service, options=options)
         except:
             print("Error with Selenium.")
@@ -519,7 +566,7 @@ def setup_database(links,base_file_name="scraped_database_data", new_list=False,
     #df = pd.read_csv("./" + base_file_name + "_amazon.csv")
     #df.to_csv("./" + base_file_name + "_ebay.csv", index=False)
 
-    test_check_amazon_prices_today("./" + base_file_name + "_amazon.csv")
+    test_check_amazon_prices_today("./" + base_file_name + "_amazon.csv", only_create_new_books=False)
     #check_ebay_prices_today("./" + base_file_name + "_ebay.csv")
 
 
