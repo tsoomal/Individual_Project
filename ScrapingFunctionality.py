@@ -38,13 +38,6 @@ def scroll_to_bottom(driver):
                  " window.pageYOffset : (document.documentElement ||"
                  " document.body.parentNode || document.body);"))
 
-links = ["https://www.amazon.co.uk/Best-Sellers-Books-Role-Playing-War-Games/zgbs/books/270509/ref=zg_bs_nav_books_3_270453",
-         "https://www.amazon.co.uk/best-sellers-books-Amazon/zgbs/books/270509/ref=zg_bs_pg_2_books?_encoding=UTF8&pg=2",
-         "https://www.amazon.co.uk/gp/bestsellers/books/503400/ref=pd_zg_hrsr_books",
-         "https://www.amazon.co.uk/best-sellers-books-Amazon/zgbs/books/503400/ref=zg_bs_pg_2_books?_encoding=UTF8&pg=2",
-         "https://www.amazon.co.uk/gp/bestsellers/books/14909604031/ref=pd_zg_hrsr_books",
-         "https://www.amazon.co.uk/best-sellers-books-Amazon/zgbs/books/14909604031/ref=zg_bs_pg_2_books?_encoding=UTF8&pg=2"]
-
 def create_blank_csv(file_name, createHeader=False):
     if createHeader==True:
         header = ["Title", "Link", "Edition Format"]
@@ -117,17 +110,20 @@ def setup_list_one_page_from_amazon(file_name, URL=None):
         print(link)
 
         # Edition Format
-        edition_element = book_element.find("span", class_="a-size-small a-color-secondary a-text-normal")
-        edition_format_text = edition_element.get_text()
-        print(edition_format_text)
+        try:
+            edition_element = book_element.find("span", class_="a-size-small a-color-secondary a-text-normal")
+            edition_format_text = edition_element.get_text()
+            print(edition_format_text)
 
-        if edition_format_text=="Paperback" or edition_format_text=="Hardcover":
-            data = [title, link, edition_format_text]
+            if edition_format_text=="Paperback" or edition_format_text=="Hardcover":
+                data = [title, link, edition_format_text]
 
-            with open(file_name, "a+", newline="", encoding="UTF8") as f:
-                    writer = csv.writer(f)
-                    writer.writerow(data)
-        else:
+                with open(file_name, "a+", newline="", encoding="UTF8") as f:
+                        writer = csv.writer(f)
+                        writer.writerow(data)
+            else:
+                print("Book not saved to list of books.")
+        except:
             print("Book not saved to list of books.")
 
 
@@ -196,7 +192,7 @@ def check_amazon_prices_today(file_name, URL=None):
             new_product_prices_list.append(price_without_sign)
             print("New Product Price: ", price_without_sign)
         else:
-            new_product_prices_list.append(999999)
+            new_product_prices_list.append(-999)
             print("New Product Price: FAIL")
 
 
@@ -204,7 +200,7 @@ def check_amazon_prices_today(file_name, URL=None):
         try:
             pass
         except:
-            new_product_prices_list.append(999999)
+            new_product_prices_list.append(-999)
             print("New Delivery Price: FAIL")
 
 
@@ -218,7 +214,7 @@ def check_amazon_prices_today(file_name, URL=None):
             results = soup.find("span", id="price")
 
         except:
-            new_product_prices_list.append(999999)
+            new_product_prices_list.append(-999)
             print("Used Product Price: FAIL")
 
 
@@ -226,7 +222,7 @@ def check_amazon_prices_today(file_name, URL=None):
         try:
             pass
         except:
-            new_product_prices_list.append(999999)
+            new_product_prices_list.append(-999)
             print("Used Delivery Price: FAIL")
 
         time2 = datetime.now()
@@ -272,7 +268,7 @@ def check_ebay_prices_today(file_name):
             ebay_price_list.append(lowest_price)
         except:
             print("FAIL")
-            ebay_price_list.append(999999)
+            ebay_price_list.append(-999)
 
     df[current_date] = ebay_price_list
     df.to_csv(file_name)
@@ -297,22 +293,25 @@ def test_check_amazon_prices_today(file_name):
     prefs = {"profile.managed_default_content_settings.images": 2}
     options.add_experimental_option("prefs", prefs)
 
-    for row_number in range(1):
-        book_name = df.iloc[row_number, [0]][0]
-        amazon_link = df.iloc[row_number, [1]][0]
-        edition_format = df.iloc[row_number, [2]][0]
-        # https://stackoverflow.com/questions/27387415/how-would-i-get-everything-before-a-in-a-string-python
-        isbn = str((df.iloc[row_number,[3]])[0]).split(".")[0]
-        isbn = isbn.zfill(10)
-        time1 = datetime.now()
-        print("Item: " + str(row_number))
-        URL_raw = df.iloc[row_number, [1]]
-        URL = "https://www." + URL_raw[0]
-        print(book_name)
-        print(amazon_link)
-        print(edition_format)
-        print(URL)
-        driver = webdriver.Chrome(service=service, options=options)
+    for row_number in range(number_of_rows):
+        try:
+            book_name = df.iloc[row_number, [0]][0]
+            amazon_link = df.iloc[row_number, [1]][0]
+            edition_format = df.iloc[row_number, [2]][0]
+            # https://stackoverflow.com/questions/27387415/how-would-i-get-everything-before-a-in-a-string-python
+            isbn = str((df.iloc[row_number,[3]])[0]).split(".")[0]
+            isbn = isbn.zfill(10)
+            time1 = datetime.now()
+            print("Item: " + str(row_number))
+            URL_raw = df.iloc[row_number, [1]]
+            URL = "https://www." + URL_raw[0]
+            print(book_name)
+            print(amazon_link)
+            print(edition_format)
+            print(URL)
+            driver = webdriver.Chrome(service=service, options=options)
+        except:
+            print("Error with Selenium.")
 
 
         # New Products
@@ -333,11 +332,11 @@ def test_check_amazon_prices_today(file_name):
                     new_product_price = price_without_sign
                     print("New Product Price: ", price_without_sign)
                 else:
-                    new_product_price = -999999
-                    new_product_prices_list.append(-999999)
+                    new_product_price = -999
+                    new_product_prices_list.append(-999)
                     print("New Product Price: FAIL")
             except Exception as e:
-                new_product_price = -999999
+                new_product_price = -999
                 print("Except: New Product price")
                 print(e)
 
@@ -353,8 +352,8 @@ def test_check_amazon_prices_today(file_name):
                     new_delivery_price = float(results2["data-csa-c-delivery-price"])
                     new_delivery_prices_list.append(results2["data-csa-c-delivery-price"])
             except:
-                new_delivery_price = -999999
-                new_delivery_prices_list.append(-999999)
+                new_delivery_price = -999
+                new_delivery_prices_list.append(-999)
                 print("New Delivery Price: FAIL")
 
         except Exception as e:
@@ -430,12 +429,12 @@ def test_check_amazon_prices_today(file_name):
                     used_product_prices_list.append(price_without_sign)
                     print("Used Product Price: ", price_without_sign)
                 else:
-                    used_product_price = -999999
-                    used_product_prices_list.append(-999999)
+                    used_product_price = -999
+                    used_product_prices_list.append(-999)
                     print("Used Product Price: FAIL")
             except:
-                used_product_price = -999999
-                used_product_prices_list.append(-999999)
+                used_product_price = -999.00
+                used_product_prices_list.append(-999)
                 print("Used Product Price: FAIL")
 
 
@@ -457,8 +456,8 @@ def test_check_amazon_prices_today(file_name):
 
             except Exception as e:
                 print(e)
-                used_delivery_price = -999999
-                used_delivery_prices_list.append(-999999)
+                used_delivery_price = -999
+                used_delivery_prices_list.append(-999)
                 print("Used Delivery Price: FAIL")
 
         except:
@@ -470,8 +469,27 @@ def test_check_amazon_prices_today(file_name):
         print()
 
         try:
-            new_book = Amazon(book_name=book_name, amazon_link=amazon_link, isbn=isbn, edition_format=edition_format, new_product_price=new_product_price, new_delivery_price=new_delivery_price, new_total_price=float(new_product_price)+float(new_delivery_price),
-                              used_product_price=used_product_price, used_delivery_price=used_delivery_price, used_total_price=float(used_product_price)+float(used_delivery_price))
+            new_total_price_raw = float(new_product_price) + float(new_delivery_price)
+        except:
+            new_product_price=-999
+            new_delivery_price=-999
+            new_total_price_raw=-999
+
+        if new_total_price_raw <= -1000 or new_total_price_raw >= 1000:
+            new_total_price_raw = -999
+
+        try:
+            used_total_price_raw = float(used_product_price)+float(used_delivery_price)
+        except:
+            used_product_price = -999
+            used_delivery_price = -999
+            used_total_price_raw = -999
+        if used_total_price_raw <= -1000 or used_total_price_raw >= 1000:
+            used_total_price_raw = -999
+
+        try:
+            new_book = Amazon(book_name=book_name, amazon_link=amazon_link, isbn=isbn, edition_format=edition_format, new_product_price=new_product_price, new_delivery_price=new_delivery_price, new_total_price=new_total_price_raw,
+                              used_product_price=used_product_price, used_delivery_price=used_delivery_price, used_total_price=used_total_price_raw)
             db.session.add(new_book)
             db.session.commit()
         except IntegrityError:
@@ -479,55 +497,47 @@ def test_check_amazon_prices_today(file_name):
             book_to_update_amazon = Amazon.query.get_or_404(isbn)
             book_to_update_amazon.new_product_price = new_product_price
             book_to_update_amazon.new_delivery_price = new_delivery_price
-            book_to_update_amazon.new_total_price = float(new_product_price)+float(new_delivery_price)
+            book_to_update_amazon.new_total_price = new_total_price_raw
             book_to_update_amazon.used_product_price = used_product_price
             book_to_update_amazon.used_delivery_price = used_delivery_price
-            book_to_update_amazon.used_total_price = float(used_product_price)+float(used_delivery_price)
+            book_to_update_amazon.used_total_price = used_total_price_raw
             db.session.commit()
 
-        exit(1)
-
-        driver.quit()
-    #df["New Product Price"] = new_product_prices_list
-    #df["New Delivery Price"] = new_delivery_prices_list
-    #df["New Total Price"] = new_product_prices_list + new_delivery_prices_list
-    #df["Used Product Price"] = used_product_prices_list
-    #df["Used Delivery Price"] = used_delivery_prices_list
-    #df["Used Total Price"] = used_product_prices_list + used_delivery_prices_list
-    #df.to_csv(file_name, index=False)
 
 
+def setup_database(links,base_file_name="scraped_database_data", new_list=False,URL=None):
 
+    if new_list:
+        create_blank_csv("./"+ base_file_name +"_amazon.csv", createHeader=True)
 
+        for link in links:
+            setup_list_one_page_from_amazon("./"+ base_file_name +"_amazon.csv",link)
 
+        get_ISBN_from_list("./"+ base_file_name +"_amazon.csv")
 
+    #create_blank_csv("./" + base_file_name + "_ebay.csv")
+    #df = pd.read_csv("./" + base_file_name + "_amazon.csv")
+    #df.to_csv("./" + base_file_name + "_ebay.csv", index=False)
 
-
-
-def setup_database(links,base_file_name="scraped_database_data", URL=None):
-
-    create_blank_csv("./"+ base_file_name +"_amazon.csv", createHeader=True)
-
-    for link in links:
-        setup_list_one_page_from_amazon("./"+ base_file_name +"_amazon.csv",link)
-
-    get_ISBN_from_list("./"+ base_file_name +"_amazon.csv")
-
-    create_blank_csv("./" + base_file_name + "_ebay.csv")
-    df = pd.read_csv("./" + base_file_name + "_amazon.csv")
-    df.to_csv("./" + base_file_name + "_ebay.csv", index=False)
-
-    check_amazon_prices_today("./" + base_file_name + "_amazon.csv")
-    check_ebay_prices_today("./" + base_file_name + "_ebay.csv")
+    test_check_amazon_prices_today("./" + base_file_name + "_amazon.csv")
+    #check_ebay_prices_today("./" + base_file_name + "_ebay.csv")
 
 
 
 def main():
+    links = [
+        "https://www.amazon.co.uk/Best-Sellers-Books-Role-Playing-War-Games/zgbs/books/270509/ref=zg_bs_nav_books_3_270453",
+        "https://www.amazon.co.uk/best-sellers-books-Amazon/zgbs/books/270509/ref=zg_bs_pg_2_books?_encoding=UTF8&pg=2",
+        "https://www.amazon.co.uk/gp/bestsellers/books/503400/ref=pd_zg_hrsr_books",
+        "https://www.amazon.co.uk/best-sellers-books-Amazon/zgbs/books/503400/ref=zg_bs_pg_2_books?_encoding=UTF8&pg=2",
+        "https://www.amazon.co.uk/gp/bestsellers/books/14909604031/ref=pd_zg_hrsr_books",
+        "https://www.amazon.co.uk/best-sellers-books-Amazon/zgbs/books/14909604031/ref=zg_bs_pg_2_books?_encoding=UTF8&pg=2"]
+    setup_database(links)
     #test_check_amazon_prices_today("./Web Scraping/BeautifulSoup/ScraperAmazonDatasetTargetedPrices.csv")
     #check_ebay_prices_today("Targeted")
     #create_blank_csv("./scraped_database_data.csv", createHeader=True)
     #setup_list_one_page_from_amazon("./scraped_database_data.csv")
-    test_check_amazon_prices_today("scraped_database_data.csv")
+    #test_check_amazon_prices_today("scraped_database_data.csv")
 
 
 if __name__ == "__main__":
