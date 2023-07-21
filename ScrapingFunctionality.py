@@ -142,8 +142,8 @@ def get_ISBN_from_list(file_name):
     isbn_list = []
 
     for row_number in range(number_of_rows):
-        row = df.iloc[row_number,[1]]
-        string_row = row[0]
+        link_in_row = df.iloc[row_number,[1]]
+        string_row = link_in_row[0]
         index_of_dp = string_row.find("dp/")
         rest_of_string = string_row[(index_of_dp+3):]
         isbn_number = rest_of_string[:10]
@@ -156,16 +156,15 @@ def get_ISBN_from_list(file_name):
     df = pd.read_csv(file_name)
     df.drop_duplicates(subset=["ISBN"], inplace=True, keep='first')
     df.to_csv(file_name, index=False)
-    df.to_csv(file_name, index=False)
 
     # Delete alleged ISBNs not in ISBN format
     df = pd.read_csv(file_name)
-    ISBN_column = df.iloc[:, [2]]
+    ISBN_column = df.iloc[:, [3]]
     number_of_rows = df.shape[0]
     rows_to_delete = []
 
     for row_number in range(number_of_rows):
-        ISBN_chosen_row = df.iloc[row_number, [2]]
+        ISBN_chosen_row = df.iloc[row_number, [3]]
         ISBN_chosen = ISBN_chosen_row[0]
         print(ISBN_chosen)
         for char in ISBN_chosen:
@@ -180,8 +179,6 @@ def get_ISBN_from_list(file_name):
         for row in rows_to_delete:
             df = df.drop(row)
 
-    df.to_csv(file_name,
-              index=False)
     df.to_csv(file_name,
               index=False)
 
