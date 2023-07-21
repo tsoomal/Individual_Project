@@ -225,8 +225,8 @@ def update_prices_in_database():
     t_ebay = UpdateEbayDB()
     t_ebay.start()
 
-    #t_amazon = UpdateAmazonDB()
-    #t_amazon.start()
+    t_amazon = UpdateAmazonDB()
+    t_amazon.start()
 
     books = Amazon.query.order_by(Amazon.book_name)
     if updatable_amazon and updatable_ebay:

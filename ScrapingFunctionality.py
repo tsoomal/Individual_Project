@@ -191,7 +191,7 @@ def check_ebay_prices_today(file_name, only_create_new_books=False):
     number_of_rows = df.shape[0]
     isbn_col = df.iloc[:, [3]]
 
-    for row_number in range(1):
+    for row_number in range(number_of_rows):
         book_name = df.iloc[row_number, [0]][0]
         ebay_link = df.iloc[row_number, [1]][0]
         edition_format = df.iloc[row_number, [2]][0]
