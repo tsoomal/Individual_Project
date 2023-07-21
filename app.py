@@ -61,9 +61,12 @@ class Ebay(db.Model):
     ebay_link = db.Column(db.String(200), nullable=False)
     isbn = db.Column(db.String(13), primary_key=True)
     edition_format = db.Column(db.String(40), nullable=False)
-    product_price = db.Column(db.Numeric(5,2), nullable=False)
-    delivery_price = db.Column(db.Numeric(5,2), nullable=False)
-    total_price = db.Column(db.Numeric(5,2), nullable=False)
+    new_product_price = db.Column(db.Numeric(5, 2), nullable=False)
+    new_delivery_price = db.Column(db.Numeric(5, 2), nullable=False)
+    new_total_price = db.Column(db.Numeric(5, 2), nullable=False)
+    used_product_price = db.Column(db.Numeric(5, 2), nullable=False)
+    used_delivery_price = db.Column(db.Numeric(5, 2), nullable=False)
+    used_total_price = db.Column(db.Numeric(5, 2), nullable=False)
 
     def __init__(self, book_name, ebay_link, isbn, edition_format, new_product_price, new_delivery_price, new_total_price,
                  used_product_price, used_delivery_price, used_total_price):
