@@ -1,7 +1,7 @@
 import csv
 from datetime import datetime
 import time
-
+import re
 import werkzeug
 
 from app import Amazon, db, Ebay
@@ -184,18 +184,11 @@ def get_ISBN_from_list(file_name):
 
 
 def check_ebay_prices_today(file_name, only_create_new_books=False):
+    now = datetime.now()
+
     df = pd.read_csv(file_name)
     number_of_rows = df.shape[0]
-
-    service = Service("..\chromedriver_win32")
-    options = webdriver.ChromeOptions()
-    # https://stackoverflow.com/questions/12211781/how-to-maximize-window-in-chrome-using-webdriver-python
-    #options.add_argument("--start-maximized")
-    options.add_argument("--window-size=1920,1080")
-    options.add_argument("--headless=new")
-    options.add_argument('--blink-settings=imagesEnabled=false')
-    prefs = {"profile.managed_default_content_settings.images": 2}
-    options.add_experimental_option("prefs", prefs)
+    isbn_col = df.iloc[:, [3]]
 
     for row_number in range(number_of_rows):
         book_name = df.iloc[row_number, [0]][0]
@@ -222,154 +215,117 @@ def check_ebay_prices_today(file_name, only_create_new_books=False):
 
         time1 = datetime.now()
         print("Item: " + str(row_number))
-        URL_raw = df.iloc[row_number, [1]]
-        URL = "https://www." + URL_raw[0]
         print(book_name)
         print(ebay_link)
         print(edition_format)
-        print(URL)
-
-        try:
-            driver = webdriver.Chrome(service=service, options=options)
-        except:
-            print("Error with Selenium.")
-
 
         # New Products
         try:
-            URL = "https://www.amazon.co.uk/dp/" + str(isbn)
+            URL = "https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw=" + str(
+                isbn) + "&_sacat=0&_sop=15&LH_ItemCondition=3&LH_PrefLoc=2&rt=nc&LH_BIN=1"
             print(URL)
-            driver.get(URL)
-            html = driver.page_source
+            page = requests.get(URL)
+            html = page.text
             soup = BeautifulSoup(html, features="lxml")
 
             # New Product Price
             try:
-                results = soup.find("span", class_="a-offscreen")
-                if results is not None:
-                    price = results.get_text()
-                    price_without_sign = price[1:]
-                    new_product_price = price_without_sign
-                    print("New Product Price: ", price_without_sign)
-                else:
-                    new_product_price = -999
-                    print("New Product Price: FAIL")
+                results = soup.find("ul", class_="srp-results")
+                new_product_price_list = results.findAll("span", class_="s-item__price")
+                new_product_price_with_sign = new_product_price_list[0].get_text()
+                new_product_price = new_product_price_with_sign[1:]
+                print("New Product Price: £" + new_product_price)
             except Exception as e:
                 new_product_price = -999
-                print("Except: New Product price")
-                print(e)
+                print("New Product Price: FAIL")
 
             # New Delivery Price
             try:
-                results1 = soup.find("div", id="mir-layout-DELIVERY_BLOCK-slot-PRIMARY_DELIVERY_MESSAGE_LARGE")
-                results2 = results1.find("span", attrs={'data-csa-c-delivery-price': True})
-                print("New delivery price: " + results2["data-csa-c-delivery-price"])
-                if (results2["data-csa-c-delivery-price"]=="FREE"):
+                results = soup.find("ul", class_="srp-results")
+                new_delivery_price_list = results.findAll("span", class_="s-item__shipping s-item__logisticsCost")
+                new_delivery_price_with_sign = new_delivery_price_list[0].get_text()
+                if (("Free" in new_delivery_price_with_sign) or ("free" in new_delivery_price_with_sign)) and (("Postage" in new_delivery_price_with_sign) or ("postage" in new_delivery_price_with_sign)):
                     new_delivery_price = 0
+                    print("New Delivery Price: £0.00")
                 else:
-                    new_delivery_price = float(results2["data-csa-c-delivery-price"])
+                    #new_delivery_price = new_delivery_price_with_sign[1:]
+                    new_delivery_price = re.findall("\d+\.\d+",new_delivery_price_with_sign)[0]
+                    print("New Delivery Price: £" + new_delivery_price)
             except:
-                new_delivery_price = -999
-                print("New Delivery Price: FAIL")
+                try:
+                    results = soup.find("ul", class_="srp-results")
+                    new_delivery_price_list = results.findAll("span", class_="s-item__dynamic s-item__freeXDays")
+                    new_delivery_price_with_sign = new_delivery_price_list[0].get_text()
+                    if (("Free" in new_delivery_price_with_sign) or ("free" in new_delivery_price_with_sign)) and (
+                            ("Postage" in new_delivery_price_with_sign) or ("postage" in new_delivery_price_with_sign)):
+                        new_delivery_price = 0
+                        print("New Delivery Price: £0.00")
+                    else:
+                        # new_delivery_price = new_delivery_price_with_sign[1:]
+                        new_delivery_price = re.findall("\d+\.\d+", new_delivery_price_with_sign)[0]
+                        print("New Delivery Price: £" + new_delivery_price)
+                except Exception as e:
+                    new_delivery_price = -999
+                    print("New Delivery Price: FAIL")
 
         except Exception as e:
             print("Except: Whole try-catch block for new products")
             print(e)
 
-
+        # https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw=0786965606&_sacat=0&_sop=15&LH_BIN=1&LH_PrefLoc=1&rt=nc&LH_ItemCondition=4
 
         # Used Products
         try:
+            URL = "https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw=" + str(
+                isbn) + "&_sacat=0&_sop=15&LH_BIN=1&LH_PrefLoc=1&rt=nc&LH_ItemCondition=4"
+            print(URL)
+            page = requests.get(URL)
+            html = page.text
+            soup = BeautifulSoup(html, features="lxml")
+
             # Used Product Price
             try:
-                URL = "https://www.amazon.co.uk/dp/" + str(isbn)
-                driver.get(URL)
-                # Accept Cookies https://stackoverflow.com/questions/65056154/handling-accept-cookies-popup-with-selenium-in-python
-                WebDriverWait(driver, 10).until(
-                    EC.element_to_be_clickable((By.XPATH, "// *[ @ id = 'sp-cc-accept']"))).click()
-                # https://stackoverflow.com/questions/20986631/how-can-i-scroll-a-web-page-using-selenium-webdriver-in-python
-                driver.execute_script("window.scrollTo(document.body.scrollHeight, 0);")
-
-                html = driver.page_source
-                soup = BeautifulSoup(html, features="lxml")
-                results = soup.find("div", id="tmmSwatches")
-                results2 = results.findAll("li")
-                counter=0
-                found_selected_button = False
-                for list_item in results2:
-                    if list_item.get("class")[1] == "selected":
-                        found_selected_button = True
-                        break
-                    else:
-                        counter+=1
-
-                if found_selected_button==True:
-                    #print(counter)
-                    if counter ==0:
-                        WebDriverWait(driver, 10).until(
-                            EC.element_to_be_clickable(
-                                (By.XPATH, "//*[@id='tmmSwatches']/ul/li[1]/span/span[3]/span[1]/span/a"))).click()
-                    if counter ==1:
-                        WebDriverWait(driver, 10).until(
-                            EC.element_to_be_clickable(
-                                (By.XPATH, "//*[@id='tmmSwatches']/ul/li[2]/span/span[3]/span[1]/span/a"))).click()
-                    elif counter == 2:
-                        driver.get_screenshot_as_file("./screenshot_ts1.png")
-                        WebDriverWait(driver, 10).until(
-                            EC.element_to_be_clickable(
-                                (By.XPATH, "//*[@id='tmmSwatches']/ul/li[3]/span/span[3]/span[1]/span/a"))).click()
-                    elif counter == 3:
-                        WebDriverWait(driver, 10).until(
-                            EC.element_to_be_clickable(
-                                (By.XPATH, "//*[@id='tmmSwatches']/ul/li[4]/span/span[3]/span[1]/span/a"))).click()
-                    elif counter == 4:
-                        WebDriverWait(driver, 10).until(
-                            EC.element_to_be_clickable(
-                                (By.XPATH, "//*[@id='tmmSwatches']/ul/li[5]/span/span[3]/span[1]/span/a"))).click()
-                else:
-                    raise Exception
-
-                time.sleep(3)
-
-                driver.get_screenshot_as_file("./screenshot3.png")
-                html = driver.page_source
-                soup = BeautifulSoup(html, features="lxml")
-                results = soup.find("div", id="aod-offer")
-                price_text = results.find("span", class_="a-offscreen").get_text()
-
-                if results is not None:
-                    price_without_sign = price_text[1:]
-                    used_product_price = price_without_sign
-                    print("Used Product Price: ", price_without_sign)
-                else:
-                    used_product_price = -999
-                    print("Used Product Price: FAIL")
-            except:
-                used_product_price = -999.00
+                results = soup.find("ul", class_="srp-results")
+                used_product_price_list = results.findAll("span", class_="s-item__price")
+                used_product_price_with_sign = used_product_price_list[0].get_text()
+                used_product_price = used_product_price_with_sign[1:]
+                print("Used Product Price: £" + used_product_price)
+            except Exception as e:
+                used_product_price = -999
                 print("Used Product Price: FAIL")
-
 
             # Used Delivery Price
             try:
-                driver.get_screenshot_as_file("./screenshot_used_paperback.png")
-
-                results1 = soup.find("div", class_="a-section a-spacing-none a-padding-base aod-information-block aod-clear-float")
-                results2 = results1.find("span", attrs={'data-csa-c-delivery-price': True})
-                if (results2["data-csa-c-delivery-price"] == "FREE"):
-                    print("Used Delivery Price: " + results2["data-csa-c-delivery-price"])
+                results = soup.find("ul", class_="srp-results")
+                used_delivery_price_list = results.findAll("span", class_="s-item__shipping s-item__logisticsCost")
+                used_delivery_price_with_sign = used_delivery_price_list[0].get_text()
+                if (("Free" in used_delivery_price_with_sign) or ("free" in used_delivery_price_with_sign)) and (
+                        ("Postage" in used_delivery_price_with_sign) or ("postage" in used_delivery_price_with_sign)):
                     used_delivery_price = 0
+                    print("Used Delivery Price: £0.00")
                 else:
-                    delivery_price_without_sign = results2["data-csa-c-delivery-price"][1:]
-                    print("Used Delivery Price: " + delivery_price_without_sign)
-                    used_delivery_price = delivery_price_without_sign
+                    used_delivery_price = re.findall("\d+\.\d+",used_delivery_price_with_sign)[0]
+                    print("Used Delivery Price: £" + used_delivery_price)
+            except:
+                try:
+                    results = soup.find("ul", class_="srp-results")
+                    used_delivery_price_list = results.findAll("span", class_="s-item__dynamic s-item__freeXDays")
+                    used_delivery_price_with_sign = used_delivery_price_list[0].get_text()
+                    if (("Free" in used_delivery_price_with_sign) or ("free" in used_delivery_price_with_sign)) and (
+                            ("Postage" in used_delivery_price_with_sign) or (
+                            "postage" in used_delivery_price_with_sign)):
+                        used_delivery_price = 0
+                        print("Used Delivery Price: £0.00")
+                    else:
+                        used_delivery_price = re.findall("\d+\.\d+", used_delivery_price_with_sign)[0]
+                        print("Used Delivery Price: £" + used_delivery_price)
+                except Exception as e:
+                    used_delivery_price = -999
+                    print("Used Delivery Price: FAIL")
 
-            except Exception as e:
-                print(e)
-                used_delivery_price = -999
-                print("Used Delivery Price: FAIL")
-
-        except:
-            print("EXCEPTION: Try-catch block for Delivery Price")
+        except Exception as e:
+            print("Except: Whole try-catch block for used products")
+            print(e)
 
         time2 = datetime.now()
         time_diff = time2 - time1
@@ -618,6 +574,7 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
 
         except:
             print("EXCEPTION: Try-catch block for Delivery Price")
+
 
         time2 = datetime.now()
         time_diff = time2 - time1
