@@ -27,6 +27,12 @@ db = SQLAlchemy(app)
 app.app_context().push()
 migrate = Migrate(app,db)
 
+
+global updatable_amazon
+updatable_amazon = True
+global updatable_ebay
+updatable_ebay = True
+
 # Creating the database model
 class Amazon(db.Model):
     __tablename__ = 'Amazon'
@@ -103,12 +109,17 @@ def contact():
 
 @app.route("/books", methods =['POST','GET'])
 def books():
+    if updatable_amazon and updatable_ebay:
+        updatable = True
+    else:
+        updatable = False
+
     if request.method == "POST":
         books = Amazon.query.order_by(Amazon.book_name)
-        return render_template("books.html", books=books)
+        return render_template("books.html", books=books, updatable=updatable)
     else:
         books = Amazon.query.order_by(Amazon.book_name)
-        return render_template("books.html", books=books)
+        return render_template("books.html", books=books, updatable=updatable)
 
 @app.route("/add_books", methods =['POST','GET'])
 def add_books():
@@ -183,25 +194,29 @@ def add_books():
 
     return render_template("add_books.html")
 
+
 # https://unbiased-coder.com/python-flask-multithreading/#How_To_Background_Task_In_Flask
 class UpdateAmazonDB(threading.Thread):
     def __init__(self):
         super(UpdateAmazonDB, self).__init__()
-
     def run(self):
         # https://stackoverflow.com/questions/73999854/flask-error-runtimeerror-working-outside-of-application-context
+        # https://realpython.com/python-use-global-variable-in-function/#:~:text=If%20you%20want%20to%20modify,built%2Din%20globals()%20function
+        globals()["updatable_amazon"] = False
         with app.app_context():
             check_amazon_prices_today("./scraped_database_data_amazon.csv", only_create_new_books=False)
         print('Threaded task for updating Amazon DB has been completed')
+        globals()["updatable_amazon"] = True
 class UpdateEbayDB(threading.Thread):
     def __init__(self):
         super(UpdateEbayDB, self).__init__()
-
     def run(self):
         # https://stackoverflow.com/questions/73999854/flask-error-runtimeerror-working-outside-of-application-context
+        globals()["updatable_ebay"] = False
         with app.app_context():
             check_ebay_prices_today("./scraped_database_data_ebay.csv", only_create_new_books=False)
         print('Threaded task for updating Ebay DB has been completed')
+        globals()["updatable_ebay"] = True
 
 @app.route("/update_prices_in_database")
 def update_prices_in_database():
@@ -210,11 +225,15 @@ def update_prices_in_database():
     t_ebay = UpdateEbayDB()
     t_ebay.start()
 
-    t_amazon = UpdateAmazonDB()
-    t_amazon.start()
+    #t_amazon = UpdateAmazonDB()
+    #t_amazon.start()
 
     books = Amazon.query.order_by(Amazon.book_name)
-    return render_template("books.html", books=books)
+    if updatable_amazon and updatable_ebay:
+        updatable = True
+    else:
+        updatable = False
+    return render_template("books.html", books=books, updatable=updatable)
 
 @app.route("/update/<string:isbn>", methods =['POST','GET'])
 def update(isbn):
@@ -237,7 +256,11 @@ def update(isbn):
     except:
         books = Amazon.query.order_by(Amazon.book_name)
         error_statement = "Update should include valid ISBN-10/ISBN-13 number"
-        return render_template("books.html", error_statement=error_statement, books=books)
+        if updatable_amazon and updatable_ebay:
+            updatable = True
+        else:
+            updatable = False
+        return render_template("books.html", error_statement=error_statement, books=books, updatable=updatable)
 
     if request.method == "POST":
         if request.form.get('book_name'):

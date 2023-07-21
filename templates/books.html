@@ -15,7 +15,12 @@
 
         <br/>
         <a class="btn btn-primary" href="/add_books" role="button">Add Book</a>
+        {% if updatable==True %}
         <a class="btn btn-primary" href="/update_prices_in_database" role="button">Update Prices in Database</a>
+        {% endif %}
+        {% if updatable==False %}
+        <button type="button" class="btn btn-lg btn-primary" disabled>Update Prices in Database</button>
+        {% endif %}
         <br/>
 
 
