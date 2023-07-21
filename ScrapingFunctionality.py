@@ -619,7 +619,7 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
 
 
 
-def setup_database(links,base_file_name="scraped_database_data", new_list=False,URL=None):
+def setup_database(links,base_file_name="scraped_database_data", new_list=False):
 
     if new_list:
         create_blank_csv("./"+ base_file_name +"_amazon.csv", createHeader=True)
@@ -629,12 +629,12 @@ def setup_database(links,base_file_name="scraped_database_data", new_list=False,
 
         get_ISBN_from_list("./"+ base_file_name +"_amazon.csv")
 
-    #create_blank_csv("./" + base_file_name + "_ebay.csv")
-    #df = pd.read_csv("./" + base_file_name + "_amazon.csv")
-    #df.to_csv("./" + base_file_name + "_ebay.csv", index=False)
+    create_blank_csv("./" + base_file_name + "_ebay.csv")
+    df = pd.read_csv("./" + base_file_name + "_amazon.csv")
+    df.to_csv("./" + base_file_name + "_ebay.csv", index=False)
 
-    #check_amazon_prices_today("./" + base_file_name + "_amazon.csv", only_create_new_books=False)
-    check_ebay_prices_today("./" + base_file_name + "_ebay.csv")
+    check_amazon_prices_today("./" + base_file_name + "_amazon.csv", only_create_new_books=False)
+    check_ebay_prices_today("./" + base_file_name + "_ebay.csv", only_create_new_books=False)
 
 
 
@@ -646,12 +646,10 @@ def main():
         "https://www.amazon.co.uk/best-sellers-books-Amazon/zgbs/books/503400/ref=zg_bs_pg_2_books?_encoding=UTF8&pg=2",
         "https://www.amazon.co.uk/gp/bestsellers/books/14909604031/ref=pd_zg_hrsr_books",
         "https://www.amazon.co.uk/best-sellers-books-Amazon/zgbs/books/14909604031/ref=zg_bs_pg_2_books?_encoding=UTF8&pg=2"]
-    setup_database(links,new_list=False)
-    #check_amazon_prices_today("./Web Scraping/BeautifulSoup/ScraperAmazonDatasetTargetedPrices.csv")
-    #check_ebay_prices_today("Targeted")
-    #create_blank_csv("./scraped_database_data.csv", createHeader=True)
-    #setup_list_one_page_from_amazon("./scraped_database_data.csv")
-    #check_amazon_prices_today("scraped_database_data.csv")
+
+    check_amazon_prices_today("./scraped_database_data_amazon.csv", only_create_new_books=False)
+    check_ebay_prices_today("./scraped_database_data_ebay.csv", only_create_new_books=False)
+
 
 
 if __name__ == "__main__":
