@@ -3,11 +3,8 @@ from datetime import datetime
 import time
 import re
 import werkzeug
-
 from app import Amazon, db, Ebay
 from sqlalchemy.exc import IntegrityError
-
-import numpy as np
 import pandas as pd
 # https://www.youtube.com/watch?v=HiOtQMcI5wg
 from bs4 import BeautifulSoup
@@ -261,7 +258,7 @@ def check_ebay_prices_today(file_name, only_create_new_books=False):
                         new_delivery_price = 0
                         print("New Delivery Price: £0.00")
                     else:
-                        # new_delivery_price = new_delivery_price_with_sign[1:]
+                        # https://www.tutorialspoint.com/Extract-decimal-numbers-from-a-string-in-Python#:~:text=To%20extract%20decimal%20numbers%20from,to%20work%20with%20regular%20expressions.
                         new_delivery_price = re.findall("\d+\.\d+", new_delivery_price_with_sign)[0]
                         print("New Delivery Price: £" + new_delivery_price)
                 except Exception as e:
@@ -272,7 +269,6 @@ def check_ebay_prices_today(file_name, only_create_new_books=False):
             print("Except: Whole try-catch block for new products")
             print(e)
 
-        # https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw=0786965606&_sacat=0&_sop=15&LH_BIN=1&LH_PrefLoc=1&rt=nc&LH_ItemCondition=4
 
         # Used Products
         try:
@@ -317,6 +313,7 @@ def check_ebay_prices_today(file_name, only_create_new_books=False):
                         used_delivery_price = 0
                         print("Used Delivery Price: £0.00")
                     else:
+                        # https://www.tutorialspoint.com/Extract-decimal-numbers-from-a-string-in-Python#:~:text=To%20extract%20decimal%20numbers%20from,to%20work%20with%20regular%20expressions.
                         used_delivery_price = re.findall("\d+\.\d+", used_delivery_price_with_sign)[0]
                         print("Used Delivery Price: £" + used_delivery_price)
                 except Exception as e:
