@@ -5,7 +5,7 @@
 # https://stackabuse.com/using-sqlalchemy-with-flask-and-postgresql/
 
 
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, copy_current_request_context
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import smtplib
@@ -15,6 +15,8 @@ from flask_migrate import Migrate
 from sqlalchemy.exc import IntegrityError
 # https://stackoverflow.com/questions/38111620/python-isbn-13-digit-validate
 import isbnlib
+from ScrapingFunctionality import check_ebay_prices_today, check_amazon_prices_today
+import threading
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:password@localhost:5432/BookArbitrage"
@@ -181,6 +183,38 @@ def add_books():
 
     return render_template("add_books.html")
 
+# https://unbiased-coder.com/python-flask-multithreading/#How_To_Background_Task_In_Flask
+class UpdateAmazonDB(threading.Thread):
+    def __init__(self):
+        super(UpdateAmazonDB, self).__init__()
+
+    def run(self):
+        # https://stackoverflow.com/questions/73999854/flask-error-runtimeerror-working-outside-of-application-context
+        with app.app_context():
+            check_amazon_prices_today("./scraped_database_data_amazon.csv", only_create_new_books=False)
+        print('Threaded task for updating Amazon DB has been completed')
+class UpdateEbayDB(threading.Thread):
+    def __init__(self):
+        super(UpdateEbayDB, self).__init__()
+
+    def run(self):
+        # https://stackoverflow.com/questions/73999854/flask-error-runtimeerror-working-outside-of-application-context
+        with app.app_context():
+            check_ebay_prices_today("./scraped_database_data_ebay.csv", only_create_new_books=False)
+        print('Threaded task for updating Ebay DB has been completed')
+
+@app.route("/update_prices_in_database")
+def update_prices_in_database():
+    # https://stackoverflow.com/questions/62435134/how-to-run-a-function-in-background-without-blocking-main-thread-and-serving-fla
+
+    t_ebay = UpdateEbayDB()
+    t_ebay.start()
+
+    t_amazon = UpdateAmazonDB()
+    t_amazon.start()
+
+    books = Amazon.query.order_by(Amazon.book_name)
+    return render_template("books.html", books=books)
 
 @app.route("/update/<string:isbn>", methods =['POST','GET'])
 def update(isbn):

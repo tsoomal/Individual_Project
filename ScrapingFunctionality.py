@@ -3,7 +3,11 @@ from datetime import datetime
 import time
 import re
 import werkzeug
-from app import Amazon, db, Ebay
+
+#from app import Amazon, db, Ebay
+# https://stackoverflow.com/questions/7336802/how-to-avoid-circular-imports-in-python
+import app
+
 from sqlalchemy.exc import IntegrityError
 import pandas as pd
 # https://www.youtube.com/watch?v=HiOtQMcI5wg
@@ -187,7 +191,7 @@ def check_ebay_prices_today(file_name, only_create_new_books=False):
     number_of_rows = df.shape[0]
     isbn_col = df.iloc[:, [3]]
 
-    for row_number in range(number_of_rows):
+    for row_number in range(1):
         book_name = df.iloc[row_number, [0]][0]
         ebay_link = df.iloc[row_number, [1]][0]
         edition_format = df.iloc[row_number, [2]][0]
@@ -197,21 +201,21 @@ def check_ebay_prices_today(file_name, only_create_new_books=False):
 
         if only_create_new_books==True:
             try:
-                book_in_ebay_db = Ebay.query.get_or_404(isbn)
+                book_in_ebay_db = app.Ebay.query.get_or_404(isbn)
                 print(row_number)
                 print(book_in_ebay_db)
                 if book_in_ebay_db.new_product_price==-999 and book_in_ebay_db.new_delivery_price==-999 and \
                         book_in_ebay_db.new_total_price==-999 and book_in_ebay_db.used_product_price==-999 and \
                         book_in_ebay_db.used_delivery_price==-999 and book_in_ebay_db.used_total_price==-999:
-                    db.session.delete(book_in_ebay_db)
-                    db.session.commit()
+                    app.db.session.delete(book_in_ebay_db)
+                    app.db.session.commit()
                 else:
                     continue
             except werkzeug.exceptions.NotFound:
                 pass
 
         time1 = datetime.now()
-        print("Item: " + str(row_number))
+        print("Item: " + str(row_number+1))
         print(book_name)
         print(ebay_link)
         print(edition_format)
@@ -350,20 +354,20 @@ def check_ebay_prices_today(file_name, only_create_new_books=False):
 
 
         try:
-            new_book = Ebay(book_name=book_name, ebay_link=ebay_link, isbn=isbn, edition_format=edition_format, new_product_price=new_product_price, new_delivery_price=new_delivery_price, new_total_price=new_total_price_raw,
+            new_book = app.Ebay(book_name=book_name, ebay_link=ebay_link, isbn=isbn, edition_format=edition_format, new_product_price=new_product_price, new_delivery_price=new_delivery_price, new_total_price=new_total_price_raw,
                               used_product_price=used_product_price, used_delivery_price=used_delivery_price, used_total_price=used_total_price_raw)
-            db.session.add(new_book)
-            db.session.commit()
+            app.db.session.add(new_book)
+            app.db.session.commit()
         except IntegrityError:
-            db.session.rollback()
-            book_to_update_ebay = Ebay.query.get_or_404(isbn)
+            app.db.session.rollback()
+            book_to_update_ebay = app.Ebay.query.get_or_404(isbn)
             book_to_update_ebay.new_product_price = new_product_price
             book_to_update_ebay.new_delivery_price = new_delivery_price
             book_to_update_ebay.new_total_price = new_total_price_raw
             book_to_update_ebay.used_product_price = used_product_price
             book_to_update_ebay.used_delivery_price = used_delivery_price
             book_to_update_ebay.used_total_price = used_total_price_raw
-            db.session.commit()
+            app.db.session.commit()
 
 
 
@@ -397,21 +401,21 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
 
         if only_create_new_books==True:
             try:
-                book_in_amazon_db = Amazon.query.get_or_404(isbn)
+                book_in_amazon_db = app.Amazon.query.get_or_404(isbn)
                 print(row_number)
                 print(book_in_amazon_db)
                 if book_in_amazon_db.new_product_price==-999 and book_in_amazon_db.new_delivery_price==-999 and \
                         book_in_amazon_db.new_total_price==-999 and book_in_amazon_db.used_product_price==-999 and \
                         book_in_amazon_db.used_delivery_price==-999 and book_in_amazon_db.used_total_price==-999:
-                    db.session.delete(book_in_amazon_db)
-                    db.session.commit()
+                    app.db.session.delete(book_in_amazon_db)
+                    app.db.session.commit()
                 else:
                     continue
             except werkzeug.exceptions.NotFound:
                 pass
 
         time1 = datetime.now()
-        print("Item: " + str(row_number))
+        print("Item: " + str(row_number+1))
         URL_raw = df.iloc[row_number, [1]]
         URL = "https://www." + URL_raw[0]
         print(book_name)
@@ -509,7 +513,6 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
                             EC.element_to_be_clickable(
                                 (By.XPATH, "//*[@id='tmmSwatches']/ul/li[2]/span/span[3]/span[1]/span/a"))).click()
                     elif counter == 2:
-                        driver.get_screenshot_as_file("./screenshot_ts1.png")
                         WebDriverWait(driver, 10).until(
                             EC.element_to_be_clickable(
                                 (By.XPATH, "//*[@id='tmmSwatches']/ul/li[3]/span/span[3]/span[1]/span/a"))).click()
@@ -526,7 +529,6 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
 
                 time.sleep(3)
 
-                driver.get_screenshot_as_file("./screenshot3.png")
                 html = driver.page_source
                 soup = BeautifulSoup(html, features="lxml")
                 results = soup.find("div", id="aod-offer")
@@ -549,8 +551,6 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
 
             # Used Delivery Price
             try:
-                driver.get_screenshot_as_file("./screenshot_used_paperback.png")
-
                 results1 = soup.find("div", class_="a-section a-spacing-none a-padding-base aod-information-block aod-clear-float")
                 results2 = results1.find("span", attrs={'data-csa-c-delivery-price': True})
                 if (results2["data-csa-c-delivery-price"] == "FREE"):
@@ -599,20 +599,20 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
 
 
         try:
-            new_book = Amazon(book_name=book_name, amazon_link=amazon_link, isbn=isbn, edition_format=edition_format, new_product_price=new_product_price, new_delivery_price=new_delivery_price, new_total_price=new_total_price_raw,
+            new_book = app.Amazon(book_name=book_name, amazon_link=amazon_link, isbn=isbn, edition_format=edition_format, new_product_price=new_product_price, new_delivery_price=new_delivery_price, new_total_price=new_total_price_raw,
                               used_product_price=used_product_price, used_delivery_price=used_delivery_price, used_total_price=used_total_price_raw)
-            db.session.add(new_book)
-            db.session.commit()
+            app.db.session.add(new_book)
+            app.db.session.commit()
         except IntegrityError:
-            db.session.rollback()
-            book_to_update_amazon = Amazon.query.get_or_404(isbn)
+            app.db.session.rollback()
+            book_to_update_amazon = app.Amazon.query.get_or_404(isbn)
             book_to_update_amazon.new_product_price = new_product_price
             book_to_update_amazon.new_delivery_price = new_delivery_price
             book_to_update_amazon.new_total_price = new_total_price_raw
             book_to_update_amazon.used_product_price = used_product_price
             book_to_update_amazon.used_delivery_price = used_delivery_price
             book_to_update_amazon.used_total_price = used_total_price_raw
-            db.session.commit()
+            app.db.session.commit()
 
 
 
