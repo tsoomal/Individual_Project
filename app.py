@@ -233,7 +233,7 @@ def update_prices_in_database():
         updatable = True
     else:
         updatable = False
-    return render_template("books.html", books=books, updatable=updatable)
+    return redirect('/books')
 
 @app.route("/update/<string:isbn>", methods =['POST','GET'])
 def update(isbn):
