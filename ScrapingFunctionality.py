@@ -1,4 +1,5 @@
 import csv
+import os
 from datetime import datetime
 import time
 import re
@@ -381,8 +382,11 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
     df = pd.read_csv(file_name)
     number_of_rows = df.shape[0]
 
-    service = Service("..\chromedriver_win32")
+    service = Service(os.environ.get("CHROMEDRIVER_PATH"))
     options = webdriver.ChromeOptions()
+    options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--no-sandbox")
     # https://stackoverflow.com/questions/12211781/how-to-maximize-window-in-chrome-using-webdriver-python
     #options.add_argument("--start-maximized")
     options.add_argument("--window-size=1920,1080")
