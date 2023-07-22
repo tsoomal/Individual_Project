@@ -391,7 +391,6 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
     #options.add_argument("--disable-dev-shm-usage")
     #options.add_argument("--no-sandbox")
 
-
     # https://stackoverflow.com/questions/12211781/how-to-maximize-window-in-chrome-using-webdriver-python
     #options.add_argument("--start-maximized")
     # https://stackoverflow.com/questions/11613869/how-to-disable-logging-using-selenium-with-python-binding
@@ -438,7 +437,10 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
             driver = webdriver.Chrome(service=service, options=options)
         except:
             print("Error with Selenium.")
-            driver.quit()
+            try:
+                driver.quit()
+            except:
+                return
             return
 
 
@@ -647,7 +649,7 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
             book_to_update_amazon.used_total_price = used_total_price_raw
             app.db.session.commit()
 
-            driver.quit()
+        driver.quit()
 
 
 
