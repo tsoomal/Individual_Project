@@ -385,11 +385,17 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
     # https://www.andressevilla.com/running-chromedriver-with-python-selenium-on-heroku/
     service = Service(os.environ.get("CHROMEDRIVER_PATH"))
     options = webdriver.ChromeOptions()
-    options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--no-sandbox")
+
+    # Settings Needed for Heroku
+    #options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+    #options.add_argument("--disable-dev-shm-usage")
+    #options.add_argument("--no-sandbox")
+
+
     # https://stackoverflow.com/questions/12211781/how-to-maximize-window-in-chrome-using-webdriver-python
     #options.add_argument("--start-maximized")
+    # https://stackoverflow.com/questions/11613869/how-to-disable-logging-using-selenium-with-python-binding
+    options.add_experimental_option("excludeSwitches", ["enable-logging"])
     options.add_argument("--window-size=1920,1080")
     options.add_argument("--headless=new")
     options.add_argument('--blink-settings=imagesEnabled=false')
@@ -432,6 +438,8 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
             driver = webdriver.Chrome(service=service, options=options)
         except:
             print("Error with Selenium.")
+            driver.quit()
+            return
 
 
         # New Products
@@ -479,6 +487,8 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
         except Exception as e:
             print("Except: Whole try-catch block for new products")
             print(e)
+            driver.quit()
+            return
 
 
 
@@ -576,6 +586,8 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
 
         except:
             print("EXCEPTION: Try-catch block for Delivery Price")
+            driver.quit()
+            return
 
 
         time2 = datetime.now()
@@ -618,6 +630,8 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
             book_to_update_amazon.used_delivery_price = used_delivery_price
             book_to_update_amazon.used_total_price = used_total_price_raw
             app.db.session.commit()
+
+            driver.quit()
 
 
 
