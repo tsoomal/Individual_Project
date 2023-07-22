@@ -334,21 +334,24 @@ def delete(isbn):
 
 @app.route("/delete_all_books")
 def delete_all_books():
+    # https://stackoverflow.com/questions/16573802/flask-sqlalchemy-how-to-delete-all-rows-in-a-single-table
     try:
         num_rows_deleted = db.session.query(Amazon).delete()
         print("Number of rows deleted from Amazon Table: " + num_rows_deleted)
         db.session.commit()
-    except:
+    except Exception as e:
         db.session.rollback()
         print("ERROR: No rows deleted from Amazon Table.")
+        print(e)
 
     try:
         num_rows_deleted = db.session.query(Ebay).delete()
         print("Number of rows deleted from Ebay Table: " + num_rows_deleted)
         db.session.commit()
-    except:
+    except Exception as e:
         db.session.rollback()
         print("ERROR: No rows deleted from Ebay Table.")
+        print(e)
 
     return redirect('/books')
 
