@@ -382,6 +382,7 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
     df = pd.read_csv(file_name)
     number_of_rows = df.shape[0]
 
+    # https://www.andressevilla.com/running-chromedriver-with-python-selenium-on-heroku/
     service = Service(os.environ.get("CHROMEDRIVER_PATH"))
     options = webdriver.ChromeOptions()
     options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")

@@ -116,11 +116,11 @@ def books():
         updatable = False
 
     if request.method == "POST":
-        books = Amazon.query.order_by(Amazon.book_name)
-        return render_template("books.html", books=books, updatable=updatable)
+        books_ebay = Ebay.query.order_by(Ebay.book_name)
+        return render_template("books.html", books_ebay=books_ebay, updatable=updatable)
     else:
-        books = Amazon.query.order_by(Amazon.book_name)
-        return render_template("books.html", books=books, updatable=updatable)
+        books_ebay = Ebay.query.order_by(Ebay.book_name)
+        return render_template("books.html", books_ebay=books_ebay, updatable=updatable)
 
 @app.route("/add_books", methods =['POST','GET'])
 def add_books():
@@ -228,8 +228,8 @@ def update_prices_in_database():
     t_ebay = UpdateEbayDB()
     t_ebay.start()
 
-    t_amazon = UpdateAmazonDB()
-    t_amazon.start()
+    #t_amazon = UpdateAmazonDB()
+    #t_amazon.start()
 
     books = Amazon.query.order_by(Amazon.book_name)
     if updatable_amazon and updatable_ebay:
