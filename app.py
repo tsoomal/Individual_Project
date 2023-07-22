@@ -171,13 +171,15 @@ def add_books():
 
         # Push to database
         try:
-            new_book = Amazon(book_name=book_name, isbn=isbn, amazon_link="placeholder_link", product_price=5.00,
-                              delivery_price=0.00, total_price=5.00)
+            new_book = Amazon(book_name=book_name, amazon_link="placeholder_link", isbn=isbn, edition_format="Paperback", new_product_price=5.00,
+                              new_delivery_price=0.00, new_total_price=5.00, used_product_price=5.00,
+                              used_delivery_price=0.00, used_total_price=5.00)
             db.session.add(new_book)
             db.session.commit()
 
-            new_book = Ebay(book_name=book_name, isbn=isbn, ebay_link="placeholder_link", product_price=5.00,
-                            delivery_price=0.00, total_price=5.00)
+            new_book = Ebay(book_name=book_name, ebay_link="placeholder_link", isbn=isbn, edition_format="Paperback", new_product_price=5.00,
+                              new_delivery_price=0.00, new_total_price=5.00, used_product_price=5.00,
+                              used_delivery_price=0.00, used_total_price=5.00)
             db.session.add(new_book)
             db.session.commit()
             return redirect('/books')
