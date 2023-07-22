@@ -208,6 +208,8 @@ class UpdateAmazonDB(threading.Thread):
         globals()["updatable_amazon"] = False
         with app.app_context():
             check_amazon_prices_today("./scraped_database_data_amazon.csv", only_create_new_books=False)
+            check_amazon_prices_today("./scraped_database_data_amazon.csv", only_create_new_books=True)
+            check_amazon_prices_today("./scraped_database_data_amazon.csv", only_create_new_books=True)
         print('Threaded task for updating Amazon DB has been completed')
         globals()["updatable_amazon"] = True
 class UpdateEbayDB(threading.Thread):
