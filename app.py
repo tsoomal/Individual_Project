@@ -117,10 +117,12 @@ def books():
 
     if request.method == "POST":
         books_ebay = Ebay.query.order_by(Ebay.book_name)
-        return render_template("books.html", books_ebay=books_ebay, updatable=updatable)
+        books_amazon = Amazon.query.order_by(Amazon.book_name)
+        return render_template("books.html", books_ebay=books_ebay, books_amazon=books_amazon, updatable=updatable, zip=zip)
     else:
         books_ebay = Ebay.query.order_by(Ebay.book_name)
-        return render_template("books.html", books_ebay=books_ebay, updatable=updatable)
+        books_amazon = Amazon.query.order_by(Amazon.book_name)
+        return render_template("books.html", books_ebay=books_ebay, books_amazon=books_amazon, updatable=updatable, zip=zip)
 
 @app.route("/add_books", methods =['POST','GET'])
 def add_books():
@@ -264,7 +266,10 @@ def update(isbn):
             updatable = True
         else:
             updatable = False
-        return render_template("books.html", error_statement=error_statement, books=books, updatable=updatable)
+        books_ebay = Ebay.query.order_by(Ebay.book_name)
+        books_amazon = Amazon.query.order_by(Amazon.book_name)
+        return render_template("books.html", books_ebay=books_ebay, books_amazon=books_amazon, updatable=updatable,
+                               zip=zip)
 
     if request.method == "POST":
         if request.form.get('book_name'):

@@ -541,6 +541,9 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
                         WebDriverWait(driver, 10).until(
                             EC.element_to_be_clickable(
                                 (By.XPATH, "//*[@id='tmmSwatches']/ul/li[1]/span/span[3]/span[1]/span/a"))).click()
+                        # //*[@id="tmmSwatches"]/ul/li/span/span[3]/span/span/a
+                        # //*[@id="tmmSwatches"]/ul/li[4]/span/span[3]/span[1]/span/a
+
                     if counter ==1:
                         WebDriverWait(driver, 10).until(
                             EC.element_to_be_clickable(

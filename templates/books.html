@@ -41,7 +41,7 @@
         <thead>
             <!-- https://stackoverflow.com/questions/61969955/bootstrap-fixed-width-table-columns-in-container-fluid -->
             <tr class="d-flex">
-                <th class="col-5">Name</th>
+                <th class="col-4">Name</th>
                 <th class="col-1">ISBN</th>
                 <th class="col-1">Ebay New Total Price</th>
                 <th class="col-1">Ebay Used Total Price</th>
@@ -53,16 +53,16 @@
         </thead>
         <tbody>
             <!--https://stackoverflow.com/questions/1663807/how-do-i-iterate-through-two-lists-in-parallel-->
-            {% for book in books_ebay %}
+            {% for book_ebay, book_amazon in zip(books_ebay, books_amazon) %}
             <tr class="d-flex">
-                <td class="col-5">{{ book.book_name }}</td>
-                <td class="col-1">{{ book.isbn }}</td>
-                <td class="col-1">£{{ book.new_total_price }}</td>
-                <td class="col-1">£{{ book.used_total_price }}</td>
-                <td class="col-1">TODO</td>
-                <td class="col-1">TODO</td>
-                <td class="col-1"> <a href="/update/{{book.isbn}}" class="btn btn-outline-secondary btn-sm">Update</a> </td>
-                <td class="col-1"> <a href="/delete/{{book.isbn}}" class="btn btn-outline-danger btn-sm">Delete</a> </td>
+                <td class="col-4">{{ book_ebay.book_name }}</td>
+                <td class="col-1">{{ book_ebay.isbn }}</td>
+                <td class="col-1">£{{ book_ebay.new_total_price }}</td>
+                <td class="col-1">£{{ book_ebay.used_total_price }}</td>
+                <td class="col-1">£{{ book_amazon.new_total_price }}</td>
+                <td class="col-1">£{{ book_amazon.used_total_price }}</td>
+                <td class="col-1"> <a href="/update/{{book_ebay.isbn}}" class="btn btn-outline-secondary btn-sm">Update</a> </td>
+                <td class="col-1"> <a href="/delete/{{book_ebay.isbn}}" class="btn btn-outline-danger btn-sm">Delete</a> </td>
             </tr>
             {% endfor %}
         </tbody>
