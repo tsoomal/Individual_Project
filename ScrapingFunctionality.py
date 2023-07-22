@@ -458,7 +458,23 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
                     price_without_sign = price[1:]
                     new_product_prices_list.append(price_without_sign)
                     new_product_price = price_without_sign
-                    print("New Product Price: ", price_without_sign)
+                    if "age" in new_product_price:
+                        driver.get_screenshot_as_file('./screenshot.png')
+                        html = driver.page_source
+                        soup = BeautifulSoup(html, features="lxml")
+                        results = soup.find("div", id="aod-offer")
+                        price_text = results.find("span", class_="a-offscreen").get_text()
+
+                        if results is not None:
+                            price_without_sign = price_text[1:]
+                            new_product_price = price_without_sign
+                            print("New Product Price: ", price_without_sign)
+                        else:
+                            new_product_price = -999
+                            new_product_prices_list.append(-999)
+                            print("New Product Price: FAIL")
+                    else:
+                        print("New Product Price: ", price_without_sign)
                 else:
                     new_product_price = -999
                     new_product_prices_list.append(-999)

@@ -206,12 +206,16 @@ class UpdateAmazonDB(threading.Thread):
         # https://stackoverflow.com/questions/73999854/flask-error-runtimeerror-working-outside-of-application-context
         # https://realpython.com/python-use-global-variable-in-function/#:~:text=If%20you%20want%20to%20modify,built%2Din%20globals()%20function
         globals()["updatable_amazon"] = False
-        with app.app_context():
-            check_amazon_prices_today("./scraped_database_data_amazon.csv", only_create_new_books=False)
-            check_amazon_prices_today("./scraped_database_data_amazon.csv", only_create_new_books=True)
-            check_amazon_prices_today("./scraped_database_data_amazon.csv", only_create_new_books=True)
-        print('Threaded task for updating Amazon DB has been completed')
-        globals()["updatable_amazon"] = True
+        try:
+            with app.app_context():
+                #check_amazon_prices_today("./scraped_database_data_amazon.csv", only_create_new_books=False)
+                #check_amazon_prices_today("./scraped_database_data_amazon.csv", only_create_new_books=True)
+                check_amazon_prices_today("./scraped_database_data_amazon.csv", only_create_new_books=True)
+            print('Threaded task for updating Amazon DB has been completed')
+            globals()["updatable_amazon"] = True
+        except:
+            print('Threaded task for updating Amazon DB has FAILED')
+            globals()["updatable_amazon"] = True
 class UpdateEbayDB(threading.Thread):
     def __init__(self):
         super(UpdateEbayDB, self).__init__()
@@ -227,18 +231,13 @@ class UpdateEbayDB(threading.Thread):
 def update_prices_in_database():
     # https://stackoverflow.com/questions/62435134/how-to-run-a-function-in-background-without-blocking-main-thread-and-serving-fla
 
-    t_ebay = UpdateEbayDB()
-    t_ebay.start()
+    #t_ebay = UpdateEbayDB()
+    #t_ebay.start()
 
-    #t_amazon = UpdateAmazonDB()
-    #t_amazon.start()
+    t_amazon = UpdateAmazonDB()
+    t_amazon.start()
 
-    books = Amazon.query.order_by(Amazon.book_name)
-    if updatable_amazon and updatable_ebay:
-        updatable = True
-    else:
-        updatable = False
-    return redirect('/books')
+    return redirect('books')
 
 @app.route("/update/<string:isbn>", methods =['POST','GET'])
 def update(isbn):

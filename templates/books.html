@@ -14,7 +14,16 @@
     {% endif %}
 
     <br/>
-    <a class="btn btn-primary" href="/delete_all_books" role="button">Delete all Database Records</a>
+
+    <div class="btn-group">
+      <button type="button" class="btn btn-danger dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Delete all Database Records?
+      </button>
+      <div class="dropdown-menu">
+        <a class="dropdown-item" href="/delete_all_books">Yes! Delete ALL database records</a>
+      </div>
+    </div>
+
     <a class="btn btn-primary" href="/add_books" role="button">Add Book</a>
     {% if updatable==True %}
     <a class="btn btn-primary" href="/update_prices_in_database" role="button">Update Prices in Database</a>
@@ -24,6 +33,8 @@
     <button type="button" class="btn btn-primary" disabled>Update Prices in Database</button>
     {% endif %}
     <br/>
+    <br/>
+    <br/>
 
     <!-- https://stackoverflow.com/questions/32774118/building-a-bootstrap-table-with-dynamic-elements-in-flask -->
     <table class="table">
@@ -32,10 +43,12 @@
             <tr class="d-flex">
                 <th class="col-5">Name</th>
                 <th class="col-1">ISBN</th>
-                <th class="col-2">ebay_new_total_price</th>
-                <th class="col-2">ebay_used_total_price</th>
-                <th class="col-2">amazon_new_total_price</th>
-                <th class="col-2">amazon_used_total_price</th>
+                <th class="col-1">Ebay New Total Price</th>
+                <th class="col-1">Ebay Used Total Price</th>
+                <th class="col-1">Amazon New Total Price</th>
+                <th class="col-1">Amazon Used Total Price</th>
+                <th class="col-1">Update Record</th>
+                <th class="col-1">Delete Record</th>
             <tr>
         </thead>
         <tbody>
@@ -44,8 +57,12 @@
             <tr class="d-flex">
                 <td class="col-5">{{ book.book_name }}</td>
                 <td class="col-1">{{ book.isbn }}</td>
-                <td class="col-2">£{{ book.new_total_price }}</td>
-                <td class="col-2">£{{ book.used_total_price }}</td>
+                <td class="col-1">£{{ book.new_total_price }}</td>
+                <td class="col-1">£{{ book.used_total_price }}</td>
+                <td class="col-1">TODO</td>
+                <td class="col-1">TODO</td>
+                <td class="col-1"> <a href="/update/{{book.isbn}}" class="btn btn-outline-secondary btn-sm">Update</a> </td>
+                <td class="col-1"> <a href="/delete/{{book.isbn}}" class="btn btn-outline-danger btn-sm">Delete</a> </td>
             </tr>
             {% endfor %}
         </tbody>
