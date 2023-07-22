@@ -332,6 +332,26 @@ def delete(isbn):
 
     return redirect('/books')
 
+@app.route("/delete_all_books")
+def delete_all_books():
+    try:
+        num_rows_deleted = db.session.query(Amazon).delete()
+        print("Number of rows deleted from Amazon Table: " + num_rows_deleted)
+        db.session.commit()
+    except:
+        db.session.rollback()
+        print("ERROR: No rows deleted from Amazon Table.")
+
+    try:
+        num_rows_deleted = db.session.query(Ebay).delete()
+        print("Number of rows deleted from Ebay Table: " + num_rows_deleted)
+        db.session.commit()
+    except:
+        db.session.rollback()
+        print("ERROR: No rows deleted from Ebay Table.")
+
+    return redirect('/books')
+
 
 @app.route("/form", methods=["POST"])
 def form():
