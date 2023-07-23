@@ -1,7 +1,7 @@
 import os
+import re
 from datetime import datetime
 import time
-import werkzeug
 import pandas as pd
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -795,8 +795,7 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
     prefs = {"profile.managed_default_content_settings.images": 2}
     options.add_experimental_option("prefs", prefs)
 
-    #for row_number in range(number_of_rows):
-    for row_number in range(54, number_of_rows):
+    for row_number in range(number_of_rows):
         book_name = df.iloc[row_number, [0]][0]
         amazon_link = df.iloc[row_number, [1]][0]
         edition_format = df.iloc[row_number, [2]][0]
@@ -823,10 +822,10 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
                 return
             return
 
-
         # INSERT HERE
 
-        # New Products
+        # NEW PRODUCTS
+        # NEW PRODUCT PRICES AND NEW DELIVERY PRICES
         try:
             URL = "https://www.amazon.co.uk/dp/" + str(isbn)
             print(URL)
@@ -871,9 +870,38 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
                     else:
                         new_delivery_price = float(results2["data-csa-c-delivery-price"])
                 except:
-                    new_delivery_price = -999
-                    print("New Delivery Price: FAIL")
 
+                    # Secondary method of finding new delivery price
+                    # https://www.amazon.co.uk/dp/0786968982
+                    try:
+                        results1 = soup.find("div", id="mir-layout-DELIVERY_BLOCK-slot-NO_PROMISE_UPSELL_MESSAGE")
+                        results2 = results1.get_text()
+                        if ("FREE" in results2) or ("free" in results2) or ("Free" in results2):
+                            new_delivery_price = 0
+                            print("New Delivery Price: £0.00")
+                        else:
+                            new_delivery_price = re.findall("\d+\.\d+",results2)[0]
+                            print("New Delivery Price: £" + str(new_delivery_price))
+                    except:
+                        # Tertiary method of finding new delivery price
+                        # https://www.amazon.co.uk/dp/0786967439
+                        try:
+                            results1 = soup.find("div", id="delivery-block-ags-dcp-container_0")
+                            results2 = results1.get_text()
+                            print(results2)
+                            if ("FREE delivery" in results2):
+                                new_delivery_price = 0
+                                print("New Delivery Price: £0.00")
+                            else:
+                                new_delivery_price = re.findall("\d+\.\d+", results2)[0]
+                                print("New Delivery Price: £" + str(new_delivery_price))
+                        except:
+                            new_delivery_price = -999
+                            print("New Delivery Price: FAIL")
+
+
+
+                # USED PRODUCTS
                 # Normal method of finding used product and delivery prices
                 try:
                     URL = "https://www.amazon.co.uk/dp/" + str(isbn)
@@ -904,8 +932,6 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
                                 EC.element_to_be_clickable(
                                     (By.XPATH,
                                      "//*[@id='tmmSwatches']/ul/li[1]/span/span[3]/span[1]/span/a"))).click()
-                            # //*[@id="tmmSwatches"]/ul/li/span/span[3]/span/span/a
-                            # //*[@id="tmmSwatches"]/ul/li[4]/span/span[3]/span[1]/span/a
 
                         if counter == 1:
                             WebDriverWait(driver, 10).until(
@@ -1210,7 +1236,6 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
                         return
 
                 # Normal Secondary FOR USED PRICE
-
                 URL = "https://www.amazon.co.uk/dp/" + str(isbn)
                 driver.get(URL)
 
@@ -1225,8 +1250,6 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
                             break
                         else:
                             counter += 1
-
-                    # print(counter)
 
                     span_block = results2[counter].findAll("span", attrs={'data-show-all-offers-display': True})
 
@@ -1252,7 +1275,6 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
                         WebDriverWait(driver, 10).until(
                             EC.element_to_be_clickable(
                                 (By.XPATH, xpath_string))).click()
-
                     else:
                         raise Exception
 
