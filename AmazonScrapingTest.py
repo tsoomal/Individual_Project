@@ -795,7 +795,8 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
     prefs = {"profile.managed_default_content_settings.images": 2}
     options.add_experimental_option("prefs", prefs)
 
-    for row_number in range(number_of_rows):
+    #for row_number in range(number_of_rows):
+    for row_number in range(54, number_of_rows):
         book_name = df.iloc[row_number, [0]][0]
         amazon_link = df.iloc[row_number, [1]][0]
         edition_format = df.iloc[row_number, [2]][0]
