@@ -794,7 +794,7 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
     prefs = {"profile.managed_default_content_settings.images": 2}
     options.add_experimental_option("prefs", prefs)
 
-    for row_number in range(number_of_rows):
+    for row_number in range(201, number_of_rows):
         book_name = df.iloc[row_number, [0]][0]
         amazon_link = df.iloc[row_number, [1]][0]
         edition_format = df.iloc[row_number, [2]][0]
@@ -866,9 +866,17 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
                     if (results2["data-csa-c-delivery-price"] == "FREE"):
                         new_delivery_price = 0
                     else:
-                        new_delivery_price = float(results2["data-csa-c-delivery-price"])
-                except:
+                        try:
+                            if "£" in results2["data-csa-c-delivery-price"]:
+                                new_delivery_price = re.findall("\d+\.\d+", results2["data-csa-c-delivery-price"])[0]
+                                new_delivery_price = float(new_delivery_price)
+                            else:
+                                new_delivery_price = float(results2["data-csa-c-delivery-price"])
+                        except:
+                            # new_product_price isn't a string
+                            new_delivery_price = float(results2["data-csa-c-delivery-price"])
 
+                except Exception as e:
                     # Secondary method of finding new delivery price
                     # https://www.amazon.co.uk/dp/0786968982
                     try:
@@ -880,7 +888,7 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
                         else:
                             new_delivery_price = re.findall("\d+\.\d+",results2)[0]
                             print("New Delivery Price: £" + str(new_delivery_price))
-                    except:
+                    except Exception as e:
                         # Tertiary method of finding new delivery price
                         # https://www.amazon.co.uk/dp/0786967439
                         try:
@@ -893,7 +901,7 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
                             else:
                                 new_delivery_price = re.findall("\d+\.\d+", results2)[0]
                                 print("New Delivery Price: £" + str(new_delivery_price))
-                        except:
+                        except Exception as e:
                             new_delivery_price = -999
                             print("New Delivery Price: FAIL")
 
