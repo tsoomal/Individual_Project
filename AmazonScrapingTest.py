@@ -1135,8 +1135,12 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
                                 print("new_delivery_price: " + str(new_delivery_price))
 
                             print()
-                            if "£" in new_product_price:
-                                new_product_price = re.findall("\d+\.\d+", new_product_price)[0]
+                            try:
+                                if "£" in new_product_price:
+                                    new_product_price = re.findall("\d+\.\d+", new_product_price)[0]
+                            except:
+                                # new_product_price isn't a string
+                                pass
                             print("new_product_price: " + str(new_product_price))
                             print("new_delivery_price: " + str(new_delivery_price))
                             print("used_product_price: " + str(used_product_price))
@@ -1358,8 +1362,12 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
             return False
 
         print()
-        if "£" in new_product_price:
-            new_product_price = re.findall("\d+\.\d+", new_product_price)[0]
+        try:
+            if "£" in new_product_price:
+                new_product_price = re.findall("\d+\.\d+", new_product_price)[0]
+        except:
+            # new_product_price isn't a string
+            pass
         print("new_product_price: " + str(new_product_price))
         print("new_delivery_price: " + str(new_delivery_price))
         print("used_product_price: " + str(used_product_price))
@@ -1398,4 +1406,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
