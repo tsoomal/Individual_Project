@@ -803,11 +803,6 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
         isbn = str((df.iloc[row_number,[3]])[0]).split(".")[0]
         isbn = isbn.zfill(10)
 
-        if isbn == "1852862912" or isbn == "1932386009" or isbn == "1852860243":
-            pass
-        else:
-            continue
-
         time1 = datetime.now()
         print("Item: " + str(row_number+1))
         URL_raw = df.iloc[row_number, [1]]
@@ -959,7 +954,6 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
                                     (By.XPATH,
                                      "//*[@id='tmmSwatches']/ul/li[5]/span/span[3]/span[1]/span/a"))).click()
                     else:
-                        print("Exception raised! Line 962")
                         raise Exception
 
                     time.sleep(3)
@@ -1014,8 +1008,7 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
                         else:
                             counter += 1
 
-                    #print(counter)
-                    print("HI")
+                    # print(counter)
 
                     span_block = results2[counter].findAll("span", attrs={'data-show-all-offers-display': True})
 
@@ -1082,7 +1075,6 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
                                             (By.XPATH, xpath_string))).click()
 
                                 else:
-                                    print("Exception raised! Line 1084")
                                     raise Exception
 
                                 time.sleep(3)
@@ -1137,7 +1129,6 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
                                 print("new_product_price: " + str(new_product_price))
                                 print("new_delivery_price: " + str(new_delivery_price))
 
-                            #return
                             continue
                         if counter == 0:
                             xpath_string = "//*[@id='tmmSwatches']/ul/li/span/span[3]/span[" + str(
@@ -1152,7 +1143,6 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
                                 (By.XPATH, xpath_string))).click()
 
                     else:
-                        print("Exception raised! Line 1153")
                         raise Exception
 
                     time.sleep(3)
@@ -1161,7 +1151,7 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
                     soup = BeautifulSoup(html, features="lxml")
                     results = soup.find("div", id="aod-offer")
                     price_text = results.find("span", class_="a-offscreen").get_text()
-                    new_product_price = price_text[1:]
+                    new_product_price = price_text
                     print("New Product Price: " + str(new_product_price))
 
                     # New Delivery Price
@@ -1180,6 +1170,7 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
                     except Exception as e:
                         # New Delivery Price
                         try:
+                            print("CHECK")
                             results1 = soup.find("div",
                                                  id="mir-layout-DELIVERY_BLOCK-slot-PRIMARY_DELIVERY_MESSAGE_LARGE")
                             results2 = results1.find("span", attrs={'data-csa-c-delivery-price': True})
@@ -1226,7 +1217,6 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
                             new_product_price = -999
                             print("New Product Price: FAIL")
                     except Exception as e:
-                        print("Exception raised! Line 1228")
                         used_delivery_price = -999
                         return
 
@@ -1243,7 +1233,6 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
                             new_delivery_price = delivery_price_without_sign
 
                     except Exception as e:
-                        print("Exception raised! Line 1245")
                         return
 
                 # Normal Secondary FOR USED PRICE
@@ -1287,7 +1276,6 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
                             EC.element_to_be_clickable(
                                 (By.XPATH, xpath_string))).click()
                     else:
-                        print("Exception raised! Line 1289")
                         raise Exception
 
                     time.sleep(3)
@@ -1387,5 +1375,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
 
