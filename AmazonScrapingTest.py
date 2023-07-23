@@ -795,7 +795,7 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
     prefs = {"profile.managed_default_content_settings.images": 2}
     options.add_experimental_option("prefs", prefs)
 
-    for row_number in range(number_of_rows):
+    for row_number in range(112, number_of_rows):
         book_name = df.iloc[row_number, [0]][0]
         amazon_link = df.iloc[row_number, [1]][0]
         edition_format = df.iloc[row_number, [2]][0]
@@ -819,8 +819,8 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
             try:
                 driver.quit()
             except:
-                return
-            return
+                return False
+            return False
 
         # INSERT HERE
 
@@ -995,8 +995,14 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
 
             except Exception as e:
                 # New Product Price wasn't findable.
+                # NEW PRODUCT NOT FOUND
+                # ONLY USED PRODUCT EXISTS OR NO PRODUCT AVAILABLE AT ALL.
 
                 try:
+                    URL = "https://www.amazon.co.uk/dp/" + str(isbn)
+                    driver.get(URL)
+                    html = driver.page_source
+                    soup = BeautifulSoup(html, features="lxml")
                     results = soup.find("div", id="tmmSwatches")
                     results2 = results.findAll("li")
                     counter = 0
@@ -1033,6 +1039,8 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
 
                             URL = "https://www.amazon.co.uk/dp/" + str(isbn)
                             driver.get(URL)
+                            html = driver.page_source
+                            soup = BeautifulSoup(html, features="lxml")
 
                             try:
                                 results = soup.find("div", id="tmmSwatches")
@@ -1129,7 +1137,16 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
                                 print("new_product_price: " + str(new_product_price))
                                 print("new_delivery_price: " + str(new_delivery_price))
 
+                            print()
+                            print("new_product_price: " + str(new_product_price))
+                            print("new_delivery_price: " + str(new_delivery_price))
+                            print("used_product_price: " + str(used_product_price))
+                            print("used_delivery_price: " + str(used_delivery_price))
+                            print()
+                            print()
+                            print()
                             continue
+
                         if counter == 0:
                             xpath_string = "//*[@id='tmmSwatches']/ul/li/span/span[3]/span[" + str(
                                 index_of_new + 1) + "]/span/a"
@@ -1188,52 +1205,55 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
                 except Exception as e:
                     new_product_price = -999
                     new_delivery_price = -999
-                    print("Except: New")
-                    print(e)
+                    print("Except: New price doesn't exist")
+                    #print(e)
 
                     try:
-                        results = soup.find("span", class_="a-offscreen")
-                        if results is not None:
-                            price = results.get_text()
-                            price_without_sign = price[1:]
-                            new_product_price = price_without_sign
-                            if "age" in new_product_price:
-                                driver.get_screenshot_as_file('./screenshot.png')
-                                html = driver.page_source
-                                soup = BeautifulSoup(html, features="lxml")
-                                results = soup.find("div", id="aod-offer")
-                                price_text = results.find("span", class_="a-offscreen").get_text()
+                        pass
+                        # Only used prices exist.
+                    #     results = soup.find("span", class_="a-offscreen")
+                    #     if results is not None:
+                    #         price = results.get_text()
+                    #         price_without_sign = price[1:]
+                    #         new_product_price = price_without_sign
+                    #         if "age" in new_product_price:
+                    #             driver.get_screenshot_as_file('./screenshot.png')
+                    #             html = driver.page_source
+                    #             soup = BeautifulSoup(html, features="lxml")
+                    #             results = soup.find("div", id="aod-offer")
+                    #             price_text = results.find("span", class_="a-offscreen").get_text()
+                    #
+                    #             if results is not None:
+                    #                 price_without_sign = price_text[1:]
+                    #                 new_product_price = price_without_sign
+                    #                 print("New Product Price: £" + str(price_without_sign))
+                    #             else:
+                    #                 new_product_price = -999
+                    #                 print("New Product Price: FAIL")
+                    #         else:
+                    #             print("New Product Price: £" + str(price_without_sign))
+                    #     else:
+                    #         new_product_price = -999
+                    #         print("New Product Price: FAIL")
+                    # except Exception as e:
+                    #     used_delivery_price = -999
+                    #     print(e)
+                    #     continue
+                    #
+                    # try:
+                    #     results1 = soup.find("div",
+                    #                          class_="a-section a-spacing-none a-padding-base aod-information-block aod-clear-float")
+                    #     results2 = results1.find("span", attrs={'data-csa-c-delivery-price': True})
+                    #     if (results2["data-csa-c-delivery-price"] == "FREE"):
+                    #         print("New Delivery Price: " + results2["data-csa-c-delivery-price"])
+                    #         new_delivery_price = 0
+                    #     else:
+                    #         delivery_price_without_sign = results2["data-csa-c-delivery-price"][1:]
+                    #         print("New Delivery Price: £" + delivery_price_without_sign)
+                    #         new_delivery_price = delivery_price_without_sign
 
-                                if results is not None:
-                                    price_without_sign = price_text[1:]
-                                    new_product_price = price_without_sign
-                                    print("New Product Price: £" + str(price_without_sign))
-                                else:
-                                    new_product_price = -999
-                                    print("New Product Price: FAIL")
-                            else:
-                                print("New Product Price: £" + str(price_without_sign))
-                        else:
-                            new_product_price = -999
-                            print("New Product Price: FAIL")
                     except Exception as e:
-                        used_delivery_price = -999
-                        return
-
-                    try:
-                        results1 = soup.find("div",
-                                             class_="a-section a-spacing-none a-padding-base aod-information-block aod-clear-float")
-                        results2 = results1.find("span", attrs={'data-csa-c-delivery-price': True})
-                        if (results2["data-csa-c-delivery-price"] == "FREE"):
-                            print("New Delivery Price: " + results2["data-csa-c-delivery-price"])
-                            new_delivery_price = 0
-                        else:
-                            delivery_price_without_sign = results2["data-csa-c-delivery-price"][1:]
-                            print("New Delivery Price: £" + delivery_price_without_sign)
-                            new_delivery_price = delivery_price_without_sign
-
-                    except Exception as e:
-                        return
+                        continue
 
                 # Normal Secondary FOR USED PRICE
                 URL = "https://www.amazon.co.uk/dp/" + str(isbn)
@@ -1335,7 +1355,7 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
             print("Except: Whole try-catch block for new products")
             print(e)
             driver.quit()
-            return
+            return False
 
         print()
         print("new_product_price: " + str(new_product_price))
@@ -1347,6 +1367,7 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
         print()
 
         driver.quit()
+    return True
 
 
 
