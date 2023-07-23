@@ -460,6 +460,8 @@ def check_amazon_prices_today_isbn(file_name, isbn, only_create_new_books=False)
 
                         URL = "https://www.amazon.co.uk/dp/" + str(isbn)
                         driver.get(URL)
+                        html = driver.page_source
+                        soup = BeautifulSoup(html, features="lxml")
 
                         try:
                             results = soup.find("div", id="tmmSwatches")
@@ -663,6 +665,8 @@ def check_amazon_prices_today_isbn(file_name, isbn, only_create_new_books=False)
 
             URL = "https://www.amazon.co.uk/dp/" + str(isbn)
             driver.get(URL)
+            html = driver.page_source
+            soup = BeautifulSoup(html, features="lxml")
 
             try:
                 results = soup.find("div", id="tmmSwatches")
@@ -1258,6 +1262,9 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
                 # Normal Secondary FOR USED PRICE
                 URL = "https://www.amazon.co.uk/dp/" + str(isbn)
                 driver.get(URL)
+                html = driver.page_source
+                soup = BeautifulSoup(html, features="lxml")
+
 
                 try:
                     results = soup.find("div", id="tmmSwatches")
