@@ -374,10 +374,6 @@ def check_ebay_prices_today(file_name, only_create_new_books=False):
 
 
 def check_amazon_prices_today(file_name, only_create_new_books=False):
-    new_product_prices_list = []
-    new_delivery_prices_list = []
-    used_product_prices_list = []
-    used_delivery_prices_list = []
 
     df = pd.read_csv(file_name)
     number_of_rows = df.shape[0]
@@ -458,7 +454,6 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
                 if results is not None:
                     price = results.get_text()
                     price_without_sign = price[1:]
-                    new_product_prices_list.append(price_without_sign)
                     new_product_price = price_without_sign
                     if "age" in new_product_price:
                         driver.get_screenshot_as_file('./screenshot.png')
@@ -473,13 +468,11 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
                             print("New Product Price: ", price_without_sign)
                         else:
                             new_product_price = -999
-                            new_product_prices_list.append(-999)
                             print("New Product Price: FAIL")
                     else:
                         print("New Product Price: ", price_without_sign)
                 else:
                     new_product_price = -999
-                    new_product_prices_list.append(-999)
                     print("New Product Price: FAIL")
             except Exception as e:
                 new_product_price = -999
@@ -493,13 +486,10 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
                 print("New delivery price: " + results2["data-csa-c-delivery-price"])
                 if (results2["data-csa-c-delivery-price"]=="FREE"):
                     new_delivery_price = 0
-                    new_delivery_prices_list.append(0)
                 else:
                     new_delivery_price = float(results2["data-csa-c-delivery-price"])
-                    new_delivery_prices_list.append(results2["data-csa-c-delivery-price"])
             except:
                 new_delivery_price = -999
-                new_delivery_prices_list.append(-999)
                 print("New Delivery Price: FAIL")
 
         except Exception as e:
@@ -573,15 +563,12 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
                 if results is not None:
                     price_without_sign = price_text[1:]
                     used_product_price = price_without_sign
-                    used_product_prices_list.append(price_without_sign)
                     print("Used Product Price: ", price_without_sign)
                 else:
                     used_product_price = -999
-                    used_product_prices_list.append(-999)
                     print("Used Product Price: FAIL")
             except:
                 used_product_price = -999.00
-                used_product_prices_list.append(-999)
                 print("Used Product Price: FAIL")
 
 
@@ -592,17 +579,14 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
                 if (results2["data-csa-c-delivery-price"] == "FREE"):
                     print("Used Delivery Price: " + results2["data-csa-c-delivery-price"])
                     used_delivery_price = 0
-                    used_delivery_prices_list.append(0)
                 else:
                     delivery_price_without_sign = results2["data-csa-c-delivery-price"][1:]
                     print("Used Delivery Price: " + delivery_price_without_sign)
                     used_delivery_price = delivery_price_without_sign
-                    used_delivery_prices_list.append(float(delivery_price_without_sign))
 
             except Exception as e:
                 print(e)
                 used_delivery_price = -999
-                used_delivery_prices_list.append(-999)
                 print("Used Delivery Price: FAIL")
 
         except:
