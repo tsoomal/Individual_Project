@@ -802,6 +802,12 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
         isbn = str((df.iloc[row_number,[3]])[0]).split(".")[0]
         isbn = isbn.zfill(10)
 
+        if isbn == "1858755832" or isbn == "1801262098":
+            pass
+        else:
+            continue
+
+
         time1 = datetime.now()
         print("Item: " + str(row_number+1))
         URL_raw = df.iloc[row_number, [1]]

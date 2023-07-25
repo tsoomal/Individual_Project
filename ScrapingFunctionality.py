@@ -942,14 +942,12 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
             driver.quit()
             return False
 
-        print()
         try:
             if "£" in new_product_price:
                 new_product_price = re.findall("\d+\.\d+", new_product_price)[0]
         except:
             # new_product_price isn't a string
             pass
-
 
         time2 = datetime.now()
         time_diff = time2 - time1
