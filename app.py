@@ -101,9 +101,21 @@ def index():
 def about():
     return render_template("about.html")
 
-@app.route("/query_database")
+@app.route("/query_database", methods =['POST','GET'])
 def query_database():
-    return render_template("query_database.html")
+    if request.method == "POST":
+        isbn_input = request.form['isbn_input']
+        print(isbn_input)
+        book_to_display_amazon = Amazon.query.get_or_404(isbn_input)
+        book_to_display_ebay = Ebay.query.get_or_404(isbn_input)
+
+        print(book_to_display_amazon.new_product_price)
+
+        return render_template("query_database.html", book_to_display_ebay=book_to_display_ebay, book_to_display_amazon=book_to_display_amazon, isbn_input=isbn_input)
+    else:
+        return render_template("query_database.html")
+
+
 @app.route("/contact")
 def contact():
     return render_template("contact.html")
@@ -368,7 +380,7 @@ def delete_all_books():
     return redirect('/books')
 
 
-@app.route("/form", methods=["POST"])
+@app.route("/contact_form", methods=["POST"])
 def form():
     name = request.form.get("name")
     email_address = request.form.get("email_address")
@@ -393,7 +405,7 @@ def form():
     msg['To'] = "tsoomal@hotmail.co.uk"
     server.send_message(msg)
 
-    return render_template("form.html", name=name, email_address=email_address, message=message)
+    return render_template("contact_form.html", name=name, email_address=email_address, message=message)
 
 if __name__ == "__main__":
     db.create_all()

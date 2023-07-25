@@ -5,5 +5,88 @@
 {% block content %}
     <div class="container">
     <h1>Query the Database!</h1>
+        <br/>
+
+        <!-- https://mdbootstrap.com/docs/standard/extended/input-and-button-on-same-line/-->
+    <form action="/query_database" method="POST">
+         <div class="d-flex justify-content-left mb-4">
+             <div class="form-outline me-3" style="width: 14rem">
+             <input type="text" id="isbn_input" class="form-control" placeholder="ISBN" name="isbn_input" value={{isbn_input}}>
+             </div>
+             <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+    </form>
+
+
+    {% if book_to_display_ebay and book_to_display_amazon %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <strong>Book Found!</strong>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+        <!-- https://stackoverflow.com/questions/28612699/table-header-on-left-side-in-bootstrap -->
+        <table class="table table-bordered">
+      <tbody>
+        <tr class="d-flex">
+          <th class="col-3">Book Name</th>
+          <td class="col-3">{{book_to_display_ebay.book_name}}</td>
+        </tr>
+        <tr class="d-flex">
+          <th class="col-3">First Name</th>
+          <td class="col-3">John</td>
+        </tr>
+        <tr class="d-flex">
+          <th class="col-3">Last Name</th>
+          <td class="col-3">Carter</td>
+        </tr>
+        <tr class="d-flex">
+          <th class="col-3">Email</th>
+          <td class="col-3">johncarter@mail.com</td>
+        </tr>
+      </tbody>
+    </table>
+
+
+        <br/>
+        {{book_to_display_ebay.book_name}}
+        <br/>
+        {{book_to_display_ebay.ebay_link}}
+        <br/>
+        {{book_to_display_ebay.isbn}}
+        <br/>
+        {{book_to_display_ebay.edition_format}}
+        <br/>
+        {{book_to_display_ebay.new_product_price}}
+        <br/>
+        {{book_to_display_ebay.new_delivery_price}}
+        <br/>
+        {{book_to_display_ebay.new_total_price}}
+        <br/>
+        {{book_to_display_ebay.used_product_price}}
+        <br/>
+        {{book_to_display_ebay.used_delivery_price}}
+        <br/>
+        {{book_to_display_ebay.used_total_price}}
+        <br/>
+        {{book_to_display_amazon.new_product_price}}
+        <br/>
+        {{book_to_display_amazon.new_delivery_price}}
+        <br/>
+        {{book_to_display_amazon.new_total_price}}
+        <br/>
+        {{book_to_display_amazon.used_product_price}}
+        <br/>
+        {{book_to_display_amazon.used_delivery_price}}
+        <br/>
+        {{book_to_display_amazon.used_total_price}}
+    {% endif %}
+
+
+
+
+
+
+
+
+
 	</div>
 {% endblock %}
