@@ -24,13 +24,13 @@
       </div>
     </div>
 
-    <a class="btn btn-primary" href="/add_books" role="button">Add Book</a>
+    <a class="btn btn-primary ms-2" href="/add_books" role="button">Add Book</a>
     {% if updatable==True %}
-    <a class="btn btn-primary" href="/update_prices_in_database" role="button">Update Prices in Database</a>
+    <a class="btn btn-primary ms-2" href="/update_prices_in_database" role="button">Update Prices in Database</a>
     {% endif %}
     {% if updatable==False %}
     <!-- https://getbootstrap.com/docs/4.0/components/buttons/ -->
-    <button type="button" class="btn btn-primary" disabled>Update Prices in Database</button>
+    <button type="button" class="btn btn-primary ms-2" disabled>Update Prices in Database</button>
     {% endif %}
     <br/>
     <br/>
