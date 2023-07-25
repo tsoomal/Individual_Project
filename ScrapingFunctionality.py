@@ -728,6 +728,164 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
                                         else:
                                             used_product_price = -999
                                             print("Used Product Price: FAIL")
+
+                                    elif "%" in new_product_price:
+                                        # Used product on buy-box. New price definitely exists. Used price may not exist.
+                                        try:
+                                            # Click on link for new items.
+                                            results = soup.find("div", id="tmmSwatches")
+                                            results2 = results.findAll("li")
+                                            counter = 0
+                                            found_selected_button = False
+                                            for list_item in results2:
+                                                if list_item.get("class")[1] == "selected":
+                                                    found_selected_button = True
+                                                    break
+                                                else:
+                                                    counter += 1
+
+                                            span_block = results2[counter].findAll("span", attrs={
+                                                'data-show-all-offers-display': True})
+
+                                            for loop_counter, block in enumerate(span_block):
+                                                stringer = (block['data-show-all-offers-display'])
+
+                                                if "used" in stringer:
+                                                    pass
+                                                elif "new" in stringer or "all" in stringer:
+                                                    index_of_new = loop_counter
+
+                                            if found_selected_button == True:
+                                                counter = counter
+
+                                            index_of_new = index_of_new
+                                            if counter == 0:
+                                                xpath_string = "//*[@id='tmmSwatches']/ul/li/span/span[3]/span[" + str(
+                                                    index_of_new + 1) + "]/span/a"
+                                            else:
+                                                xpath_string = "//*[@id='tmmSwatches']/ul/li[" + str(
+                                                    counter + 1) + "]/span/span[3]/span[" + str(
+                                                    index_of_new + 1) + "]/span/a"
+
+                                            WebDriverWait(driver, 10).until(
+                                                EC.element_to_be_clickable(
+                                                    (By.XPATH, xpath_string))).click()
+
+                                            time.sleep(3)
+                                            driver.get_screenshot_as_file("./screenshot.png")
+                                            html = driver.page_source
+                                            soup = BeautifulSoup(html, features="lxml")
+                                            # New Product Price
+                                            results = soup.find("div",
+                                                                class_="a-section a-spacing-none a-padding-base aod-information-block aod-clear-float")
+                                            price_text = results.find("span", class_="a-offscreen").get_text()
+                                            new_product_price = price_text[1:]
+                                            print("New Product Price: " + str(new_product_price))
+
+                                            # New Delivery Price
+                                            results2 = results.find("span", attrs={'data-csa-c-delivery-price': True})
+                                            if (results2["data-csa-c-delivery-price"] == "FREE"):
+                                                print("New Delivery Price: " + results2["data-csa-c-delivery-price"])
+                                                new_delivery_price = 0
+                                            else:
+                                                delivery_price_without_sign = results2["data-csa-c-delivery-price"][1:]
+                                                print("New Delivery Price: £" + delivery_price_without_sign)
+                                                new_delivery_price = delivery_price_without_sign
+
+                                            # Go back to main product listing page.
+                                            driver.get(URL)
+                                            html = driver.page_source
+                                            soup = BeautifulSoup(html, features="lxml")
+
+                                            # Get Used prices
+                                            try:
+                                                # Click Used link
+                                                results = soup.find("div", id="tmmSwatches")
+                                                results2 = results.findAll("li")
+                                                counter = 0
+                                                found_selected_button = False
+                                                for list_item in results2:
+                                                    if list_item.get("class")[1] == "selected":
+                                                        found_selected_button = True
+                                                        break
+                                                    else:
+                                                        counter += 1
+
+                                                span_block = results2[counter].findAll("span",
+                                                                                       attrs={
+                                                                                           'data-show-all-offers-display': True})
+
+                                                for loop_counter, block in enumerate(span_block):
+                                                    stringer = (block['data-show-all-offers-display'])
+
+                                                    if "used" in stringer:
+                                                        index_of_used = loop_counter
+                                                    elif "new" in stringer:
+                                                        pass
+
+                                                if found_selected_button == True:
+                                                    counter = counter
+                                                    index_of_used = index_of_used
+                                                    if counter == 0:
+                                                        xpath_string = "//*[@id='tmmSwatches']/ul/li/span/span[3]/span[" + str(
+                                                            index_of_used + 1) + "]/span/a"
+                                                    else:
+                                                        xpath_string = "//*[@id='tmmSwatches']/ul/li[" + str(
+                                                            counter + 1) + "]/span/span[3]/span[" + str(
+                                                            index_of_used + 1) + "]/span/a"
+
+                                                    WebDriverWait(driver, 10).until(
+                                                        EC.element_to_be_clickable(
+                                                            (By.XPATH, xpath_string))).click()
+
+                                                else:
+                                                    raise Exception
+
+                                                time.sleep(3)
+
+                                                html = driver.page_source
+                                                soup = BeautifulSoup(html, features="lxml")
+                                                results = soup.find("div",
+                                                                    class_="a-section a-spacing-none asin-container-padding aod-clear-float")
+                                                # Used Product Price
+                                                price_text = results.find("span", class_="a-offscreen").get_text()
+                                                used_product_price = price_text[1:]
+
+                                                results1 = results.find("div",
+                                                                        id="mir-layout-DELIVERY_BLOCK-slot-PRIMARY_DELIVERY_MESSAGE_LARGE")
+                                                results2 = results1.find("span",
+                                                                         attrs={'data-csa-c-delivery-price': True})
+                                                print("New delivery price: " + results2["data-csa-c-delivery-price"])
+                                                if (results2["data-csa-c-delivery-price"] == "FREE"):
+                                                    new_delivery_price = 0
+                                                else:
+                                                    try:
+                                                        if "£" in results2["data-csa-c-delivery-price"]:
+                                                            new_delivery_price = \
+                                                                re.findall("\d+\.\d+",
+                                                                           results2["data-csa-c-delivery-price"])[0]
+                                                            new_delivery_price = float(new_delivery_price)
+                                                        else:
+                                                            new_delivery_price = float(
+                                                                results2["data-csa-c-delivery-price"])
+                                                    except:
+                                                        # new_product_price isn't a string
+                                                        new_delivery_price = float(
+                                                            results2["data-csa-c-delivery-price"])
+                                            except:
+                                                used_product_price = -999
+                                                used_delivery_price = -999
+                                        except Exception as e:
+                                            print("% Handler failed.")
+                                            new_product_price = -999
+                                            new_delivery_price = -999
+                                            used_product_price = -999
+                                            used_delivery_price = -999
+                                            print(e)
+
+                                        end_of_item_loop(amazon_link, book_name, driver, edition_format, isbn, new_delivery_price, new_product_price, time1, used_delivery_price, used_product_price)
+                                        continue
+
                                     else:
                                         print("Used Product Price: £" + str(price_without_sign))
                                 else:
@@ -942,56 +1100,63 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
             driver.quit()
             return False
 
-        try:
-            if "£" in new_product_price:
-                new_product_price = re.findall("\d+\.\d+", new_product_price)[0]
-        except:
-            # new_product_price isn't a string
-            pass
-
-        time2 = datetime.now()
-        time_diff = time2 - time1
-        print("Time: ", time_diff.seconds)
-        print()
-
-        try:
-            new_total_price_raw = float(new_product_price) + float(new_delivery_price)
-        except:
-            new_product_price=-999
-            new_delivery_price=-999
-            new_total_price_raw=-999
-
-        if new_total_price_raw <= -1000 or new_total_price_raw >= 1000:
-            new_total_price_raw = -999
-
-        try:
-            used_total_price_raw = float(used_product_price)+float(used_delivery_price)
-        except:
-            used_product_price = -999
-            used_delivery_price = -999
-            used_total_price_raw = -999
-        if used_total_price_raw <= -1000 or used_total_price_raw >= 1000:
-            used_total_price_raw = -999
-
-
-        try:
-            new_book = app.Amazon(book_name=book_name, amazon_link=amazon_link, isbn=isbn, edition_format=edition_format, new_product_price=new_product_price, new_delivery_price=new_delivery_price, new_total_price=new_total_price_raw,
-                              used_product_price=used_product_price, used_delivery_price=used_delivery_price, used_total_price=used_total_price_raw)
-            app.db.session.add(new_book)
-            app.db.session.commit()
-        except IntegrityError:
-            app.db.session.rollback()
-            book_to_update_amazon = app.Amazon.query.get_or_404(isbn)
-            book_to_update_amazon.new_product_price = new_product_price
-            book_to_update_amazon.new_delivery_price = new_delivery_price
-            book_to_update_amazon.new_total_price = new_total_price_raw
-            book_to_update_amazon.used_product_price = used_product_price
-            book_to_update_amazon.used_delivery_price = used_delivery_price
-            book_to_update_amazon.used_total_price = used_total_price_raw
-            app.db.session.commit()
-
-        driver.quit()
+        end_of_item_loop(amazon_link, book_name, driver, edition_format, isbn, new_delivery_price, new_product_price, time1, used_delivery_price, used_product_price)
     return True
+
+
+def end_of_item_loop(amazon_link, book_name, driver, edition_format, isbn, new_delivery_price, new_product_price,
+                     time1, used_delivery_price, used_product_price):
+    time2 = datetime.now()
+    time_diff = time2 - time1
+    print("Time: ", time_diff.seconds)
+    print()
+
+    try:
+        if "£" in new_product_price:
+            new_product_price = re.findall("\d+\.\d+", new_product_price)[0]
+    except:
+        # new_product_price isn't a string
+        pass
+
+    try:
+        new_total_price_raw = float(new_product_price) + float(new_delivery_price)
+    except:
+        new_product_price = -999
+        new_delivery_price = -999
+        new_total_price_raw = -999
+    if new_total_price_raw <= -1000 or new_total_price_raw >= 1000:
+        new_total_price_raw = -999
+    try:
+        used_total_price_raw = float(used_product_price) + float(
+            used_delivery_price)
+    except:
+        used_product_price = -999
+        used_delivery_price = -999
+        used_total_price_raw = -999
+    if used_total_price_raw <= -1000 or used_total_price_raw >= 1000:
+        used_total_price_raw = -999
+    try:
+        new_book = app.Amazon(book_name=book_name, amazon_link=amazon_link,
+                              isbn=isbn, edition_format=edition_format,
+                              new_product_price=new_product_price,
+                              new_delivery_price=new_delivery_price,
+                              new_total_price=new_total_price_raw,
+                              used_product_price=used_product_price,
+                              used_delivery_price=used_delivery_price,
+                              used_total_price=used_total_price_raw)
+        app.db.session.add(new_book)
+        app.db.session.commit()
+    except IntegrityError:
+        app.db.session.rollback()
+        book_to_update_amazon = app.Amazon.query.get_or_404(isbn)
+        book_to_update_amazon.new_product_price = new_product_price
+        book_to_update_amazon.new_delivery_price = new_delivery_price
+        book_to_update_amazon.new_total_price = new_total_price_raw
+        book_to_update_amazon.used_product_price = used_product_price
+        book_to_update_amazon.used_delivery_price = used_delivery_price
+        book_to_update_amazon.used_total_price = used_total_price_raw
+        app.db.session.commit()
+    driver.quit()
 
 
 
