@@ -635,8 +635,6 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
                         else:
                             counter += 1
 
-                    # print(counter)
-
                     span_block = results2[counter].findAll("span", attrs={'data-show-all-offers-display': True})
 
                     for loop_counter, block in enumerate(span_block):
@@ -664,49 +662,7 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
                             soup = BeautifulSoup(html, features="lxml")
 
                             try:
-                                results = soup.find("div", id="tmmSwatches")
-                                results2 = results.findAll("li")
-                                counter = 0
-                                found_selected_button = False
-                                for list_item in results2:
-                                    if list_item.get("class")[1] == "selected":
-                                        found_selected_button = True
-                                        break
-                                    else:
-                                        counter += 1
-
-                                # print(counter)
-
-                                span_block = results2[counter].findAll("span",
-                                                                       attrs={'data-show-all-offers-display': True})
-
-                                for loop_counter, block in enumerate(span_block):
-                                    stringer = (block['data-show-all-offers-display'])
-
-                                    if "used" in stringer:
-                                        index_of_used = loop_counter
-                                    elif "new" in stringer:
-                                        pass
-
-                                if found_selected_button == True:
-                                    counter = counter
-                                    index_of_used = index_of_used
-                                    if counter == 0:
-                                        xpath_string = "//*[@id='tmmSwatches']/ul/li/span/span[3]/span[" + str(
-                                            index_of_used + 1) + "]/span/a"
-                                    else:
-                                        xpath_string = "//*[@id='tmmSwatches']/ul/li[" + str(
-                                            counter + 1) + "]/span/span[3]/span[" + str(
-                                            index_of_used + 1) + "]/span/a"
-
-                                    WebDriverWait(driver, 10).until(
-                                        EC.element_to_be_clickable(
-                                            (By.XPATH, xpath_string))).click()
-
-                                else:
-                                    raise Exception
-
-                                time.sleep(3)
+                                click_used_link(driver, soup)
 
                                 html = driver.page_source
                                 soup = BeautifulSoup(html, features="lxml")
@@ -733,46 +689,7 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
                                         # Used product on buy-box. New price definitely exists. Used price may not exist.
                                         try:
                                             # Click on link for new items.
-                                            results = soup.find("div", id="tmmSwatches")
-                                            results2 = results.findAll("li")
-                                            counter = 0
-                                            found_selected_button = False
-                                            for list_item in results2:
-                                                if list_item.get("class")[1] == "selected":
-                                                    found_selected_button = True
-                                                    break
-                                                else:
-                                                    counter += 1
-
-                                            span_block = results2[counter].findAll("span", attrs={
-                                                'data-show-all-offers-display': True})
-
-                                            for loop_counter, block in enumerate(span_block):
-                                                stringer = (block['data-show-all-offers-display'])
-
-                                                if "used" in stringer:
-                                                    pass
-                                                elif "new" in stringer or "all" in stringer:
-                                                    index_of_new = loop_counter
-
-                                            if found_selected_button == True:
-                                                counter = counter
-
-                                            index_of_new = index_of_new
-                                            if counter == 0:
-                                                xpath_string = "//*[@id='tmmSwatches']/ul/li/span/span[3]/span[" + str(
-                                                    index_of_new + 1) + "]/span/a"
-                                            else:
-                                                xpath_string = "//*[@id='tmmSwatches']/ul/li[" + str(
-                                                    counter + 1) + "]/span/span[3]/span[" + str(
-                                                    index_of_new + 1) + "]/span/a"
-
-                                            WebDriverWait(driver, 10).until(
-                                                EC.element_to_be_clickable(
-                                                    (By.XPATH, xpath_string))).click()
-
-                                            time.sleep(3)
-                                            driver.get_screenshot_as_file("./screenshot.png")
+                                            click_new_link(driver, index_of_new, soup)
                                             html = driver.page_source
                                             soup = BeautifulSoup(html, features="lxml")
                                             # New Product Price
@@ -800,48 +717,7 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
                                             # Get Used prices
                                             try:
                                                 # Click Used link
-                                                results = soup.find("div", id="tmmSwatches")
-                                                results2 = results.findAll("li")
-                                                counter = 0
-                                                found_selected_button = False
-                                                for list_item in results2:
-                                                    if list_item.get("class")[1] == "selected":
-                                                        found_selected_button = True
-                                                        break
-                                                    else:
-                                                        counter += 1
-
-                                                span_block = results2[counter].findAll("span",
-                                                                                       attrs={
-                                                                                           'data-show-all-offers-display': True})
-
-                                                for loop_counter, block in enumerate(span_block):
-                                                    stringer = (block['data-show-all-offers-display'])
-
-                                                    if "used" in stringer:
-                                                        index_of_used = loop_counter
-                                                    elif "new" in stringer:
-                                                        pass
-
-                                                if found_selected_button == True:
-                                                    counter = counter
-                                                    index_of_used = index_of_used
-                                                    if counter == 0:
-                                                        xpath_string = "//*[@id='tmmSwatches']/ul/li/span/span[3]/span[" + str(
-                                                            index_of_used + 1) + "]/span/a"
-                                                    else:
-                                                        xpath_string = "//*[@id='tmmSwatches']/ul/li[" + str(
-                                                            counter + 1) + "]/span/span[3]/span[" + str(
-                                                            index_of_used + 1) + "]/span/a"
-
-                                                    WebDriverWait(driver, 10).until(
-                                                        EC.element_to_be_clickable(
-                                                            (By.XPATH, xpath_string))).click()
-
-                                                else:
-                                                    raise Exception
-
-                                                time.sleep(3)
+                                                click_used_link(driver, soup)
 
                                                 html = driver.page_source
                                                 soup = BeautifulSoup(html, features="lxml")
@@ -910,25 +786,13 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
                             except Exception as e:
                                 used_product_price = -999
                                 used_delivery_price = -999
-                                print("Secondary method for used item failed.")
+                                print("Secondary method for used item failed. (1)")
                                 print(e)
                                 print("new_product_price: " + str(new_product_price))
                                 print("new_delivery_price: " + str(new_delivery_price))
 
                             print()
-                            try:
-                                if "£" in new_product_price:
-                                    new_product_price = re.findall("\d+\.\d+", new_product_price)[0]
-                            except:
-                                # new_product_price isn't a string
-                                pass
-                            print("new_product_price: " + str(new_product_price))
-                            print("new_delivery_price: " + str(new_delivery_price))
-                            print("used_product_price: " + str(used_product_price))
-                            print("used_delivery_price: " + str(used_delivery_price))
-                            print()
-                            print()
-                            print()
+                            end_of_item_loop(amazon_link, book_name, driver, edition_format, isbn, new_delivery_price, new_product_price, time1, used_delivery_price, used_product_price)
                             continue
 
                         if counter == 0:
@@ -992,11 +856,6 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
                     print("Except: New price doesn't exist")
                     # print(e)
 
-                    try:
-                        pass
-                    except Exception as e:
-                        continue
-
                 # Normal Secondary FOR USED PRICE
                 URL = "https://www.amazon.co.uk/dp/" + str(isbn)
                 driver.get(URL)
@@ -1004,45 +863,7 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
                 soup = BeautifulSoup(html, features="lxml")
 
                 try:
-                    results = soup.find("div", id="tmmSwatches")
-                    results2 = results.findAll("li")
-                    counter = 0
-                    found_selected_button = False
-                    for list_item in results2:
-                        if list_item.get("class")[1] == "selected":
-                            found_selected_button = True
-                            break
-                        else:
-                            counter += 1
-
-                    span_block = results2[counter].findAll("span", attrs={'data-show-all-offers-display': True})
-
-                    for loop_counter, block in enumerate(span_block):
-                        stringer = (block['data-show-all-offers-display'])
-
-                        if "used" in stringer:
-                            index_of_used = loop_counter
-                        elif "new" in stringer:
-                            pass
-
-                    if found_selected_button == True:
-                        counter = counter
-                        index_of_used = index_of_used
-                        if counter == 0:
-                            xpath_string = "//*[@id='tmmSwatches']/ul/li/span/span[3]/span[" + str(
-                                index_of_used + 1) + "]/span/a"
-                        else:
-                            xpath_string = "//*[@id='tmmSwatches']/ul/li[" + str(
-                                counter + 1) + "]/span/span[3]/span[" + str(
-                                index_of_used + 1) + "]/span/a"
-
-                        WebDriverWait(driver, 10).until(
-                            EC.element_to_be_clickable(
-                                (By.XPATH, xpath_string))).click()
-                    else:
-                        raise Exception
-
-                    time.sleep(3)
+                    click_used_link(driver, soup)
 
                     html = driver.page_source
                     soup = BeautifulSoup(html, features="lxml")
@@ -1090,7 +911,7 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
                 except:
                     used_product_price = -999
                     used_delivery_price = -999
-                    print("Secondary method for used item failed.")
+                    print("Secondary method for used item failed. (2)")
                     print("new_product_price: " + str(new_product_price))
                     print("new_delivery_price: " + str(new_delivery_price))
 
@@ -1102,6 +923,84 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
 
         end_of_item_loop(amazon_link, book_name, driver, edition_format, isbn, new_delivery_price, new_product_price, time1, used_delivery_price, used_product_price)
     return True
+
+
+def click_used_link(driver, soup):
+    results = soup.find("div", id="tmmSwatches")
+    results2 = results.findAll("li")
+    counter = 0
+    found_selected_button = False
+    for list_item in results2:
+        if list_item.get("class")[1] == "selected":
+            found_selected_button = True
+            break
+        else:
+            counter += 1
+    span_block = results2[counter].findAll("span",
+                                           attrs={'data-show-all-offers-display': True})
+    for loop_counter, block in enumerate(span_block):
+        stringer = (block['data-show-all-offers-display'])
+
+        if "used" in stringer:
+            index_of_used = loop_counter
+        elif "new" in stringer:
+            pass
+    if found_selected_button == True:
+        counter = counter
+        index_of_used = index_of_used
+        if counter == 0:
+            xpath_string = "//*[@id='tmmSwatches']/ul/li/span/span[3]/span[" + str(
+                index_of_used + 1) + "]/span/a"
+        else:
+            xpath_string = "//*[@id='tmmSwatches']/ul/li[" + str(
+                counter + 1) + "]/span/span[3]/span[" + str(
+                index_of_used + 1) + "]/span/a"
+
+        WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable(
+                (By.XPATH, xpath_string))).click()
+
+    else:
+        raise Exception
+    time.sleep(3)
+    return
+
+
+def click_new_link(driver, index_of_new, soup):
+    results = soup.find("div", id="tmmSwatches")
+    results2 = results.findAll("li")
+    counter = 0
+    found_selected_button = False
+    for list_item in results2:
+        if list_item.get("class")[1] == "selected":
+            found_selected_button = True
+            break
+        else:
+            counter += 1
+    span_block = results2[counter].findAll("span", attrs={
+        'data-show-all-offers-display': True})
+    for loop_counter, block in enumerate(span_block):
+        stringer = (block['data-show-all-offers-display'])
+
+        if "used" in stringer:
+            pass
+        elif "new" in stringer or "all" in stringer:
+            index_of_new = loop_counter
+    if found_selected_button == True:
+        counter = counter
+    index_of_new = index_of_new
+    if counter == 0:
+        xpath_string = "//*[@id='tmmSwatches']/ul/li/span/span[3]/span[" + str(
+            index_of_new + 1) + "]/span/a"
+    else:
+        xpath_string = "//*[@id='tmmSwatches']/ul/li[" + str(
+            counter + 1) + "]/span/span[3]/span[" + str(
+            index_of_new + 1) + "]/span/a"
+    WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable(
+            (By.XPATH, xpath_string))).click()
+    time.sleep(3)
+    return
 
 
 def end_of_item_loop(amazon_link, book_name, driver, edition_format, isbn, new_delivery_price, new_product_price,

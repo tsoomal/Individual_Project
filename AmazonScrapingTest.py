@@ -802,10 +802,15 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
         isbn = str((df.iloc[row_number,[3]])[0]).split(".")[0]
         isbn = isbn.zfill(10)
 
-        # if isbn == "1858755832" or isbn == "1801262098" or isbn == "1840231246" or isbn == "185286480X":
+        # if isbn == "1852865164" or isbn == "1852867329" or isbn == "1563893436":
         #     pass
         # else:
         #     continue
+
+        if isbn == "1858755832" or isbn == "1801262098" or isbn == "1840231246" or isbn == "185286480X":
+            pass
+        else:
+            continue
 
         # if isbn == "1858755832":
         #     pass
@@ -1314,7 +1319,7 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
                             except Exception as e:
                                 used_product_price = -999
                                 used_delivery_price = -999
-                                print("Secondary method for used item failed.")
+                                print("Secondary method for used item failed. (1)")
                                 print(e)
                                 print("new_product_price: " + str(new_product_price))
                                 print("new_delivery_price: " + str(new_delivery_price))
@@ -1494,7 +1499,7 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
                 except:
                     used_product_price = -999
                     used_delivery_price = -999
-                    print("Secondary method for used item failed.")
+                    print("Secondary method for used item failed. (2)")
                     print("new_product_price: " + str(new_product_price))
                     print("new_delivery_price: " + str(new_delivery_price))
 
