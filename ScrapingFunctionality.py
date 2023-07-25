@@ -408,7 +408,7 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
         if only_create_new_books==True:
             try:
                 book_in_amazon_db = app.Amazon.query.get_or_404(isbn)
-                print(row_number)
+                print(row_number + 1)
                 print(book_in_amazon_db)
                 if book_in_amazon_db.new_product_price==-999 and book_in_amazon_db.new_delivery_price==-999 and \
                         book_in_amazon_db.new_total_price==-999 and book_in_amazon_db.used_product_price==-999 and \

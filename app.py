@@ -210,7 +210,7 @@ class UpdateAmazonDB(threading.Thread):
         globals()["updatable_amazon"] = False
         try:
             with app.app_context():
-                check_amazon_prices_today("./scraped_database_data_amazon.csv", only_create_new_books=True)
+                check_amazon_prices_today("./scraped_database_data_amazon.csv", only_create_new_books=False)
                 #check_amazon_prices_today("./scraped_database_data_amazon.csv", only_create_new_books=True)
 
                 # NEED TO ADD COLUMN FOR DAY LAST UPDATED.
