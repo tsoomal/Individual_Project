@@ -101,24 +101,52 @@ def index():
 def about():
     return render_template("about.html")
 
-@app.route("/query_database", methods =['POST','GET'])
+@app.route("/query_database")
 def query_database():
-    if request.method == "POST":
-        isbn_input = request.form['isbn_input']
-        print(isbn_input)
+    return render_template("query_database.html")
+
+@app.route("/query_form", methods=["POST"])
+def query_form():
+    isbn_input = request.form['isbn_input']
+    try:
         book_to_display_amazon = Amazon.query.get_or_404(isbn_input)
         book_to_display_ebay = Ebay.query.get_or_404(isbn_input)
-
-        print(book_to_display_amazon.new_product_price)
-
-        return render_template("query_database.html", book_to_display_ebay=book_to_display_ebay, book_to_display_amazon=book_to_display_amazon, isbn_input=isbn_input)
-    else:
-        return render_template("query_database.html")
-
+        return render_template("query_database.html", message="Book found!",
+                               book_to_display_ebay=book_to_display_ebay,
+                               book_to_display_amazon=book_to_display_amazon, isbn_input=isbn_input)
+    except:
+        return render_template("query_database.html", message="Book not found!", isbn_input=isbn_input)
 
 @app.route("/contact")
 def contact():
     return render_template("contact.html")
+
+@app.route("/contact_form", methods=["POST"])
+def contact_form():
+    name = request.form.get("name")
+    email_address = request.form.get("email_address")
+    message = request.form.get("message")
+
+    # Error-handling
+    if not name or not email_address or not message:
+        error_statement = "All form fields required!"
+        return render_template("contact.html", error_statement=error_statement, name=name,
+                               email_address=email_address, message=message)
+
+    server = smtplib.SMTP("smtp.gmail.com", 587)
+    server.starttls()
+    # Environmental Variable has to be configured in run-time environment
+    server.login("bookarbitragedevteam@gmail.com",os.getenv('gmail_password'))
+
+    # https://stackoverflow.com/questions/7232088/python-subject-not-shown-when-sending-email-using-smtplib-module
+    msg = EmailMessage()
+    msg.set_content("Name:\n" + name + "\n\n" + "Email address:\n" + email_address + "\n\n" + "Message:\n" + message)
+    msg['Subject'] = "BookArbitrage Contact Form Submission"
+    msg['From'] = "bookarbitragedevteam@gmail.com"
+    msg['To'] = "tsoomal@hotmail.co.uk"
+    server.send_message(msg)
+
+    return render_template("contact_form.html", name=name, email_address=email_address, message=message)
 
 @app.route("/books", methods =['POST','GET'])
 def books():
@@ -380,32 +408,6 @@ def delete_all_books():
     return redirect('/books')
 
 
-@app.route("/contact_form", methods=["POST"])
-def form():
-    name = request.form.get("name")
-    email_address = request.form.get("email_address")
-    message = request.form.get("message")
-
-    # Error-handling
-    if not name or not email_address or not message:
-        error_statement = "All form fields required!"
-        return render_template("contact.html", error_statement=error_statement, name=name,
-                               email_address=email_address, message=message)
-
-    server = smtplib.SMTP("smtp.gmail.com", 587)
-    server.starttls()
-    # Environmental Variable has to be configured in run-time environment
-    server.login("bookarbitragedevteam@gmail.com",os.getenv('gmail_password'))
-
-    # https://stackoverflow.com/questions/7232088/python-subject-not-shown-when-sending-email-using-smtplib-module
-    msg = EmailMessage()
-    msg.set_content("Name:\n" + name + "\n\n" + "Email address:\n" + email_address + "\n\n" + "Message:\n" + message)
-    msg['Subject'] = "BookArbitrage Contact Form Submission"
-    msg['From'] = "bookarbitragedevteam@gmail.com"
-    msg['To'] = "tsoomal@hotmail.co.uk"
-    server.send_message(msg)
-
-    return render_template("contact_form.html", name=name, email_address=email_address, message=message)
 
 if __name__ == "__main__":
     db.create_all()
