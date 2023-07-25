@@ -468,6 +468,83 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
                         else:
                             new_product_price = -999
                             print("New Product Price: FAIL")
+                    elif "%" in new_product_price:
+                        # Used product on buy-box. New price definitely exists. Used price may not exist.
+                        try:
+                            # Click on link for new items.
+                            click_new_link(driver, soup)
+                            html = driver.page_source
+                            soup = BeautifulSoup(html, features="lxml")
+                            # New Product Price
+                            results = soup.find("div",
+                                                class_="a-section a-spacing-none a-padding-base aod-information-block aod-clear-float")
+                            price_text = results.find("span", class_="a-offscreen").get_text()
+                            new_product_price = price_text[1:]
+                            print("New Product Price: " + str(new_product_price))
+
+                            # New Delivery Price
+                            results2 = results.find("span", attrs={'data-csa-c-delivery-price': True})
+                            if (results2["data-csa-c-delivery-price"] == "FREE"):
+                                print("New Delivery Price: " + results2["data-csa-c-delivery-price"])
+                                new_delivery_price = 0
+                            else:
+                                delivery_price_without_sign = results2["data-csa-c-delivery-price"][1:]
+                                print("New Delivery Price: £" + delivery_price_without_sign)
+                                new_delivery_price = delivery_price_without_sign
+
+                            # Go back to main product listing page.
+                            driver.get(URL)
+                            html = driver.page_source
+                            soup = BeautifulSoup(html, features="lxml")
+
+                            # Get Used prices
+                            try:
+                                # Click Used link
+                                click_used_link(driver, soup)
+
+                                html = driver.page_source
+                                soup = BeautifulSoup(html, features="lxml")
+                                results = soup.find("div",
+                                                    class_="a-section a-spacing-none asin-container-padding aod-clear-float")
+                                # Used Product Price
+                                price_text = results.find("span", class_="a-offscreen").get_text()
+                                used_product_price = price_text[1:]
+
+                                results1 = results.find("div",
+                                                        id="mir-layout-DELIVERY_BLOCK-slot-PRIMARY_DELIVERY_MESSAGE_LARGE")
+                                results2 = results1.find("span",
+                                                         attrs={'data-csa-c-delivery-price': True})
+                                print("New delivery price: " + results2["data-csa-c-delivery-price"])
+                                if (results2["data-csa-c-delivery-price"] == "FREE"):
+                                    new_delivery_price = 0
+                                else:
+                                    try:
+                                        if "£" in results2["data-csa-c-delivery-price"]:
+                                            new_delivery_price = \
+                                                re.findall("\d+\.\d+",
+                                                           results2["data-csa-c-delivery-price"])[0]
+                                            new_delivery_price = float(new_delivery_price)
+                                        else:
+                                            new_delivery_price = float(
+                                                results2["data-csa-c-delivery-price"])
+                                    except:
+                                        # new_product_price isn't a string
+                                        new_delivery_price = float(
+                                            results2["data-csa-c-delivery-price"])
+                            except:
+                                used_product_price = -999
+                                used_delivery_price = -999
+                        except Exception as e:
+                            print("% Handler failed.")
+                            new_product_price = -999
+                            new_delivery_price = -999
+                            used_product_price = -999
+                            used_delivery_price = -999
+                            print(e)
+
+                        end_of_item_loop(amazon_link, book_name, driver, edition_format, isbn, new_delivery_price,
+                                         new_product_price, time1, used_delivery_price, used_product_price)
+                        continue
                     else:
                         print("New Product Price: £" + str(price_without_sign))
                 else:
@@ -684,84 +761,6 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
                                         else:
                                             used_product_price = -999
                                             print("Used Product Price: FAIL")
-
-                                    elif "%" in new_product_price:
-                                        # Used product on buy-box. New price definitely exists. Used price may not exist.
-                                        try:
-                                            # Click on link for new items.
-                                            click_new_link(driver, index_of_new, soup)
-                                            html = driver.page_source
-                                            soup = BeautifulSoup(html, features="lxml")
-                                            # New Product Price
-                                            results = soup.find("div",
-                                                                class_="a-section a-spacing-none a-padding-base aod-information-block aod-clear-float")
-                                            price_text = results.find("span", class_="a-offscreen").get_text()
-                                            new_product_price = price_text[1:]
-                                            print("New Product Price: " + str(new_product_price))
-
-                                            # New Delivery Price
-                                            results2 = results.find("span", attrs={'data-csa-c-delivery-price': True})
-                                            if (results2["data-csa-c-delivery-price"] == "FREE"):
-                                                print("New Delivery Price: " + results2["data-csa-c-delivery-price"])
-                                                new_delivery_price = 0
-                                            else:
-                                                delivery_price_without_sign = results2["data-csa-c-delivery-price"][1:]
-                                                print("New Delivery Price: £" + delivery_price_without_sign)
-                                                new_delivery_price = delivery_price_without_sign
-
-                                            # Go back to main product listing page.
-                                            driver.get(URL)
-                                            html = driver.page_source
-                                            soup = BeautifulSoup(html, features="lxml")
-
-                                            # Get Used prices
-                                            try:
-                                                # Click Used link
-                                                click_used_link(driver, soup)
-
-                                                html = driver.page_source
-                                                soup = BeautifulSoup(html, features="lxml")
-                                                results = soup.find("div",
-                                                                    class_="a-section a-spacing-none asin-container-padding aod-clear-float")
-                                                # Used Product Price
-                                                price_text = results.find("span", class_="a-offscreen").get_text()
-                                                used_product_price = price_text[1:]
-
-                                                results1 = results.find("div",
-                                                                        id="mir-layout-DELIVERY_BLOCK-slot-PRIMARY_DELIVERY_MESSAGE_LARGE")
-                                                results2 = results1.find("span",
-                                                                         attrs={'data-csa-c-delivery-price': True})
-                                                print("New delivery price: " + results2["data-csa-c-delivery-price"])
-                                                if (results2["data-csa-c-delivery-price"] == "FREE"):
-                                                    new_delivery_price = 0
-                                                else:
-                                                    try:
-                                                        if "£" in results2["data-csa-c-delivery-price"]:
-                                                            new_delivery_price = \
-                                                                re.findall("\d+\.\d+",
-                                                                           results2["data-csa-c-delivery-price"])[0]
-                                                            new_delivery_price = float(new_delivery_price)
-                                                        else:
-                                                            new_delivery_price = float(
-                                                                results2["data-csa-c-delivery-price"])
-                                                    except:
-                                                        # new_product_price isn't a string
-                                                        new_delivery_price = float(
-                                                            results2["data-csa-c-delivery-price"])
-                                            except:
-                                                used_product_price = -999
-                                                used_delivery_price = -999
-                                        except Exception as e:
-                                            print("% Handler failed.")
-                                            new_product_price = -999
-                                            new_delivery_price = -999
-                                            used_product_price = -999
-                                            used_delivery_price = -999
-                                            print(e)
-
-                                        end_of_item_loop(amazon_link, book_name, driver, edition_format, isbn, new_delivery_price, new_product_price, time1, used_delivery_price, used_product_price)
-                                        continue
-
                                     else:
                                         print("Used Product Price: £" + str(price_without_sign))
                                 else:
@@ -966,7 +965,7 @@ def click_used_link(driver, soup):
     return
 
 
-def click_new_link(driver, index_of_new, soup):
+def click_new_link(driver, soup):
     results = soup.find("div", id="tmmSwatches")
     results2 = results.findAll("li")
     counter = 0

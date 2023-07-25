@@ -807,10 +807,10 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
         # else:
         #     continue
 
-        if isbn == "1858755832" or isbn == "1801262098" or isbn == "1840231246" or isbn == "185286480X":
-            pass
-        else:
-            continue
+        # if isbn == "1858755832" or isbn == "1801262098" or isbn == "1840231246" or isbn == "185286480X":
+        #     pass
+        # else:
+        #     continue
 
         # if isbn == "1858755832":
         #     pass
