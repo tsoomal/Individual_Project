@@ -15,7 +15,10 @@
 
     <br/>
 
-    <div class="btn-group">
+        <!-- https://stackoverflow.com/questions/62009672/prevent-nav-item-to-a-new-line-when-reduce-page-width -->
+    <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups" style="min-width: 600px;">
+        <div class="btn-group me-2" role="group" aria-label="First group">
+
       <button type="button" class="btn btn-danger dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         Delete all Database Records?
       </button>
@@ -23,16 +26,21 @@
         <a class="dropdown-item" href="/delete_all_books">Yes! Delete ALL database records</a>
       </div>
     </div>
+    <div class="btn-group me-2" role="group" aria-label="Second group">
+        <a class="btn btn-primary" href="/add_books" role="button">Add Book</a>
+    </div>
 
-    <a class="btn btn-primary ms-2" href="/add_books" role="button">Add Book</a>
+            <div class="btn-group" role="group" aria-label="Third group">
     {% if updatable==True %}
-    <a class="btn btn-primary ms-2" href="/update_prices_in_database" role="button">Update Prices in Database</a>
+    <a class="btn btn-primary" href="/update_prices_in_database" role="button">Update Prices in Database</a>
     {% endif %}
     {% if updatable==False %}
     <!-- https://getbootstrap.com/docs/4.0/components/buttons/ -->
-    <button type="button" class="btn btn-primary ms-2" disabled>Update Prices in Database</button>
+    <button type="button" class="btn btn-primary" disabled>Update Prices in Database</button>
     {% endif %}
-    <br/>
+    </div>
+    </div>
+
     <br/>
     <br/>
 
