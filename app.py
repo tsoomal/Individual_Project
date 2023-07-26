@@ -416,6 +416,9 @@ def opportunities():
     books_ebay_new = []
     books_amazon_used = []
     books_ebay_used = []
+    # ADD PROFIT
+    # ADD LINKS
+    # BUY NEW, SELL USED BOOKS
 
     for book_ebay, book_amazon in zip(all_books_ebay, all_books_amazon):
 
@@ -472,6 +475,33 @@ def opportunities():
         else:
             # Both books have the same used total prices.
             pass
+
+            # # BUY NEW, SELL USED BOOKS
+            # if book_ebay.new_total_price == -999 and book_amazon.new_total_price == -999:
+            #     # No arbitrage possible
+            #     pass
+            # elif book_ebay.new_total_price == -999 and book_amazon.new_total_price != -999:
+            #     # Buy on Amazon, Sell on Ebay
+            #     # Need to get historical average sold price on eBay.
+            #     pass
+            # elif book_ebay.new_total_price != -999 and book_amazon.new_total_price == -999:
+            #     # Buy on Ebay, Sell on Amazon
+            #     pass
+            # elif book_ebay.new_total_price > book_amazon.new_total_price:
+            #     # Buy on Amazon, Sell on Ebay
+            #     total_selling_price_to_breakeven = (storage_amazon_to_ebay(book_amazon.new_total_price))
+            #     if book_ebay.new_total_price > total_selling_price_to_breakeven:
+            #         books_amazon_new.append(book_amazon)
+            #         books_ebay_new.append(book_ebay)
+            # elif book_ebay.new_total_price < book_amazon.new_total_price:
+            #     # Buy on Ebay, Sell on Amazon
+            #     total_selling_price_to_breakeven = (storage_ebay_to_amazon(book_ebay.new_total_price))
+            #     if book_amazon.new_total_price > total_selling_price_to_breakeven:
+            #         books_amazon_new.append(book_amazon)
+            #         books_ebay_new.append(book_ebay)
+            # else:
+            #     # Both books have the same new total prices.
+            #     pass
 
     return render_template("opportunities.html", books_amazon_new=books_amazon_new, books_ebay_new=books_ebay_new,
                            books_amazon_used=books_amazon_used, books_ebay_used=books_ebay_used, zip=zip)
