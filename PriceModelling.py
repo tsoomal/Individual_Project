@@ -1,4 +1,8 @@
+import decimal
+
+
 def storage_ebay_to_amazon(total_source_price):
+    total_source_price = float(total_source_price)
     ebay_shipping_cost = 0
     selling_credit_received = 2.8
     storage_cost = 0
@@ -22,10 +26,14 @@ def storage_ebay_to_amazon(total_source_price):
 
     amazon_referral_fee_including_VAT = 1.2 * amazon_referral_fee_excluding_VAT
 
+    total_selling_price_to_breakeven = decimal.Decimal(total_selling_price_to_breakeven)
+    #print(type(total_selling_price_to_breakeven))
+
     return total_selling_price_to_breakeven
 
 
 def storage_amazon_to_ebay(total_source_price):
+    total_source_price = float(total_source_price)
     amazon_shipping_cost = 0
     storage_cost = 0
     delivery_fee_to_customer = 2.99
@@ -39,6 +47,8 @@ def storage_amazon_to_ebay(total_source_price):
                 storage_cost + delivery_fee_to_customer + listing_fee +
                 expected_refund_cost + 0.3)
     final_value_fee = (0.128 * total_selling_price_to_breakeven) +0.3
+
+    total_selling_price_to_breakeven = decimal.Decimal(total_selling_price_to_breakeven)
 
     return total_selling_price_to_breakeven
 

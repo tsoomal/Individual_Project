@@ -4,7 +4,6 @@
 # Using Postgresql
 # https://stackabuse.com/using-sqlalchemy-with-flask-and-postgresql/
 
-
 from flask import Flask, render_template, request, redirect, copy_current_request_context
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
@@ -17,6 +16,7 @@ from sqlalchemy.exc import IntegrityError
 import isbnlib
 from ScrapingFunctionality import check_ebay_prices_today, check_amazon_prices_today
 import threading
+from PriceModelling import storage_ebay_to_amazon, storage_amazon_to_ebay
 
 app = Flask(__name__)
 #app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:password@localhost:5432/BookArbitrage"
@@ -409,9 +409,72 @@ def delete_all_books():
 
 @app.route("/opportunities")
 def opportunities():
-    books_ebay = Ebay.query.order_by(Ebay.book_name)
-    books_amazon = Amazon.query.order_by(Amazon.book_name)
-    return render_template("opportunities.html", books_amazon=books_amazon, books_ebay=books_ebay, zip=zip)
+    all_books_ebay = Ebay.query.order_by(Ebay.book_name)
+    all_books_amazon = Amazon.query.order_by(Amazon.book_name)
+
+    books_amazon_new = []
+    books_ebay_new = []
+    books_amazon_used = []
+    books_ebay_used = []
+
+    for book_ebay, book_amazon in zip(all_books_ebay, all_books_amazon):
+
+        # NEW BOOKS
+        if book_ebay.new_total_price == -999 and book_amazon.new_total_price == -999:
+            # No arbitrage possible
+            pass
+        elif book_ebay.new_total_price == -999 and book_amazon.new_total_price != -999:
+            # Buy on Amazon, Sell on Ebay
+            # Need to get historical average sold price on eBay.
+            pass
+        elif book_ebay.new_total_price != -999 and book_amazon.new_total_price == -999:
+            # Buy on Ebay, Sell on Amazon
+            pass
+        elif book_ebay.new_total_price > book_amazon.new_total_price:
+            # Buy on Amazon, Sell on Ebay
+            total_selling_price_to_breakeven = (storage_amazon_to_ebay(book_amazon.new_total_price))
+            if book_ebay.new_total_price > total_selling_price_to_breakeven:
+                books_amazon_new.append(book_amazon)
+                books_ebay_new.append(book_ebay)
+        elif book_ebay.new_total_price < book_amazon.new_total_price:
+            # Buy on Ebay, Sell on Amazon
+            total_selling_price_to_breakeven = (storage_ebay_to_amazon(book_ebay.new_total_price))
+            if book_amazon.new_total_price > total_selling_price_to_breakeven:
+                books_amazon_new.append(book_amazon)
+                books_ebay_new.append(book_ebay)
+        else:
+            # Both books have the same new total prices.
+            pass
+
+        # USED BOOKS
+        if book_ebay.used_total_price == -999 and book_amazon.used_total_price == -999:
+            # No arbitrage possible
+            pass
+        elif book_ebay.used_total_price == -999 and book_amazon.used_total_price != -999:
+            # Buy on Amazon, Sell on Ebay
+            # Need to get historical average sold price on eBay.
+            pass
+        elif book_ebay.used_total_price != -999 and book_amazon.used_total_price == -999:
+            # Buy on Ebay, Sell on Amazon
+            pass
+        elif book_ebay.used_total_price > book_amazon.used_total_price:
+            # Buy on Amazon, Sell on Ebay
+            total_selling_price_to_breakeven = (storage_amazon_to_ebay(book_amazon.used_total_price))
+            if book_ebay.used_total_price > total_selling_price_to_breakeven:
+                books_amazon_used.append(book_amazon)
+                books_ebay_used.append(book_ebay)
+        elif book_ebay.used_total_price < book_amazon.used_total_price:
+            # Buy on Ebay, Sell on Amazon
+            total_selling_price_to_breakeven = (storage_ebay_to_amazon(book_ebay.used_total_price))
+            if book_amazon.used_total_price > total_selling_price_to_breakeven:
+                books_amazon_used.append(book_amazon)
+                books_ebay_used.append(book_ebay)
+        else:
+            # Both books have the same used total prices.
+            pass
+
+    return render_template("opportunities.html", books_amazon_new=books_amazon_new, books_ebay_new=books_ebay_new,
+                           books_amazon_used=books_amazon_used, books_ebay_used=books_ebay_used, zip=zip)
 
 
 if __name__ == "__main__":
