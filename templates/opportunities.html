@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}About BookArbitrage4U{% endblock %}
+
+{% block content %}
+    <div class="container">
+    <h1>Arbitrage Opportunities</h1>
+        <p class="text-start fs-5" >The following arbitrage opportunties were found:</p>
+
+         <table class="table table-hover">
+        <thead>
+            <!-- https://stackoverflow.com/questions/61969955/bootstrap-fixed-width-table-columns-in-container-fluid -->
+            <tr class="table-light">
+                <th class="col-4 border-start border-top align-top" scope="col">Name</th>
+                <th class="col-1 border-start border-top align-top" scope="col">ISBN</th>
+                <th class="col-1 border-start border-top align-top" scope="col">Ebay New Total Price</th>
+                <th class="col-1 border-start border-top align-top" scope="col">Ebay Used Total Price</th>
+                <th class="col-1 border-start border-top align-top" scope="col">Amazon New Total Price</th>
+                <th class="col-1 border-start border-top align-top" scope="col">Amazon Used Total Price</th>
+                <th class="col-1 border-start border-top align-top" scope="col">Update Record</th>
+                <th class="col-1 border-start border-end border-top align-top" scope="col">Delete Record</th>
+            <tr>
+        </thead>
+        <tbody>
+            <!--https://stackoverflow.com/questions/1663807/how-do-i-iterate-through-two-lists-in-parallel-->
+            {% for book_ebay, book_amazon in zip(books_ebay, books_amazon) %}
+            <tr>
+                <td class="col-4 border-start">{{ book_ebay.book_name }}</td>
+                <td class="col-1 border-start">{{ book_ebay.isbn }}</td>
+                <td class="col-1 border-start">£{{ book_ebay.new_total_price }}</td>
+                <td class="col-1 border-start">£{{ book_ebay.used_total_price }}</td>
+                <td class="col-1 border-start">£{{ book_amazon.new_total_price }}</td>
+                <td class="col-1 border-start">£{{ book_amazon.used_total_price }}</td>
+                <td class="col-1 border-start"> <div class="text-center"><a href="/update/{{book_ebay.isbn}}" class="btn btn-outline-secondary btn-sm">Update</a> </div></td>
+                <td class="col-1 border-start border-end align-top"> <div class="text-center"><a href="/delete/{{book_ebay.isbn}}" class="btn btn-outline-danger btn-sm">Delete</a></div> </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+
+	</div>
+{% endblock %}

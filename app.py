@@ -407,6 +407,11 @@ def delete_all_books():
 
     return redirect('/books')
 
+@app.route("/opportunities")
+def opportunities():
+    books_ebay = Ebay.query.order_by(Ebay.book_name)
+    books_amazon = Amazon.query.order_by(Amazon.book_name)
+    return render_template("opportunities.html", books_amazon=books_amazon, books_ebay=books_ebay, zip=zip)
 
 
 if __name__ == "__main__":
