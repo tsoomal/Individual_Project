@@ -3,6 +3,7 @@ import re
 from datetime import datetime
 import time
 import pandas as pd
+import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -1531,6 +1532,110 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
     return True
 
 
+def ebay_historical_prices(isbn, condition):
+
+    if condition.lower()=="new":
+        URL = "https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw=" + str(
+            isbn) + "&_sacat=0&_sop=15&LH_ItemCondition=3&LH_PrefLoc=2&rt=nc&LH_BIN=1&rt=nc&LH_Complete=1"
+        print(URL)
+        page = requests.get(URL)
+        html = page.text
+        soup = BeautifulSoup(html, features="lxml")
+
+    elif condition.lower()=="used":
+        URL = "https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw=" + str(
+            isbn) + "&_sacat=0&_sop=15&LH_BIN=1&LH_PrefLoc=1&rt=nc&LH_ItemCondition=4&rt=nc&LH_Complete=1"
+        print(URL)
+        page = requests.get(URL)
+        html = page.text
+        soup = BeautifulSoup(html, features="lxml")
+
+        try:
+            sum=0
+            count=0
+            results = soup.find("ul", class_="srp-results srp-list clearfix")
+            historical_used_product_price_list = results.findAll("span", class_="s-item__price")
+            try:
+                historical_used_product_price_with_sign = historical_used_product_price_list[0].get_text()
+                historical_used_product_price = historical_used_product_price_with_sign[1:]
+                sum += float(historical_used_product_price)
+
+                index = 0
+                used_delivery_price = get_used_delivery_price(index, soup)
+                sum += used_delivery_price
+
+                try:
+                    historical_used_product_price_with_sign = historical_used_product_price_list[1].get_text()
+                    historical_used_product_price = historical_used_product_price_with_sign[1:]
+                    sum += float(historical_used_product_price)
+
+                    index = 1
+                    used_delivery_price = get_used_delivery_price(index, soup)
+                    sum += used_delivery_price
+                    try:
+                        historical_used_product_price_with_sign = historical_used_product_price_list[2].get_text()
+                        historical_used_product_price = historical_used_product_price_with_sign[1:]
+                        sum += float(historical_used_product_price)
+
+                        index = 2
+                        used_delivery_price = get_used_delivery_price(index, soup)
+                        sum += used_delivery_price
+
+                        historical_used_product_price = sum/3
+                    except Exception as e:
+                        print(e)
+                        historical_used_product_price = sum/2
+                except Exception as e:
+                    print(e)
+                    historical_used_product_price = sum/1
+            except Exception as e:
+                print(e)
+                historical_used_product_price = -999
+
+            print("Historical Used Product Price: £" + str(historical_used_product_price))
+
+        except Exception as e:
+            print(e)
+            used_product_price = -999
+            print("Historical Used Product Price: FAIL")
+
+    else:
+        pass
+
+
+def get_used_delivery_price(index, soup):
+    try:
+        results = soup.find("ul", class_="srp-results")
+        used_delivery_price_list = results.findAll("span", class_="s-item__shipping s-item__logisticsCost")
+        used_delivery_price_with_sign = used_delivery_price_list[index].get_text()
+        if (("Free" in used_delivery_price_with_sign) or ("free" in used_delivery_price_with_sign)) and (
+                ("Postage" in used_delivery_price_with_sign) or (
+                "postage" in used_delivery_price_with_sign)):
+            used_delivery_price = 0
+            print("Used Delivery Price: £0.00")
+        else:
+            used_delivery_price = re.findall("\d+\.\d+", used_delivery_price_with_sign)[0]
+            print("Used Delivery Price: £" + used_delivery_price)
+    except:
+        try:
+            results = soup.find("ul", class_="srp-results")
+            used_delivery_price_list = results.findAll("span", class_="s-item__dynamic s-item__freeXDays")
+            used_delivery_price_with_sign = used_delivery_price_list[index].get_text()
+            if (("Free" in used_delivery_price_with_sign) or (
+                    "free" in used_delivery_price_with_sign)) and (
+                    ("Postage" in used_delivery_price_with_sign) or (
+                    "postage" in used_delivery_price_with_sign)):
+                used_delivery_price = 0
+                print("Used Delivery Price: £0.00")
+            else:
+                # https://www.tutorialspoint.com/Extract-decimal-numbers-from-a-string-in-Python#:~:text=To%20extract%20decimal%20numbers%20from,to%20work%20with%20regular%20expressions.
+                used_delivery_price = re.findall("\d+\.\d+", used_delivery_price_with_sign)[0]
+                print("Used Delivery Price: £" + used_delivery_price)
+        except Exception as e:
+            used_delivery_price = -999
+            print("Used Delivery Price: FAIL")
+    return used_delivery_price
+
 
 def main():
     # check_amazon_prices_today_isbn("./scraped_database_data_amazon.csv", "1804990922", only_create_new_books=False)
@@ -1552,7 +1657,11 @@ def main():
     # print()
     # print()
     # check_amazon_prices_today_isbn("./scraped_database_data_amazon.csv", "0753801523", only_create_new_books=False)
-    check_amazon_prices_today_proper_test("./scraped_database_data_amazon.csv", only_create_new_books=False)
+
+
+    #check_amazon_prices_today_proper_test("./scraped_database_data_amazon.csv", only_create_new_books=False)
+    isbn = "1852863366"
+    ebay_historical_prices(isbn,"used")
 
 
 if __name__ == "__main__":
