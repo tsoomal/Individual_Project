@@ -544,7 +544,6 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
 
                         end_of_item_loop(amazon_link, book_name, driver, edition_format, isbn, new_delivery_price,
                                          new_product_price, time1, used_delivery_price, used_product_price)
-                        driver.quit()
                         continue
                     else:
                         print("New Product Price: £" + str(price_without_sign))
@@ -793,7 +792,6 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
 
                             print()
                             end_of_item_loop(amazon_link, book_name, driver, edition_format, isbn, new_delivery_price, new_product_price, time1, used_delivery_price, used_product_price)
-                            driver.quit()
                             continue
 
                         if counter == 0:
