@@ -1031,6 +1031,7 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
                         print()
                         print()
                         print()
+                        driver.quit()
                         continue
 
 
@@ -1338,6 +1339,7 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
                             print()
                             print()
                             print()
+                            driver.quit()
                             continue
 
                         if counter == 0:
@@ -1404,6 +1406,7 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
                     try:
                         pass
                     except Exception as e:
+                        driver.quit()
                         continue
 
                 # Normal Secondary FOR USED PRICE
