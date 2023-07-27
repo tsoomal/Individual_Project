@@ -28,8 +28,8 @@
             <tr>
                 <td class="col-4 border-start">{{ book_ebay.book_name }}</td>
                 <td class="col-1 border-start">{{ book_ebay.isbn }}</td>
-                <td class="col-1 border-start">£{{ book_ebay.new_total_price }}</td>
-                <td class="col-1 border-start">£{{ book_amazon.new_total_price }}</td>
+                <td class="col-1 border-start">£{{ book_ebay.new_total_price }} <div class="text-left"><a href="https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw={{book_ebay.isbn}}&_sacat=0&LH_BIN=1&_sop=15&rt=nc&LH_ItemCondition=3" class="btn btn-outline-secondary btn-sm">Ebay Link</a></div> </td>
+                <td class="col-1 border-start">£{{ book_amazon.new_total_price }} <div class="text-left"><a href="https://{{book_amazon.amazon_link}}" class="btn btn-outline-secondary btn-sm">Amazon Link</a></div> </td>
                 <td class="col-1 border-start"> <div class="text-center"><a href="/update/{{book_ebay.isbn}}" class="btn btn-outline-secondary btn-sm">Update</a> </div></td>
                 <td class="col-1 border-start border-end align-top"> <div class="text-center"><a href="/delete/{{book_ebay.isbn}}" class="btn btn-outline-danger btn-sm">Delete</a></div> </td>
             </tr>
@@ -58,8 +58,8 @@
             <tr>
                 <td class="col-4 border-start">{{ book_ebay.book_name }}</td>
                 <td class="col-1 border-start">{{ book_ebay.isbn }}</td>
-                <td class="col-1 border-start">£{{ book_ebay.used_total_price }}</td>
-                <td class="col-1 border-start">£{{ book_amazon.used_total_price }}</td>
+                <td class="col-1 border-start">£{{ book_ebay.used_total_price }} <div class="text-left"><a href="https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw={{book_ebay.isbn}}&_sacat=0&LH_ItemCondition=4&LH_BIN=1&_sop=15" class="btn btn-outline-secondary btn-sm">Ebay Link</a></div> </td>
+                <td class="col-1 border-start">£{{ book_amazon.used_total_price }} <div class="text-left"><a href="https://{{book_amazon.amazon_link}}" class="btn btn-outline-secondary btn-sm">Amazon Link</a></div> </td>
                 <td class="col-1 border-start"> <div class="text-center"><a href="/update/{{book_ebay.isbn}}" class="btn btn-outline-secondary btn-sm">Update</a> </div></td>
                 <td class="col-1 border-start border-end align-top"> <div class="text-center"><a href="/delete/{{book_ebay.isbn}}" class="btn btn-outline-danger btn-sm">Delete</a></div> </td>
             </tr>

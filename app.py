@@ -306,7 +306,6 @@ def update(isbn):
                 else:
                     raise Exception
     except:
-        books = Amazon.query.order_by(Amazon.book_name)
         error_statement = "Update should include valid ISBN-10/ISBN-13 number"
         if updatable_amazon and updatable_ebay:
             updatable = True
@@ -315,7 +314,7 @@ def update(isbn):
         books_ebay = Ebay.query.order_by(Ebay.book_name)
         books_amazon = Amazon.query.order_by(Amazon.book_name)
         return render_template("books.html", books_ebay=books_ebay, books_amazon=books_amazon, updatable=updatable,
-                               zip=zip)
+                               zip=zip, error_statement=error_statement)
 
     if request.method == "POST":
         if request.form.get('book_name'):
