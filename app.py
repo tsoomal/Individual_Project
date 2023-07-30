@@ -20,7 +20,7 @@ from PriceModelling import storage_ebay_to_amazon, storage_amazon_to_ebay
 
 app = Flask(__name__)
 #app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:password@localhost:5432/BookArbitrage"
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["database_connection_string"]
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["database_connection_string_heroku"]
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.secret_key = 'secret string'
 # Initialising the database
