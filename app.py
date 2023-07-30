@@ -19,8 +19,8 @@ import threading
 from PriceModelling import storage_ebay_to_amazon, storage_amazon_to_ebay
 
 app = Flask(__name__)
-#app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:password@localhost:5432/BookArbitrage"
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["database_connection_string_heroku"]
+# https://stackoverflow.com/questions/65888631/how-do-i-use-heroku-postgres-with-my-flask-sqlalchemy-app
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["database_connection_string"]
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.secret_key = 'secret string'
 # Initialising the database
@@ -279,8 +279,8 @@ class UpdateEbayDB(threading.Thread):
 def update_prices_in_database():
     # https://stackoverflow.com/questions/62435134/how-to-run-a-function-in-background-without-blocking-main-thread-and-serving-fla
 
-    t_ebay = UpdateEbayDB()
-    t_ebay.start()
+    #t_ebay = UpdateEbayDB()
+    #t_ebay.start()
 
     t_amazon = UpdateAmazonDB()
     t_amazon.start()
