@@ -390,7 +390,7 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
     # https://stackoverflow.com/questions/12211781/how-to-maximize-window-in-chrome-using-webdriver-python
     #options.add_argument("--start-maximized")
     # https://stackoverflow.com/questions/11613869/how-to-disable-logging-using-selenium-with-python-binding
-    options.add_experimental_option("excludeSwitches", ["enable-logging"])
+    #options.add_experimental_option("excludeSwitches", ["enable-logging"])
     options.add_argument("--window-size=1920,1080")
     options.add_argument("--headless=new")
     options.add_argument('--blink-settings=imagesEnabled=false')
