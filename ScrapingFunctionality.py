@@ -446,7 +446,7 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
             print(URL)
             driver.get(URL)
             html = driver.page_source
-Debug            print(html)
+            print(html)
             soup = BeautifulSoup(html, features="lxml")
 
             # New Product Price
