@@ -390,7 +390,7 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
     # https://stackoverflow.com/questions/12211781/how-to-maximize-window-in-chrome-using-webdriver-python
     #options.add_argument("--start-maximized")
     # https://stackoverflow.com/questions/11613869/how-to-disable-logging-using-selenium-with-python-binding
-    #options.add_experimental_option("excludeSwitches", ["enable-logging"])
+    options.add_experimental_option("excludeSwitches", ["enable-logging"])
     options.add_argument("--window-size=1920,1080")
     options.add_argument("--headless=new")
     options.add_argument('--blink-settings=imagesEnabled=false')
@@ -1055,6 +1055,253 @@ def end_of_item_loop(amazon_link, book_name, driver, edition_format, isbn, new_d
         book_to_update_amazon.used_total_price = used_total_price_raw
         app.db.session.commit()
     driver.quit()
+
+
+def check_amazon_prices_today2(file_name, only_create_new_books=False):
+    new_product_prices_list = []
+    new_delivery_prices_list = []
+    used_product_prices_list = []
+    used_delivery_prices_list = []
+
+    df = pd.read_csv(file_name)
+    number_of_rows = df.shape[0]
+
+    # https://www.andressevilla.com/running-chromedriver-with-python-selenium-on-heroku/
+    service = Service(os.environ.get("CHROMEDRIVER_PATH"))
+    options = webdriver.ChromeOptions()
+    options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--no-sandbox")
+    # https://stackoverflow.com/questions/12211781/how-to-maximize-window-in-chrome-using-webdriver-python
+    #options.add_argument("--start-maximized")
+    options.add_argument("--window-size=1920,1080")
+    options.add_argument("--headless=new")
+    options.add_argument('--blink-settings=imagesEnabled=false')
+    prefs = {"profile.managed_default_content_settings.images": 2}
+    options.add_experimental_option("prefs", prefs)
+
+    for row_number in range(number_of_rows):
+        book_name = df.iloc[row_number, [0]][0]
+        amazon_link = df.iloc[row_number, [1]][0]
+        edition_format = df.iloc[row_number, [2]][0]
+        # https://stackoverflow.com/questions/27387415/how-would-i-get-everything-before-a-in-a-string-python
+        isbn = str((df.iloc[row_number,[3]])[0]).split(".")[0]
+        isbn = isbn.zfill(10)
+
+        if only_create_new_books==True:
+            try:
+                book_in_amazon_db = app.Amazon.query.get_or_404(isbn)
+                print(row_number)
+                print(book_in_amazon_db)
+                if book_in_amazon_db.new_product_price==-999 and book_in_amazon_db.new_delivery_price==-999 and \
+                        book_in_amazon_db.new_total_price==-999 and book_in_amazon_db.used_product_price==-999 and \
+                        book_in_amazon_db.used_delivery_price==-999 and book_in_amazon_db.used_total_price==-999:
+                    app.db.session.delete(book_in_amazon_db)
+                    app.db.session.commit()
+                else:
+                    continue
+            except werkzeug.exceptions.NotFound:
+                pass
+
+        time1 = datetime.now()
+        print("Item: " + str(row_number+1))
+        URL_raw = df.iloc[row_number, [1]]
+        URL = "https://www." + URL_raw[0]
+        print(book_name)
+        print(amazon_link)
+        print(edition_format)
+        print(URL)
+
+        try:
+            driver = webdriver.Chrome(service=service, options=options)
+        except:
+            print("Error with Selenium.")
+
+
+        # New Products
+        try:
+            URL = "https://www.amazon.co.uk/dp/" + str(isbn)
+            print(URL)
+            driver.get(URL)
+            html = driver.page_source
+            soup = BeautifulSoup(html, features="lxml")
+
+            # New Product Price
+            try:
+                results = soup.find("span", class_="a-offscreen")
+                if results is not None:
+                    price = results.get_text()
+                    price_without_sign = price[1:]
+                    new_product_prices_list.append(price_without_sign)
+                    new_product_price = price_without_sign
+                    print("New Product Price: ", price_without_sign)
+                else:
+                    new_product_price = -999
+                    new_product_prices_list.append(-999)
+                    print("New Product Price: FAIL")
+            except Exception as e:
+                new_product_price = -999
+                print("Except: New Product price")
+                print(e)
+
+            # New Delivery Price
+            try:
+                results1 = soup.find("div", id="mir-layout-DELIVERY_BLOCK-slot-PRIMARY_DELIVERY_MESSAGE_LARGE")
+                results2 = results1.find("span", attrs={'data-csa-c-delivery-price': True})
+                print("New delivery price: " + results2["data-csa-c-delivery-price"])
+                if (results2["data-csa-c-delivery-price"]=="FREE"):
+                    new_delivery_price = 0
+                    new_delivery_prices_list.append(0)
+                else:
+                    new_delivery_price = float(results2["data-csa-c-delivery-price"])
+                    new_delivery_prices_list.append(results2["data-csa-c-delivery-price"])
+            except:
+                new_delivery_price = -999
+                new_delivery_prices_list.append(-999)
+                print("New Delivery Price: FAIL")
+
+        except Exception as e:
+            print("Except: Whole try-catch block for new products")
+            print(e)
+
+
+
+        # Used Products
+        try:
+            # Used Product Price
+            try:
+                URL = "https://www.amazon.co.uk/dp/" + str(isbn)
+                driver.get(URL)
+                # Accept Cookies https://stackoverflow.com/questions/65056154/handling-accept-cookies-popup-with-selenium-in-python
+                WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.XPATH, "// *[ @ id = 'sp-cc-accept']"))).click()
+                # https://stackoverflow.com/questions/20986631/how-can-i-scroll-a-web-page-using-selenium-webdriver-in-python
+                driver.execute_script("window.scrollTo(document.body.scrollHeight, 0);")
+
+                html = driver.page_source
+                soup = BeautifulSoup(html, features="lxml")
+                results = soup.find("div", id="tmmSwatches")
+                results2 = results.findAll("li")
+                counter=0
+                found_selected_button = False
+                for list_item in results2:
+                    if list_item.get("class")[1] == "selected":
+                        found_selected_button = True
+                        break
+                    else:
+                        counter+=1
+
+                if found_selected_button==True:
+                    #print(counter)
+                    if counter ==0:
+                        WebDriverWait(driver, 10).until(
+                            EC.element_to_be_clickable(
+                                (By.XPATH, "//*[@id='tmmSwatches']/ul/li[1]/span/span[3]/span[1]/span/a"))).click()
+                    if counter ==1:
+                        WebDriverWait(driver, 10).until(
+                            EC.element_to_be_clickable(
+                                (By.XPATH, "//*[@id='tmmSwatches']/ul/li[2]/span/span[3]/span[1]/span/a"))).click()
+                    elif counter == 2:
+                        WebDriverWait(driver, 10).until(
+                            EC.element_to_be_clickable(
+                                (By.XPATH, "//*[@id='tmmSwatches']/ul/li[3]/span/span[3]/span[1]/span/a"))).click()
+                    elif counter == 3:
+                        WebDriverWait(driver, 10).until(
+                            EC.element_to_be_clickable(
+                                (By.XPATH, "//*[@id='tmmSwatches']/ul/li[4]/span/span[3]/span[1]/span/a"))).click()
+                    elif counter == 4:
+                        WebDriverWait(driver, 10).until(
+                            EC.element_to_be_clickable(
+                                (By.XPATH, "//*[@id='tmmSwatches']/ul/li[5]/span/span[3]/span[1]/span/a"))).click()
+                else:
+                    raise Exception
+
+                time.sleep(3)
+
+                html = driver.page_source
+                soup = BeautifulSoup(html, features="lxml")
+                results = soup.find("div", id="aod-offer")
+                price_text = results.find("span", class_="a-offscreen").get_text()
+
+                if results is not None:
+                    price_without_sign = price_text[1:]
+                    used_product_price = price_without_sign
+                    used_product_prices_list.append(price_without_sign)
+                    print("Used Product Price: ", price_without_sign)
+                else:
+                    used_product_price = -999
+                    used_product_prices_list.append(-999)
+                    print("Used Product Price: FAIL")
+            except:
+                used_product_price = -999.00
+                used_product_prices_list.append(-999)
+                print("Used Product Price: FAIL")
+
+
+            # Used Delivery Price
+            try:
+                results1 = soup.find("div", class_="a-section a-spacing-none a-padding-base aod-information-block aod-clear-float")
+                results2 = results1.find("span", attrs={'data-csa-c-delivery-price': True})
+                if (results2["data-csa-c-delivery-price"] == "FREE"):
+                    print("Used Delivery Price: " + results2["data-csa-c-delivery-price"])
+                    used_delivery_price = 0
+                    used_delivery_prices_list.append(0)
+                else:
+                    delivery_price_without_sign = results2["data-csa-c-delivery-price"][1:]
+                    print("Used Delivery Price: " + delivery_price_without_sign)
+                    used_delivery_price = delivery_price_without_sign
+                    used_delivery_prices_list.append(float(delivery_price_without_sign))
+
+            except Exception as e:
+                print(e)
+                used_delivery_price = -999
+                used_delivery_prices_list.append(-999)
+                print("Used Delivery Price: FAIL")
+
+        except:
+            print("EXCEPTION: Try-catch block for Delivery Price")
+
+
+        time2 = datetime.now()
+        time_diff = time2 - time1
+        print("Time: ", time_diff.seconds)
+        print()
+
+        try:
+            new_total_price_raw = float(new_product_price) + float(new_delivery_price)
+        except:
+            new_product_price=-999
+            new_delivery_price=-999
+            new_total_price_raw=-999
+
+        if new_total_price_raw <= -1000 or new_total_price_raw >= 1000:
+            new_total_price_raw = -999
+
+        try:
+            used_total_price_raw = float(used_product_price)+float(used_delivery_price)
+        except:
+            used_product_price = -999
+            used_delivery_price = -999
+            used_total_price_raw = -999
+        if used_total_price_raw <= -1000 or used_total_price_raw >= 1000:
+            used_total_price_raw = -999
+
+
+        try:
+            new_book = app.Amazon(book_name=book_name, amazon_link=amazon_link, isbn=isbn, edition_format=edition_format, new_product_price=new_product_price, new_delivery_price=new_delivery_price, new_total_price=new_total_price_raw,
+                              used_product_price=used_product_price, used_delivery_price=used_delivery_price, used_total_price=used_total_price_raw)
+            app.db.session.add(new_book)
+            app.db.session.commit()
+        except IntegrityError:
+            app.db.session.rollback()
+            book_to_update_amazon = app.Amazon.query.get_or_404(isbn)
+            book_to_update_amazon.new_product_price = new_product_price
+            book_to_update_amazon.new_delivery_price = new_delivery_price
+            book_to_update_amazon.new_total_price = new_total_price_raw
+            book_to_update_amazon.used_product_price = used_product_price
+            book_to_update_amazon.used_delivery_price = used_delivery_price
+            book_to_update_amazon.used_total_price = used_total_price_raw
+            app.db.session.commit()
 
 
 

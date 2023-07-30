@@ -14,7 +14,7 @@ from flask_migrate import Migrate
 from sqlalchemy.exc import IntegrityError
 # https://stackoverflow.com/questions/38111620/python-isbn-13-digit-validate
 import isbnlib
-from ScrapingFunctionality import check_ebay_prices_today, check_amazon_prices_today
+from ScrapingFunctionality import check_ebay_prices_today, check_amazon_prices_today2
 import threading
 from PriceModelling import storage_ebay_to_amazon, storage_amazon_to_ebay
 
@@ -250,7 +250,7 @@ class UpdateAmazonDB(threading.Thread):
         globals()["updatable_amazon"] = False
         try:
             with app.app_context():
-                check_amazon_prices_today("./scraped_database_data_amazon.csv", only_create_new_books=False)
+                check_amazon_prices_today2("./scraped_database_data_amazon.csv", only_create_new_books=False)
                 #check_amazon_prices_today("./scraped_database_data_amazon.csv", only_create_new_books=True)
 
                 # NEED TO ADD COLUMN FOR DAY LAST UPDATED.
