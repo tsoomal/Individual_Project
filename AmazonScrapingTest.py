@@ -1531,7 +1531,6 @@ def check_amazon_prices_today_proper_test(file_name, only_create_new_books=False
         driver.quit()
     return True
 
-
 def ebay_historical_prices(isbn, condition):
 
     if condition.lower()=="new":
@@ -1541,6 +1540,61 @@ def ebay_historical_prices(isbn, condition):
         page = requests.get(URL)
         html = page.text
         soup = BeautifulSoup(html, features="lxml")
+
+        try:
+            sum=0
+            count=0
+            results = soup.find("ul", class_="srp-results srp-list clearfix")
+            historical_new_product_price_list = results.findAll("span", class_="s-item__price")
+            try:
+                historical_new_product_price_with_sign = historical_new_product_price_list[0].get_text()
+                historical_new_product_price = historical_new_product_price_with_sign[1:]
+                sum += float(historical_new_product_price)
+
+                index = 0
+                new_delivery_price = get_new_delivery_price(index, soup)
+                sum += new_delivery_price
+
+                try:
+                    historical_new_product_price_with_sign = historical_new_product_price_list[1].get_text()
+                    historical_new_product_price = historical_new_product_price_with_sign[1:]
+                    sum += float(historical_new_product_price)
+
+                    index = 1
+                    new_delivery_price = get_new_delivery_price(index, soup)
+                    sum += new_delivery_price
+                    try:
+                        historical_new_product_price_with_sign = historical_new_product_price_list[2].get_text()
+                        historical_new_product_price = historical_new_product_price_with_sign[1:]
+                        sum += float(historical_new_product_price)
+
+                        index = 2
+                        new_delivery_price = get_new_delivery_price(index, soup)
+                        sum += new_delivery_price
+
+                        historical_new_product_price = sum/3
+                    except Exception as e:
+                        print(e)
+                        historical_new_product_price = sum/2
+                except Exception as e:
+                    print(e)
+                    historical_new_product_price = sum/1
+            except Exception as e:
+                print(e)
+                historical_new_product_price = -999
+
+            print("Historical New Product Price: £" + str(historical_new_product_price))
+
+        except Exception as e:
+            print(e)
+            new_product_price = -999
+            print("Historical New Product Price: FAIL")
+
+
+
+
+
+
 
     elif condition.lower()=="used":
         URL = "https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw=" + str(
@@ -1603,6 +1657,10 @@ def ebay_historical_prices(isbn, condition):
         pass
 
 
+def get_new_delivery_price(index, soup):
+    pass
+
+
 def get_used_delivery_price(index, soup):
     try:
         results = soup.find("ul", class_="srp-results")
@@ -1659,9 +1717,9 @@ def main():
     # check_amazon_prices_today_isbn("./scraped_database_data_amazon.csv", "0753801523", only_create_new_books=False)
 
 
-    #check_amazon_prices_today_proper_test("./scraped_database_data_amazon.csv", only_create_new_books=False)
-    isbn = "1852863366"
-    ebay_historical_prices(isbn,"used")
+    check_amazon_prices_today_proper_test("./scraped_database_data_amazon.csv", only_create_new_books=False)
+    #isbn = "1852863366"
+    #ebay_historical_prices(isbn,"new")
 
 
 if __name__ == "__main__":
