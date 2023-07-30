@@ -383,9 +383,9 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
     options = webdriver.ChromeOptions()
 
     # Settings Needed for Heroku
-    #options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
-    #options.add_argument("--disable-dev-shm-usage")
-    #options.add_argument("--no-sandbox")
+    options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--no-sandbox")
 
     # https://stackoverflow.com/questions/12211781/how-to-maximize-window-in-chrome-using-webdriver-python
     #options.add_argument("--start-maximized")
