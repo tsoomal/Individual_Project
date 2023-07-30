@@ -396,8 +396,6 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
     options.add_argument('--blink-settings=imagesEnabled=false')
     prefs = {"profile.managed_default_content_settings.images": 2}
     options.add_experimental_option("prefs", prefs)
-    user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36'
-    options.add_argument('user-agent={0}'.format(user_agent))
 
     for row_number in range(number_of_rows):
         book_name = df.iloc[row_number, [0]][0]
@@ -1088,7 +1086,7 @@ def main():
         "https://www.amazon.co.uk/best-sellers-books-Amazon/zgbs/books/14909604031/ref=zg_bs_pg_2_books?_encoding=UTF8&pg=2"]
 
     check_amazon_prices_today("./scraped_database_data_amazon.csv", only_create_new_books=False)
-    check_ebay_prices_today("./scraped_database_data_ebay.csv", only_create_new_books=False)
+    #check_ebay_prices_today("./scraped_database_data_ebay.csv", only_create_new_books=False)
 
 
 
