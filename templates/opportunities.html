@@ -7,10 +7,9 @@
     <h1>Arbitrage Opportunities</h1>
         <p class="text-start fs-5" >The following arbitrage opportunties were found:</p>
 
-
         <br/>
     <h4>Arbitrage of New Items:</h4>
-    <table class="table table-hover">
+    <table class="table table-hover" id="new_opportunities_table">
         <thead>
             <!-- https://stackoverflow.com/questions/61969955/bootstrap-fixed-width-table-columns-in-container-fluid -->
             <tr class="table-light">
@@ -18,6 +17,7 @@
                 <th class="col-1 border-start border-top align-top" scope="col">ISBN</th>
                 <th class="col-1 border-start border-top align-top" scope="col">Ebay New Total Price</th>
                 <th class="col-1 border-start border-top align-top" scope="col">Amazon New Total Price</th>
+                <th class="col-1 border-start border-top align-top" scope="col" data-sortable="true" data-sorter="alphanum">Estimated Profit</th>
                 <th class="col-1 border-start border-top align-top" scope="col">Update Record</th>
                 <th class="col-1 border-start border-end border-top align-top" scope="col">Delete Record</th>
             <tr>
@@ -30,6 +30,12 @@
                 <td class="col-1 border-start">{{ book_ebay.isbn }}</td>
                 <td class="col-1 border-start">£{{ book_ebay.new_total_price }} <div class="text-left"><a href="https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw={{book_ebay.isbn}}&_sacat=0&LH_BIN=1&_sop=15&rt=nc&LH_ItemCondition=3" class="btn btn-outline-secondary btn-sm">Ebay Link</a></div> </td>
                 <td class="col-1 border-start">£{{ book_amazon.new_total_price }} <div class="text-left"><a href="https://{{book_amazon.amazon_link}}" class="btn btn-outline-secondary btn-sm">Amazon Link</a></div> </td>
+                {% if book_ebay.new_total_price > book_amazon.new_total_price %}
+                <td class="col-1 border-start">£{{ book_ebay.new_total_price - book_amazon.new_total_price }}</td>
+                {% endif %}
+                {% if book_ebay.new_total_price < book_amazon.new_total_price %}
+                <td class="col-1 border-start">£{{ -book_ebay.new_total_price + book_amazon.new_total_price }}</td>
+                {% endif %}
                 <td class="col-1 border-start"> <div class="text-center"><a href="/update/{{book_ebay.isbn}}" class="btn btn-outline-secondary btn-sm">Update</a> </div></td>
                 <td class="col-1 border-start border-end align-top"> <div class="text-center"><a href="/delete/{{book_ebay.isbn}}" class="btn btn-outline-danger btn-sm">Delete</a></div> </td>
             </tr>
@@ -37,10 +43,11 @@
         </tbody>
     </table>
 
+
     <br/>
     <br/>
     <h4>Arbitrage of Used Items:</h4>
-    <table class="table table-hover">
+    <table class="table table-hover" id="used_opportunities_table">
         <thead>
             <!-- https://stackoverflow.com/questions/61969955/bootstrap-fixed-width-table-columns-in-container-fluid -->
             <tr class="table-light">
@@ -48,6 +55,7 @@
                 <th class="col-1 border-start border-top align-top" scope="col">ISBN</th>
                 <th class="col-1 border-start border-top align-top" scope="col">Ebay Used Total Price</th>
                 <th class="col-1 border-start border-top align-top" scope="col">Amazon Used Total Price</th>
+                <th class="col-1 border-start border-top align-top" scope="col">Estimated Profit</th>
                 <th class="col-1 border-start border-top align-top" scope="col">Update Record</th>
                 <th class="col-1 border-start border-end border-top align-top" scope="col">Delete Record</th>
             <tr>
@@ -59,7 +67,13 @@
                 <td class="col-4 border-start">{{ book_ebay.book_name }}</td>
                 <td class="col-1 border-start">{{ book_ebay.isbn }}</td>
                 <td class="col-1 border-start">£{{ book_ebay.used_total_price }} <div class="text-left"><a href="https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw={{book_ebay.isbn}}&_sacat=0&LH_ItemCondition=4&LH_BIN=1&_sop=15" class="btn btn-outline-secondary btn-sm">Ebay Link</a></div> </td>
-                <td class="col-1 border-start">£{{ book_amazon.used_total_price }} <div class="text-left"><a href="https://{{book_amazon.amazon_link}}" class="btn btn-outline-secondary btn-sm">Amazon Link</a></div> </td>
+                <td class="col-1 border-start">£{{ book_amazon.used_total_price}} <div class="text-left"><a href="https://{{book_amazon.amazon_link}}" class="btn btn-outline-secondary btn-sm">Amazon Link</a></div> </td>
+                {% if book_ebay.used_total_price > book_amazon.used_total_price %}
+                <td class="col-1 border-start">£{{ book_ebay.used_total_price - book_amazon.used_total_price }}</td>
+                {% endif %}
+                {% if book_ebay.used_total_price < book_amazon.used_total_price %}
+                <td class="col-1 border-start">£{{ -book_ebay.used_total_price + book_amazon.used_total_price }}</td>
+                {% endif %}
                 <td class="col-1 border-start"> <div class="text-center"><a href="/update/{{book_ebay.isbn}}" class="btn btn-outline-secondary btn-sm">Update</a> </div></td>
                 <td class="col-1 border-start border-end align-top"> <div class="text-center"><a href="/delete/{{book_ebay.isbn}}" class="btn btn-outline-danger btn-sm">Delete</a></div> </td>
             </tr>
