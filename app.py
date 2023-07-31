@@ -14,6 +14,8 @@ from flask_migrate import Migrate
 from sqlalchemy.exc import IntegrityError
 # https://stackoverflow.com/questions/38111620/python-isbn-13-digit-validate
 import isbnlib
+from twisted.python.compat import izip
+
 from ScrapingFunctionality import check_ebay_prices_today, check_amazon_prices_today
 import threading
 from PriceModelling import storage_ebay_to_amazon, storage_amazon_to_ebay
@@ -415,6 +417,8 @@ def opportunities():
     books_ebay_new = []
     books_amazon_used = []
     books_ebay_used = []
+    profit_new = []
+    profit_used = []
     # ADD PROFIT
     # ADD LINKS
     # BUY NEW, SELL USED BOOKS
@@ -438,12 +442,14 @@ def opportunities():
             if book_ebay.new_total_price > total_selling_price_to_breakeven:
                 books_amazon_new.append(book_amazon)
                 books_ebay_new.append(book_ebay)
+                profit_new.append(book_ebay.new_total_price-book_amazon.new_total_price)
         elif book_ebay.new_total_price < book_amazon.new_total_price:
             # Buy on Ebay, Sell on Amazon
             total_selling_price_to_breakeven = (storage_ebay_to_amazon(book_ebay.new_total_price))
             if book_amazon.new_total_price > total_selling_price_to_breakeven:
                 books_amazon_new.append(book_amazon)
                 books_ebay_new.append(book_ebay)
+                profit_new.append(book_amazon.new_total_price - book_ebay.new_total_price)
         else:
             # Both books have the same new total prices.
             pass
@@ -465,12 +471,14 @@ def opportunities():
             if book_ebay.used_total_price > total_selling_price_to_breakeven:
                 books_amazon_used.append(book_amazon)
                 books_ebay_used.append(book_ebay)
+                profit_used.append(book_ebay.used_total_price - book_amazon.used_total_price)
         elif book_ebay.used_total_price < book_amazon.used_total_price:
             # Buy on Ebay, Sell on Amazon
             total_selling_price_to_breakeven = (storage_ebay_to_amazon(book_ebay.used_total_price))
             if book_amazon.used_total_price > total_selling_price_to_breakeven:
                 books_amazon_used.append(book_amazon)
                 books_ebay_used.append(book_ebay)
+                profit_used.append(book_amazon.used_total_price - book_ebay.used_total_price)
         else:
             # Both books have the same used total prices.
             pass
@@ -502,8 +510,15 @@ def opportunities():
             #     # Both books have the same new total prices.
             #     pass
 
+    sorted_lists_new = sorted(izip(books_ebay_new, books_amazon_new, profit_new), reverse=True, key=lambda x: x[2])
+    books_ebay_new, books_amazon_new, profit_new = [[x[i] for x in sorted_lists_new] for i in range(3)]
+
+    sorted_lists_used = sorted(izip(books_ebay_used, books_amazon_used, profit_used), reverse=True, key=lambda y: y[2])
+    books_ebay_used, books_amazon_used, profit_used = [[y[j] for y in sorted_lists_used] for j in range(3)]
+
     return render_template("opportunities.html", books_amazon_new=books_amazon_new, books_ebay_new=books_ebay_new,
-                           books_amazon_used=books_amazon_used, books_ebay_used=books_ebay_used, zip=zip)
+                           books_amazon_used=books_amazon_used, books_ebay_used=books_ebay_used, profit_new=profit_new,
+                           profit_used=profit_used, zip=zip)
 
 
 if __name__ == "__main__":
