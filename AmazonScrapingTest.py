@@ -1535,7 +1535,7 @@ def ebay_historical_prices(isbn, condition):
 
     if condition.lower()=="new":
         URL = "https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw=" + str(
-            isbn) + "&_sacat=0&_sop=15&LH_ItemCondition=3&LH_PrefLoc=2&rt=nc&LH_BIN=1&rt=nc&LH_Complete=1"
+            isbn) + "&_sacat=0&LH_Sold=1&LH_Complete=1&LH_PrefLoc=1&rt=nc"
         print(URL)
         page = requests.get(URL)
         html = page.text
@@ -1553,7 +1553,7 @@ def ebay_historical_prices(isbn, condition):
 
                 index = 0
                 new_delivery_price = get_new_delivery_price(index, soup)
-                sum += new_delivery_price
+                sum += float(new_delivery_price)
 
                 try:
                     historical_new_product_price_with_sign = historical_new_product_price_list[1].get_text()
@@ -1562,7 +1562,7 @@ def ebay_historical_prices(isbn, condition):
 
                     index = 1
                     new_delivery_price = get_new_delivery_price(index, soup)
-                    sum += new_delivery_price
+                    sum += float(new_delivery_price)
                     try:
                         historical_new_product_price_with_sign = historical_new_product_price_list[2].get_text()
                         historical_new_product_price = historical_new_product_price_with_sign[1:]
@@ -1570,7 +1570,7 @@ def ebay_historical_prices(isbn, condition):
 
                         index = 2
                         new_delivery_price = get_new_delivery_price(index, soup)
-                        sum += new_delivery_price
+                        sum += float(new_delivery_price)
 
                         historical_new_product_price = sum/3
                     except Exception as e:
@@ -1598,7 +1598,7 @@ def ebay_historical_prices(isbn, condition):
 
     elif condition.lower()=="used":
         URL = "https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw=" + str(
-            isbn) + "&_sacat=0&_sop=15&LH_BIN=1&LH_PrefLoc=1&rt=nc&LH_ItemCondition=4&rt=nc&LH_Complete=1"
+            isbn) + "&_sacat=0&LH_ItemCondition=4&LH_Sold=1&LH_Complete=1&rt=nc&LH_PrefLoc=1"
         print(URL)
         page = requests.get(URL)
         html = page.text
@@ -1616,7 +1616,7 @@ def ebay_historical_prices(isbn, condition):
 
                 index = 0
                 used_delivery_price = get_used_delivery_price(index, soup)
-                sum += used_delivery_price
+                sum += float(used_delivery_price)
 
                 try:
                     historical_used_product_price_with_sign = historical_used_product_price_list[1].get_text()
@@ -1625,7 +1625,7 @@ def ebay_historical_prices(isbn, condition):
 
                     index = 1
                     used_delivery_price = get_used_delivery_price(index, soup)
-                    sum += used_delivery_price
+                    sum += float(used_delivery_price)
                     try:
                         historical_used_product_price_with_sign = historical_used_product_price_list[2].get_text()
                         historical_used_product_price = historical_used_product_price_with_sign[1:]
@@ -1633,7 +1633,7 @@ def ebay_historical_prices(isbn, condition):
 
                         index = 2
                         used_delivery_price = get_used_delivery_price(index, soup)
-                        sum += used_delivery_price
+                        sum += float(used_delivery_price)
 
                         historical_used_product_price = sum/3
                     except Exception as e:
@@ -1658,7 +1658,37 @@ def ebay_historical_prices(isbn, condition):
 
 
 def get_new_delivery_price(index, soup):
-    pass
+    try:
+        results = soup.find("ul", class_="srp-results")
+        new_delivery_price_list = results.findAll("span", class_="s-item__shipping s-item__logisticsCost")
+        new_delivery_price_with_sign = new_delivery_price_list[index].get_text()
+        if (("Free" in new_delivery_price_with_sign) or ("free" in new_delivery_price_with_sign)) and (
+                ("Postage" in new_delivery_price_with_sign) or (
+                "postage" in new_delivery_price_with_sign)):
+            new_delivery_price = 0
+            print("New Delivery Price: £0.00")
+        else:
+            new_delivery_price = re.findall("\d+\.\d+", new_delivery_price_with_sign)[0]
+            print("New Delivery Price: £" + str(new_delivery_price))
+    except:
+        try:
+            results = soup.find("ul", class_="srp-results")
+            new_delivery_price_list = results.findAll("span", class_="s-item__dynamic s-item__freeXDays")
+            new_delivery_price_with_sign = new_delivery_price_list[index].get_text()
+            if (("Free" in new_delivery_price_with_sign) or (
+                    "free" in new_delivery_price_with_sign)) and (
+                    ("Postage" in new_delivery_price_with_sign) or (
+                    "postage" in new_delivery_price_with_sign)):
+                new_delivery_price = 0
+                print("New Delivery Price: £0.00")
+            else:
+                # https://www.tutorialspoint.com/Extract-decimal-numbers-from-a-string-in-Python#:~:text=To%20extract%20decimal%20numbers%20from,to%20work%20with%20regular%20expressions.
+                new_delivery_price = re.findall("\d+\.\d+", new_delivery_price_with_sign)[0]
+                print("New Delivery Price: £" + str(new_delivery_price))
+        except Exception as e:
+            new_delivery_price = -999
+            print("New Delivery Price: FAIL")
+    return new_delivery_price
 
 
 def get_used_delivery_price(index, soup):
@@ -1673,7 +1703,7 @@ def get_used_delivery_price(index, soup):
             print("Used Delivery Price: £0.00")
         else:
             used_delivery_price = re.findall("\d+\.\d+", used_delivery_price_with_sign)[0]
-            print("Used Delivery Price: £" + used_delivery_price)
+            print("Used Delivery Price: £" + str(used_delivery_price))
     except:
         try:
             results = soup.find("ul", class_="srp-results")
@@ -1688,7 +1718,7 @@ def get_used_delivery_price(index, soup):
             else:
                 # https://www.tutorialspoint.com/Extract-decimal-numbers-from-a-string-in-Python#:~:text=To%20extract%20decimal%20numbers%20from,to%20work%20with%20regular%20expressions.
                 used_delivery_price = re.findall("\d+\.\d+", used_delivery_price_with_sign)[0]
-                print("Used Delivery Price: £" + used_delivery_price)
+                print("Used Delivery Price: £" + str(used_delivery_price))
         except Exception as e:
             used_delivery_price = -999
             print("Used Delivery Price: FAIL")
@@ -1717,9 +1747,9 @@ def main():
     # check_amazon_prices_today_isbn("./scraped_database_data_amazon.csv", "0753801523", only_create_new_books=False)
 
 
-    check_amazon_prices_today_proper_test("./scraped_database_data_amazon.csv", only_create_new_books=False)
-    #isbn = "1852863366"
-    #ebay_historical_prices(isbn,"new")
+    #check_amazon_prices_today_proper_test("./scraped_database_data_amazon.csv", only_create_new_books=False)
+    isbn = "0857504797"
+    ebay_historical_prices(isbn,"new")
 
 
 if __name__ == "__main__":
