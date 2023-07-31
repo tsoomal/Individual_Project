@@ -19,24 +19,38 @@
             <br/>
             <input type="text" placeholder="ISBN" name="isbn" value="{{isbn}}" pattern="([0-9]{10})|([0-9]{9}[X]{1})|([0-9]{13})" oninvalid="this.setCustomValidity('Please use either ISBN-10 or ISBN-13 format. Capitalise any \'X\' character.')" oninput="setCustomValidity('')">
             <br/>
-            <input type="text" placeholder="Edition Format" name="edition_format" value={{edition_format}}>
+            <input type="text" placeholder="Paperback/Hardcover?" name="edition_format" value={{edition_format}}>
             <br/><br/>
             <input type="text" placeholder="Ebay Link" name="ebay_link" value={{ebay_link}}>
             <br/>
-            <input type="text" placeholder="Ebay Product Price" name="ebay_product_price" value={{ebay_product_price}}>
+            <input type="text" placeholder="Ebay New Product Price" name="ebay_new_product_price" value={{ebay_new_product_price}}>
             <br/>
-            <input type="text" placeholder="Ebay Delivery Price" name="ebay_delivery_price" value={{ebay_delivery_price}}>
+            <input type="text" placeholder="Ebay New Delivery Price" name="ebay_new_delivery_price" value={{ebay_new_delivery_price}}>
             <br/>
-            <input type="text" placeholder="Ebay Total Price" name="ebay_total_price" value={{ebay_total_price}}>
+            <input type="text" placeholder="Ebay New Total Price" name="ebay_new_total_price" value={{ebay_new_total_price}}>
+            <br/>
+            <input type="text" placeholder="Ebay Used Product Price" name="ebay_used_product_price" value={{ebay_used_product_price}}>
+            <br/>
+            <input type="text" placeholder="Ebay Used Delivery Price" name="ebay_used_delivery_price" value={{ebay_used_delivery_price}}>
+            <br/>
+            <input type="text" placeholder="Ebay Used Total Price" name="ebay_used_total_price" value={{ebay_used_total_price}}>
              <br/><br/>
+
             <input type="text" placeholder="Amazon Link" name="amazon_link" value={{amazon_link}}>
             <br/>
-            <input type="text" placeholder="Amazon Product Price" name="amazon_product_price" value={{amazon_product_price}}>
+            <input type="text" placeholder="Amz New Product Price" name="amazon_new_product_price" value={{amazon_new_product_price}}>
             <br/>
-            <input type="text" placeholder="Amazon Delivery Price" name="amazon_delivery_price" value={{amazon_delivery_price}}>
+            <input type="text" placeholder="Amz New Delivery Price" name="amazon_new_delivery_price" value={{amazon_new_delivery_price}}>
             <br/>
-            <input type="text" placeholder="Amazon Total Price" name="amazon_total_price" value={{amazon_total_price}}>
+            <input type="text" placeholder="Amz New Total Price" name="amazon_new_total_price" value={{amazon_new_total_price}}>
+            <br/>
+            <input type="text" placeholder="Amz Used Product Price" name="amazon_used_product_price" value={{amazon_used_product_price}}>
+            <br/>
+            <input type="text" placeholder="Amz Used Delivery Price" name="amazon_used_delivery_price" value={{amazon_used_delivery_price}}>
+            <br/>
+            <input type="text" placeholder="Amz Used Total Price" name="amazon_used_total_price" value={{amazon_used_total_price}}>
             <br/><br/>
+
             <input type="submit" value="Add Book" class="btn btn-primary">
         </form>
 

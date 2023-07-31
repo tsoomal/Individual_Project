@@ -174,13 +174,19 @@ def add_books():
         isbn = request.form['isbn']
         edition_format = request.form['edition_format']
         ebay_link = request.form['ebay_link']
-        ebay_product_price = request.form['ebay_product_price']
-        ebay_delivery_price = request.form['ebay_delivery_price']
-        ebay_total_price = request.form['ebay_total_price']
+        ebay_new_product_price = request.form['ebay_new_product_price']
+        ebay_new_delivery_price = request.form['ebay_new_delivery_price']
+        ebay_new_total_price = request.form['ebay_new_total_price']
+        ebay_used_product_price = request.form['ebay_used_product_price']
+        ebay_used_delivery_price = request.form['ebay_used_delivery_price']
+        ebay_used_total_price = request.form['ebay_used_total_price']
         amazon_link = request.form['amazon_link']
-        amazon_product_price = request.form['amazon_product_price']
-        amazon_delivery_price = request.form['amazon_delivery_price']
-        amazon_total_price = request.form['amazon_total_price']
+        amazon_new_product_price = request.form['amazon_new_product_price']
+        amazon_new_delivery_price = request.form['amazon_new_delivery_price']
+        amazon_new_total_price = request.form['amazon_new_total_price']
+        amazon_used_product_price = request.form['amazon_used_product_price']
+        amazon_used_delivery_price = request.form['amazon_used_delivery_price']
+        amazon_used_total_price = request.form['amazon_used_total_price']
 
         if "www." in amazon_link:
             amazon_link = amazon_link.split("www.",1)[1]
@@ -191,11 +197,21 @@ def add_books():
         # Validate Book Name
         if len(book_name) == 0:
             error_statement = "Please enter a book name!"
-            return render_template("add_books.html", error_statement=error_statement, book_name=book_name, isbn=isbn, edition_format=edition_format,
-                                   ebay_link=ebay_link, ebay_product_price=ebay_product_price,
-                                   ebay_delivery_price=ebay_delivery_price, ebay_total_price=ebay_total_price,
-                                   amazon_link=amazon_link, amazon_product_price=amazon_product_price,
-                                   amazon_delivery_price=amazon_delivery_price, amazon_total_price=amazon_total_price)
+            return render_template("add_books.html", error_statement=error_statement, book_name=book_name, isbn=isbn,
+                                   edition_format=edition_format,
+                                   ebay_link=ebay_link, ebay_new_product_price=ebay_new_product_price,
+                                   ebay_new_delivery_price=ebay_new_delivery_price,
+                                   ebay_new_total_price=ebay_new_total_price,
+                                   ebay_used_product_price=ebay_used_product_price,
+                                   ebay_used_delivery_price=ebay_used_delivery_price,
+                                   ebay_used_total_price=ebay_used_total_price,
+                                   amazon_link=amazon_link, amazon_new_product_price=amazon_new_product_price,
+                                   amazon_new_delivery_price=amazon_new_delivery_price,
+                                   amazon_new_total_price=amazon_new_total_price,
+                                   amazon_used_product_price=amazon_used_product_price,
+                                   amazon_used_delivery_price=amazon_used_delivery_price,
+                                   amazon_used_total_price=amazon_used_total_price
+                                   )
 
         # Validate ISBN
         try:
@@ -214,23 +230,36 @@ def add_books():
                 raise Exception
         except:
             error_statement = "ISBN has to be in either ISBN-10 or ISBN-13 format!"
-            return render_template("add_books.html", error_statement=error_statement, book_name=book_name, isbn=isbn, edition_format=edition_format,
-                                   ebay_link=ebay_link, ebay_product_price=ebay_product_price,
-                                   ebay_delivery_price=ebay_delivery_price, ebay_total_price=ebay_total_price,
-                                   amazon_link=amazon_link, amazon_product_price=amazon_product_price,
-                                   amazon_delivery_price=amazon_delivery_price, amazon_total_price=amazon_total_price)
+            return render_template("add_books.html", error_statement=error_statement, book_name=book_name,
+                                   isbn=isbn, edition_format=edition_format,
+                                   ebay_link=ebay_link, ebay_new_product_price=ebay_new_product_price,
+                                   ebay_new_delivery_price=ebay_new_delivery_price,
+                                   ebay_new_total_price=ebay_new_total_price,
+                                   ebay_used_product_price=ebay_used_product_price,
+                                   ebay_used_delivery_price=ebay_used_delivery_price,
+                                   ebay_used_total_price=ebay_used_total_price,
+                                   amazon_link=amazon_link, amazon_new_product_price=amazon_new_product_price,
+                                   amazon_new_delivery_price=amazon_new_delivery_price,
+                                   amazon_new_total_price=amazon_new_total_price,
+                                   amazon_used_product_price=amazon_used_product_price,
+                                   amazon_used_delivery_price=amazon_used_delivery_price,
+                                   amazon_used_total_price=amazon_used_total_price)
 
         # Push to database
         try:
-            new_book = Amazon(book_name=book_name, amazon_link="placeholder_link", isbn=isbn, edition_format="Paperback", new_product_price=5.00,
-                              new_delivery_price=0.00, new_total_price=5.00, used_product_price=5.00,
-                              used_delivery_price=0.00, used_total_price=5.00)
+            new_book = Amazon(book_name=book_name, amazon_link=amazon_link, isbn=isbn, edition_format=edition_format,
+                              new_product_price=amazon_new_product_price,
+                              new_delivery_price=amazon_new_delivery_price, new_total_price=amazon_new_total_price,
+                              used_product_price=amazon_used_product_price,
+                              used_delivery_price=amazon_used_delivery_price, used_total_price=amazon_used_total_price)
             db.session.add(new_book)
             db.session.commit()
 
-            new_book = Ebay(book_name=book_name, ebay_link="placeholder_link", isbn=isbn, edition_format="Paperback", new_product_price=5.00,
-                              new_delivery_price=0.00, new_total_price=5.00, used_product_price=5.00,
-                              used_delivery_price=0.00, used_total_price=5.00)
+            new_book = Ebay(book_name=book_name, ebay_link=ebay_link, isbn=isbn, edition_format=edition_format,
+                            new_product_price=ebay_new_product_price,
+                            new_delivery_price=ebay_new_delivery_price, new_total_price=ebay_new_total_price,
+                            used_product_price=ebay_used_product_price, used_delivery_price=ebay_used_delivery_price,
+                            used_total_price=ebay_used_total_price)
             db.session.add(new_book)
             db.session.commit()
 
