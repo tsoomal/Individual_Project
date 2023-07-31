@@ -1,5 +1,6 @@
 # Tutorial on creating Python Flask app from scratch, using html, bootstrap and css for frontend. SQLlite for frontend.
 # https://www.youtube.com/playlist?list=PLCC34OHNcOtqJBOLjXTd5xC0e-VD3siPn
+import csv
 
 # Using Postgresql
 # https://stackabuse.com/using-sqlalchemy-with-flask-and-postgresql/
@@ -171,6 +172,7 @@ def add_books():
     if request.method == "POST":
         book_name = request.form['book_name']
         isbn = request.form['isbn']
+        edition_format = request.form['edition_format']
         ebay_link = request.form['ebay_link']
         ebay_product_price = request.form['ebay_product_price']
         ebay_delivery_price = request.form['ebay_delivery_price']
@@ -180,10 +182,16 @@ def add_books():
         amazon_delivery_price = request.form['amazon_delivery_price']
         amazon_total_price = request.form['amazon_total_price']
 
+        if "www." in amazon_link:
+            amazon_link = amazon_link.split("www.",1)[1]
+
+        if "www." in ebay_link:
+            ebay_link = ebay_link.split("www.",1)[1]
+
         # Validate Book Name
         if len(book_name) == 0:
             error_statement = "Please enter a book name!"
-            return render_template("add_books.html", error_statement=error_statement, book_name=book_name, isbn=isbn,
+            return render_template("add_books.html", error_statement=error_statement, book_name=book_name, isbn=isbn, edition_format=edition_format,
                                    ebay_link=ebay_link, ebay_product_price=ebay_product_price,
                                    ebay_delivery_price=ebay_delivery_price, ebay_total_price=ebay_total_price,
                                    amazon_link=amazon_link, amazon_product_price=amazon_product_price,
@@ -206,8 +214,7 @@ def add_books():
                 raise Exception
         except:
             error_statement = "ISBN has to be in either ISBN-10 or ISBN-13 format!"
-            books = Amazon.query.order_by(Amazon.book_name)
-            return render_template("add_books.html", error_statement=error_statement, book_name=book_name, isbn=isbn,
+            return render_template("add_books.html", error_statement=error_statement, book_name=book_name, isbn=isbn, edition_format=edition_format,
                                    ebay_link=ebay_link, ebay_product_price=ebay_product_price,
                                    ebay_delivery_price=ebay_delivery_price, ebay_total_price=ebay_total_price,
                                    amazon_link=amazon_link, amazon_product_price=amazon_product_price,
@@ -226,17 +233,28 @@ def add_books():
                               used_delivery_price=0.00, used_total_price=5.00)
             db.session.add(new_book)
             db.session.commit()
+
+            # Add to Amazon csv of books.
+            data = [book_name, amazon_link, edition_format, isbn]
+            with open("scraped_database_data_amazon.csv", "a+", newline="", encoding="UTF8") as f:
+                writer = csv.writer(f)
+                writer.writerow(data)
+
+            # Add to Ebay csv of books.
+            data = [book_name, ebay_link, edition_format, isbn]
+            with open("scraped_database_data_ebay.csv", "a+", newline="", encoding="UTF8") as f:
+                writer = csv.writer(f)
+                writer.writerow(data)
+
             return redirect('/books')
         except IntegrityError:
             db.session.rollback()
             error_statement = "That book already exists in the database, " \
                               "or there is another cause for an integrity error."
-            books = Amazon.query.order_by(Amazon.book_name)
             return render_template("add_books.html", error_statement=error_statement)
         except:
             db.session.rollback()
             error_statement = "There was an error adding that book to the database."
-            books = Amazon.query.order_by(Amazon.book_name)
             return render_template("add_books.html", error_statement=error_statement)
 
     return render_template("add_books.html")

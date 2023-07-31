@@ -18,6 +18,8 @@
             <input type="text" placeholder="Book Name" name="book_name" value={{book_name}}>
             <br/>
             <input type="text" placeholder="ISBN" name="isbn" value="{{isbn}}" pattern="([0-9]{10})|([0-9]{9}[X]{1})|([0-9]{13})" oninvalid="this.setCustomValidity('Please use either ISBN-10 or ISBN-13 format. Capitalise any \'X\' character.')" oninput="setCustomValidity('')">
+            <br/>
+            <input type="text" placeholder="Edition Format" name="edition_format" value={{edition_format}}>
             <br/><br/>
             <input type="text" placeholder="Ebay Link" name="ebay_link" value={{ebay_link}}>
             <br/>
