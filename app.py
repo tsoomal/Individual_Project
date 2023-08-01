@@ -16,6 +16,7 @@ from sqlalchemy.exc import IntegrityError
 # https://stackoverflow.com/questions/38111620/python-isbn-13-digit-validate
 import isbnlib
 from twisted.python.compat import izip
+import psycopg2
 
 from ScrapingFunctionality import check_ebay_prices_today, check_amazon_prices_today
 import threading
@@ -23,7 +24,10 @@ from PriceModelling import storage_ebay_to_amazon, storage_amazon_to_ebay
 
 app = Flask(__name__)
 # https://stackoverflow.com/questions/65888631/how-do-i-use-heroku-postgres-with-my-flask-sqlalchemy-app
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["database_connection_string_heroku"]
+#app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["database_connection_string_heroku"]
+app.config["SQLALCHEMY_DATABASE_URI"] = "postgres://blzndzycouuhur:78a41636547effa76d91e4a45d2fbfbf45e49ae2a615d48cf2d16fad8396be02@ec2-18-202-8-133.eu-west-1.compute.amazonaws.com:5432/d4hboil0n7mggf"
+conn = psycopg2.connect(dbname='d4hboil0n7mggf', user='blzndzycouuhur', password='78a41636547effa76d91e4a45d2fbfbf45e49ae2a615d48cf2d16fad8396be02', host='ec2-18-202-8-133.eu-west-1.compute.amazonaws.com', port='5432', sslmode='require')
+#conn = psycopg2.connect(os.environ["database_connection_string_heroku"])
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.secret_key = 'secret string'
 # Initialising the database
