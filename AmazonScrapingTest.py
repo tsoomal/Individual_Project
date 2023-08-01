@@ -1636,15 +1636,19 @@ def ebay_historical_prices(isbn, condition):
                         sum += float(used_delivery_price)
 
                         historical_used_product_price = sum/3
+                        return historical_used_product_price
                     except Exception as e:
                         print(e)
                         historical_used_product_price = sum/2
+                        return historical_used_product_price
                 except Exception as e:
                     print(e)
                     historical_used_product_price = sum/1
+                    return historical_used_product_price
             except Exception as e:
                 print(e)
                 historical_used_product_price = -999
+                return historical_used_product_price
 
             print("Historical Used Product Price: £" + str(historical_used_product_price))
 
@@ -1652,6 +1656,7 @@ def ebay_historical_prices(isbn, condition):
             print(e)
             used_product_price = -999
             print("Historical Used Product Price: FAIL")
+            return used_product_price
 
     else:
         pass
@@ -1749,7 +1754,7 @@ def main():
 
     #check_amazon_prices_today_proper_test("./scraped_database_data_amazon.csv", only_create_new_books=False)
     isbn = "0857504797"
-    ebay_historical_prices(isbn,"new")
+    print(round(ebay_historical_prices(isbn,"used"),2))
 
 
 if __name__ == "__main__":
