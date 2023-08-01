@@ -23,7 +23,7 @@ from PriceModelling import storage_ebay_to_amazon, storage_amazon_to_ebay
 
 app = Flask(__name__)
 # https://stackoverflow.com/questions/65888631/how-do-i-use-heroku-postgres-with-my-flask-sqlalchemy-app
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["database_connection_string"]
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["database_connection_string_heroku"]
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.secret_key = 'secret string'
 # Initialising the database
