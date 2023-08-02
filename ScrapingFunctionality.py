@@ -358,8 +358,11 @@ def check_ebay_prices_today(file_name, only_create_new_books=False):
 
 
         try:
+            historical_new_total_price = get_ebay_historical_price(isbn, "new")
+            historical_used_total_price = get_ebay_historical_price(isbn, "used")
             new_book = app.Ebay(book_name=book_name, ebay_link=ebay_link, isbn=isbn, edition_format=edition_format, new_product_price=new_product_price, new_delivery_price=new_delivery_price, new_total_price=new_total_price_raw,
-                              used_product_price=used_product_price, used_delivery_price=used_delivery_price, used_total_price=used_total_price_raw)
+                                historical_new_total_price=historical_new_total_price,
+                              used_product_price=used_product_price, used_delivery_price=used_delivery_price, used_total_price=used_total_price_raw ,historical_used_total_price=historical_used_total_price)
             app.db.session.add(new_book)
             app.db.session.commit()
 
@@ -1094,7 +1097,7 @@ def setup_database(links,base_file_name="scraped_database_data", new_list=False)
     check_ebay_prices_today("./" + base_file_name + "_ebay.csv", only_create_new_books=False)
 
 
-def ebay_historical_prices(isbn, condition):
+def get_ebay_historical_price(isbn, condition):
 
     if condition.lower()=="new":
         URL = "https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw=" + str(

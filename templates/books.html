@@ -7,6 +7,9 @@
         <h1>Books List</h1>
         <p>This is a list of all books, sorted by name in alphabetically, ascending order.</p>
 
+    <p>Number of records in Ebay table: {{num_records_ebay}}</p>
+    <p>Number of records in Amazon table: {{num_records_amazon}}</p>
+
     {% if error_statement %}
     <div class="alert alert-warning alert-dismissible fade show" role="alert">
       <strong>{{error_statement}}</strong>

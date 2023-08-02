@@ -8,6 +8,7 @@ import decimal
 
 from flask import Flask, render_template, request, redirect, copy_current_request_context
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import func
 from datetime import datetime
 import smtplib
 from email.message import EmailMessage
@@ -19,7 +20,7 @@ import isbnlib
 from twisted.python.compat import izip
 import psycopg2
 
-from ScrapingFunctionality import check_ebay_prices_today, check_amazon_prices_today, ebay_historical_prices
+from ScrapingFunctionality import check_ebay_prices_today, check_amazon_prices_today, get_ebay_historical_price
 import threading
 from PriceModelling import storage_ebay_to_amazon, storage_amazon_to_ebay
 
@@ -78,12 +79,15 @@ class Ebay(db.Model):
     new_product_price = db.Column(db.Numeric(5, 2), nullable=False)
     new_delivery_price = db.Column(db.Numeric(5, 2), nullable=False)
     new_total_price = db.Column(db.Numeric(5, 2), nullable=False)
+    historical_new_total_price = db.Column(db.Numeric(5, 2), nullable=False)
     used_product_price = db.Column(db.Numeric(5, 2), nullable=False)
     used_delivery_price = db.Column(db.Numeric(5, 2), nullable=False)
     used_total_price = db.Column(db.Numeric(5, 2), nullable=False)
+    historical_used_total_price = db.Column(db.Numeric(5, 2), nullable=False)
 
-    def __init__(self, book_name, ebay_link, isbn, edition_format, new_product_price, new_delivery_price, new_total_price,
-                 used_product_price, used_delivery_price, used_total_price):
+    def __init__(self, book_name, ebay_link, isbn, edition_format, new_product_price, new_delivery_price,
+                 new_total_price, historical_new_total_price, used_product_price, used_delivery_price, used_total_price,
+                 historical_used_total_price):
         self.book_name = book_name
         self.ebay_link = ebay_link
         self.isbn = isbn
@@ -91,9 +95,11 @@ class Ebay(db.Model):
         self.new_product_price = new_product_price
         self.new_delivery_price = new_delivery_price
         self.new_total_price = new_total_price
+        self.historical_new_total_price = historical_new_total_price
         self.used_product_price = used_product_price
         self.used_delivery_price = used_delivery_price
         self.used_total_price = used_total_price
+        self.historical_used_total_price = historical_used_total_price
 
     def __repr__(self):
         return f"<Book: {self.book_name}>"
@@ -160,18 +166,23 @@ def books():
     else:
         updatable = False
 
+    num_records_amazon = db.session.query(func.count(Amazon.isbn)).scalar()
+    num_records_ebay = db.session.query(func.count(Ebay.isbn)).scalar()
+
     if request.method == "POST":
         try:
             books_ebay = Ebay.query.order_by(Ebay.book_name)
             books_amazon = Amazon.query.order_by(Amazon.book_name)
-            return render_template("books.html", books_ebay=books_ebay, books_amazon=books_amazon, updatable=updatable, zip=zip)
+            return render_template("books.html", books_ebay=books_ebay, books_amazon=books_amazon, updatable=updatable,
+                                   zip=zip, num_records_ebay=num_records_ebay, num_records_amazon=num_records_amazon)
         except:
             error_statement = "Error with database connection. Please refresh page!"
             return render_template("books.html", error_statement=error_statement)
     else:
         books_ebay = Ebay.query.order_by(Ebay.book_name)
         books_amazon = Amazon.query.order_by(Amazon.book_name)
-        return render_template("books.html", books_ebay=books_ebay, books_amazon=books_amazon, updatable=updatable, zip=zip)
+        return render_template("books.html", books_ebay=books_ebay, books_amazon=books_amazon, updatable=updatable,
+                               zip=zip, num_records_ebay=num_records_ebay, num_records_amazon=num_records_amazon)
 
 @app.route("/add_books", methods =['POST','GET'])
 def add_books():
@@ -251,6 +262,10 @@ def add_books():
                                    amazon_used_delivery_price=amazon_used_delivery_price,
                                    amazon_used_total_price=amazon_used_total_price)
 
+        # Get historical prices
+        historical_new_total_price = get_ebay_historical_price(isbn, "new")
+        historical_used_total_price = get_ebay_historical_price(isbn, "used")
+
         # Push to database
         try:
             new_book = Amazon(book_name=book_name, amazon_link=amazon_link, isbn=isbn, edition_format=edition_format,
@@ -264,8 +279,10 @@ def add_books():
             new_book = Ebay(book_name=book_name, ebay_link=ebay_link, isbn=isbn, edition_format=edition_format,
                             new_product_price=ebay_new_product_price,
                             new_delivery_price=ebay_new_delivery_price, new_total_price=ebay_new_total_price,
+                            historical_new_total_price=historical_new_total_price,
                             used_product_price=ebay_used_product_price, used_delivery_price=ebay_used_delivery_price,
-                            used_total_price=ebay_used_total_price)
+                            used_total_price=ebay_used_total_price,
+                            historical_used_total_price=historical_used_total_price)
             db.session.add(new_book)
             db.session.commit()
 
@@ -366,10 +383,12 @@ def update(isbn):
             updatable = True
         else:
             updatable = False
+        num_records_amazon = db.session.query(func.count(Amazon.isbn)).scalar()
+        num_records_ebay = db.session.query(func.count(Ebay.isbn)).scalar()
         books_ebay = Ebay.query.order_by(Ebay.book_name)
         books_amazon = Amazon.query.order_by(Amazon.book_name)
         return render_template("books.html", books_ebay=books_ebay, books_amazon=books_amazon, updatable=updatable,
-                               zip=zip, error_statement=error_statement)
+                               zip=zip, num_records_ebay=num_records_ebay, num_records_amazon=num_records_amazon)
 
     if request.method == "POST":
         if request.form.get('book_name'):
@@ -481,9 +500,6 @@ def opportunities():
 
     for book_ebay, book_amazon in zip(all_books_ebay, all_books_amazon):
 
-        ebay_historical_price_new = ebay_historical_prices(book_ebay.isbn,"new")
-        ebay_historical_price_used = ebay_historical_prices(book_ebay.isbn,"used")
-
         # NEW BOOKS
         if book_ebay.new_total_price == -999 and book_amazon.new_total_price == -999:
             # No arbitrage possible
@@ -498,16 +514,16 @@ def opportunities():
         elif book_ebay.new_total_price > book_amazon.new_total_price:
             # Buy on Amazon, Sell on Ebay
             total_selling_price_to_breakeven = (storage_amazon_to_ebay(book_amazon.new_total_price))
-            if book_ebay.new_total_price < ebay_historical_price_new:
+            if book_ebay.new_total_price < book_ebay.historical_new_total_price:
                 if book_ebay.new_total_price > total_selling_price_to_breakeven:
                     books_amazon_new.append(book_amazon)
                     books_ebay_new.append(book_ebay)
                     profit_new.append(book_ebay.new_total_price-book_amazon.new_total_price)
-            elif book_ebay.new_total_price > ebay_historical_price_new:
-                if ebay_historical_price_new > total_selling_price_to_breakeven:
+            elif book_ebay.new_total_price > book_ebay.historical_new_total_price:
+                if book_ebay.historical_new_total_price > total_selling_price_to_breakeven:
                     books_amazon_new.append(book_amazon)
                     books_ebay_new.append(book_ebay)
-                    profit_new.append(round(decimal.Decimal(ebay_historical_price_new),2)-book_amazon.new_total_price)
+                    profit_new.append(round(decimal.Decimal(book_ebay.historical_new_total_price),2)-book_amazon.new_total_price)
 
         elif book_ebay.new_total_price < book_amazon.new_total_price:
             # Buy on Ebay, Sell on Amazon
@@ -534,16 +550,16 @@ def opportunities():
         elif book_ebay.used_total_price > book_amazon.used_total_price:
             # Buy on Amazon, Sell on Ebay
             total_selling_price_to_breakeven = (storage_amazon_to_ebay(book_amazon.used_total_price))
-            if book_ebay.used_total_price < ebay_historical_price_used:
+            if book_ebay.used_total_price < book_ebay.historical_used_total_price:
                 if book_ebay.used_total_price > total_selling_price_to_breakeven:
                     books_amazon_used.append(book_amazon)
                     books_ebay_used.append(book_ebay)
                     profit_used.append(book_ebay.used_total_price - book_amazon.used_total_price)
-            elif book_ebay.used_total_price > ebay_historical_price_used:
-                if ebay_historical_price_used > total_selling_price_to_breakeven:
+            elif book_ebay.used_total_price > book_ebay.historical_used_total_price:
+                if book_ebay.historical_used_total_price > total_selling_price_to_breakeven:
                     books_amazon_used.append(book_amazon)
                     books_ebay_used.append(book_ebay)
-                    profit_used.append(round(decimal.Decimal(ebay_historical_price_used),2) - book_amazon.used_total_price)
+                    profit_used.append(round(decimal.Decimal(book_ebay.historical_used_total_price),2) - book_amazon.used_total_price)
         elif book_ebay.used_total_price < book_amazon.used_total_price:
             # Buy on Ebay, Sell on Amazon
             total_selling_price_to_breakeven = (storage_ebay_to_amazon(book_ebay.used_total_price))
