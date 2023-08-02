@@ -413,6 +413,7 @@ def update(isbn):
         try:
             db.session.commit()
         except:
+            db.session.rollback()
             return "There was an error updating that book in the database"
     else:
         return render_template("update.html", book_to_update=book_to_update_amazon,
@@ -427,6 +428,7 @@ def delete(isbn):
         db.session.delete(book_to_delete)
         db.session.commit()
     except:
+        db.session.rollback()
         return "There was a problem deleting that book from the Amazon table."
 
     book_to_delete = Ebay.query.get_or_404(isbn)
@@ -434,6 +436,7 @@ def delete(isbn):
         db.session.delete(book_to_delete)
         db.session.commit()
     except:
+        db.session.rollback()
         return "There was a problem deleting that book from the Ebay table."
 
     return redirect('/books')
