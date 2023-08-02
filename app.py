@@ -334,11 +334,11 @@ class UpdateEbayDB(threading.Thread):
 def update_prices_in_database():
     # https://stackoverflow.com/questions/62435134/how-to-run-a-function-in-background-without-blocking-main-thread-and-serving-fla
 
-    #t_ebay = UpdateEbayDB()
-    #t_ebay.start()
+    t_ebay = UpdateEbayDB()
+    t_ebay.start()
 
-    t_amazon = UpdateAmazonDB()
-    t_amazon.start()
+    #t_amazon = UpdateAmazonDB()
+    #t_amazon.start()
 
     return redirect('books')
 

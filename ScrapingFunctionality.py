@@ -361,10 +361,8 @@ def check_ebay_prices_today(file_name, only_create_new_books=False):
             new_book = app.Ebay(book_name=book_name, ebay_link=ebay_link, isbn=isbn, edition_format=edition_format, new_product_price=new_product_price, new_delivery_price=new_delivery_price, new_total_price=new_total_price_raw,
                               used_product_price=used_product_price, used_delivery_price=used_delivery_price, used_total_price=used_total_price_raw)
             app.db.session.add(new_book)
-            try:
-                app.db.session.commit()
-            except:
-                app.db.session.rollback()
+            app.db.session.commit()
+
         except IntegrityError:
             app.db.session.rollback()
             book_to_update_ebay = app.Ebay.query.get_or_404(isbn)
@@ -378,6 +376,8 @@ def check_ebay_prices_today(file_name, only_create_new_books=False):
                 app.db.session.commit()
             except:
                 app.db.session.rollback()
+        except:
+            app.db.session.rollback()
 
 
 
@@ -1056,10 +1056,8 @@ def end_of_item_loop(amazon_link, book_name, driver, edition_format, isbn, new_d
                               used_delivery_price=used_delivery_price,
                               used_total_price=used_total_price_raw)
         app.db.session.add(new_book)
-        try:
-            app.db.session.commit()
-        except:
-            app.db.session.rollback()
+        app.db.session.commit()
+
     except IntegrityError:
         app.db.session.rollback()
         book_to_update_amazon = app.Amazon.query.get_or_404(isbn)
@@ -1073,6 +1071,8 @@ def end_of_item_loop(amazon_link, book_name, driver, edition_format, isbn, new_d
             app.db.session.commit()
         except:
             app.db.session.rollback()
+    except:
+        app.db.session.rollback()
     driver.quit()
 
 
