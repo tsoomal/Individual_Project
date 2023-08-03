@@ -125,36 +125,6 @@ def query_database_by_isbn(isbn):
         print(e)
         return redirect('/opportunities')
 
-
-@app.route("/query_database")
-def query_database():
-    return render_template("query_database.html")
-
-@app.route("/isbn_query_form", methods=["POST"])
-def isbn_query_form():
-    isbn_input = request.form['isbn_input']
-    try:
-        book_to_display_amazon = Amazon.query.get_or_404(isbn_input)
-        book_to_display_ebay = Ebay.query.get_or_404(isbn_input)
-        return render_template("query_database.html", message="Book found!",
-                               book_to_display_ebay=book_to_display_ebay,
-                               book_to_display_amazon=book_to_display_amazon, isbn_input=isbn_input)
-    except:
-        return render_template("query_database.html", message="Book not found!", isbn_input=isbn_input)
-
-@app.route("/name_query_form", methods=["POST"])
-def name_query_form():
-    name_input = request.form['name_input']
-    try:
-        book_to_display_amazon = Amazon.query.filter(Amazon.book_name.contains(name_input))
-        book_to_display_ebay = Ebay.query.filter(Ebay.book_name.contains(name_input))
-        return render_template("query_database.html", message="Book(s) found!",
-                               book_to_display_ebay=book_to_display_ebay,
-                               book_to_display_amazon=book_to_display_amazon, name_input=name_input, zip=zip, enumerate=enumerate)
-    except Exception as e:
-        print(e)
-        return render_template("query_database.html", message="Book not found!", name_input=name_input)
-
 @app.route("/contact")
 def contact():
     return render_template("contact.html")
@@ -429,7 +399,8 @@ def update(isbn):
         books_ebay = Ebay.query.order_by(Ebay.book_name)
         books_amazon = Amazon.query.order_by(Amazon.book_name)
         return render_template("books.html", books_ebay=books_ebay, books_amazon=books_amazon, updatable=updatable,
-                               zip=zip, num_records_ebay=num_records_ebay, num_records_amazon=num_records_amazon)
+                               zip=zip, num_records_ebay=num_records_ebay, num_records_amazon=num_records_amazon,
+                               error_statement=error_statement)
 
     if request.method == "POST":
         if request.form.get('book_name'):
