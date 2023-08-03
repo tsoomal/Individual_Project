@@ -54,10 +54,12 @@
     <br/>
     <br/>
 
-    <!-- https://stackoverflow.com/questions/32774118/building-a-bootstrap-table-with-dynamic-elements-in-flask -->
+        <br/>
+        <input class="form-control" id="search_list" type="text" placeholder="Search the entire book database...">
+        <br/>
+
+        <!-- https://stackoverflow.com/questions/32774118/building-a-bootstrap-table-with-dynamic-elements-in-flask -->
         <!-- https://getbootstrap.com/docs/5.0/utilities/borders/#border-color -->
-
-
     <table class="table table-hover">
         <thead>
             <!-- https://stackoverflow.com/questions/61969955/bootstrap-fixed-width-table-columns-in-container-fluid -->
@@ -72,7 +74,7 @@
                 <th class="col-1 border-start border-end border-top align-top" scope="col">Delete Record</th>
             <tr>
         </thead>
-        <tbody>
+        <tbody id=table_body>
             <!--https://stackoverflow.com/questions/1663807/how-do-i-iterate-through-two-lists-in-parallel-->
             {% for book_ebay, book_amazon in zip(books_ebay, books_amazon) %}
             <tr>
@@ -89,9 +91,19 @@
         </tbody>
     </table>
 
-
         <br/>
 
-
 	</div>
+
+<!-- Search book list -->
+<script>
+$(document).ready(function(){
+  $("#search_list").on("keyup", function() {
+    var value = $(this).val().toLowerCase();
+    $("#table_body tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+  });
+});
+</script>
 {% endblock %}
