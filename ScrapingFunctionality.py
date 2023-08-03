@@ -208,8 +208,8 @@ def check_ebay_prices_today(file_name, only_create_new_books=False):
                 if book_in_ebay_db.new_product_price==-999 and book_in_ebay_db.new_delivery_price==-999 and \
                         book_in_ebay_db.new_total_price==-999 and book_in_ebay_db.used_product_price==-999 and \
                         book_in_ebay_db.used_delivery_price==-999 and book_in_ebay_db.used_total_price==-999:
-                    app.db.session.delete(book_in_ebay_db)
                     try:
+                        app.db.session.delete(book_in_ebay_db)
                         app.db.session.commit()
                     except:
                         app.db.session.rollback()
@@ -368,16 +368,16 @@ def check_ebay_prices_today(file_name, only_create_new_books=False):
 
         except IntegrityError:
             app.db.session.rollback()
-            book_to_update_ebay = app.Ebay.query.get_or_404(isbn)
-            book_to_update_ebay.new_product_price = new_product_price
-            book_to_update_ebay.new_delivery_price = new_delivery_price
-            book_to_update_ebay.new_total_price = new_total_price_raw
-            book_to_update_ebay.historical_new_total_price = historical_new_total_price
-            book_to_update_ebay.used_product_price = used_product_price
-            book_to_update_ebay.used_delivery_price = used_delivery_price
-            book_to_update_ebay.used_total_price = used_total_price_raw
-            book_to_update_ebay.historical_used_total_price=historical_used_total_price
             try:
+                book_to_update_ebay = app.Ebay.query.get_or_404(isbn)
+                book_to_update_ebay.new_product_price = new_product_price
+                book_to_update_ebay.new_delivery_price = new_delivery_price
+                book_to_update_ebay.new_total_price = new_total_price_raw
+                book_to_update_ebay.historical_new_total_price = historical_new_total_price
+                book_to_update_ebay.used_product_price = used_product_price
+                book_to_update_ebay.used_delivery_price = used_delivery_price
+                book_to_update_ebay.used_total_price = used_total_price_raw
+                book_to_update_ebay.historical_used_total_price=historical_used_total_price
                 app.db.session.commit()
             except:
                 app.db.session.rollback()
