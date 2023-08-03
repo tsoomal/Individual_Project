@@ -166,8 +166,15 @@ def books():
     else:
         updatable = False
 
-    num_records_amazon = db.session.query(func.count(Amazon.isbn)).scalar()
-    num_records_ebay = db.session.query(func.count(Ebay.isbn)).scalar()
+    try:
+        num_records_amazon = db.session.query(func.count(Amazon.isbn)).scalar()
+    except:
+        db.session.rollback()
+
+    try:
+        num_records_ebay = db.session.query(func.count(Ebay.isbn)).scalar()
+    except:
+        db.session.rollback()
 
     if request.method == "POST":
         try:
@@ -177,12 +184,19 @@ def books():
                                    zip=zip, num_records_ebay=num_records_ebay, num_records_amazon=num_records_amazon)
         except:
             error_statement = "Error with database connection. Please refresh page!"
+            db.session.rollback()
             return render_template("books.html", error_statement=error_statement)
     else:
-        books_ebay = Ebay.query.order_by(Ebay.book_name)
-        books_amazon = Amazon.query.order_by(Amazon.book_name)
-        return render_template("books.html", books_ebay=books_ebay, books_amazon=books_amazon, updatable=updatable,
-                               zip=zip, num_records_ebay=num_records_ebay, num_records_amazon=num_records_amazon)
+        try:
+            books_ebay = Ebay.query.order_by(Ebay.book_name)
+            books_amazon = Amazon.query.order_by(Amazon.book_name)
+            return render_template("books.html", books_ebay=books_ebay, books_amazon=books_amazon, updatable=updatable,
+                                   zip=zip, num_records_ebay=num_records_ebay, num_records_amazon=num_records_amazon)
+        except:
+            error_statement = "Error with database connection. Please refresh page!"
+            db.session.rollback()
+            return render_template("books.html", error_statement=error_statement)
+
 
 @app.route("/add_books", methods =['POST','GET'])
 def add_books():

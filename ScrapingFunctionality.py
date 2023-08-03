@@ -372,9 +372,11 @@ def check_ebay_prices_today(file_name, only_create_new_books=False):
             book_to_update_ebay.new_product_price = new_product_price
             book_to_update_ebay.new_delivery_price = new_delivery_price
             book_to_update_ebay.new_total_price = new_total_price_raw
+            book_to_update_ebay.historical_new_total_price = historical_new_total_price
             book_to_update_ebay.used_product_price = used_product_price
             book_to_update_ebay.used_delivery_price = used_delivery_price
             book_to_update_ebay.used_total_price = used_total_price_raw
+            book_to_update_ebay.historical_used_total_price=historical_used_total_price
             try:
                 app.db.session.commit()
             except:
