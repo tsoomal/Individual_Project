@@ -71,7 +71,8 @@
                 <th class="col-1 border-start border-top align-top" scope="col">Amazon New Total Price</th>
                 <th class="col-1 border-start border-top align-top" scope="col">Amazon Used Total Price</th>
                 <th class="col-1 border-start border-top align-top" scope="col">Update Record</th>
-                <th class="col-1 border-start border-end border-top align-top" scope="col">Delete Record</th>
+                <th class="col-1 border-start border-top align-top" scope="col">Delete Record</th>
+                <th class="col-1 border-start border-end border-top align-top" scope="col">View all Details</th>
             <tr>
         </thead>
         <tbody id=table_body>
@@ -85,7 +86,8 @@
                 <td class="col-1 border-start">£{{ book_amazon.new_total_price }}</td>
                 <td class="col-1 border-start">£{{ book_amazon.used_total_price }}</td>
                 <td class="col-1 border-start"> <div class="text-center"><a href="/update/{{book_ebay.isbn}}" class="btn btn-outline-secondary btn-sm">Update</a> </div></td>
-                <td class="col-1 border-start border-end align-top"> <div class="text-center"><a href="/delete/{{book_ebay.isbn}}" class="btn btn-outline-danger btn-sm">Delete</a></div> </td>
+                <td class="col-1 border-start"><div class="text-center"><a href="/delete/{{book_ebay.isbn}}" class="btn btn-outline-danger btn-sm">Delete</a></div> </td>
+                <td class="col-1 border-start border-end align-top"> <div class="text-center"><a href="/query_database_by_isbn/{{book_ebay.isbn}}" class="btn btn-outline-secondary btn-sm">View</a></div> </td>
             </tr>
             {% endfor %}
         </tbody>
