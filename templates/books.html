@@ -5,10 +5,7 @@
 {% block content %}
     <div class="container">
         <h1>Books List</h1>
-        <p>This is a list of all books, sorted by name in alphabetically, ascending order.</p>
-
-    <p>Number of records in Ebay table: {{num_records_ebay}}</p>
-    <p>Number of records in Amazon table: {{num_records_amazon}}</p>
+        <br/>
 
     {% if error_statement %}
     <div class="alert alert-warning alert-dismissible fade show" role="alert">
@@ -16,8 +13,6 @@
       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     {% endif %}
-
-    <br/>
 
         <!-- https://stackoverflow.com/questions/62009672/prevent-nav-item-to-a-new-line-when-reduce-page-width -->
         <!-- https://getbootstrap.com/docs/5.0/components/button-group/ -->
@@ -53,17 +48,25 @@
 
     <br/>
     <br/>
+        <h4>Useful Information:</h4>
+        <p>This is a list of all books, sorted by name in alphabetically, ascending order.</p>
 
-        <br/>
+    <p>Number of records in Ebay table: {{num_records_ebay}}</p>
+    <p>Number of records in Amazon table: {{num_records_amazon}}</p>
+
+
+         <br/>
+        <h4>Database:</h4>
+
 
         <div class="mb-3 row">
-    <label for="search_all" class="col-sm-2 col-form-label">Search the entire database:</label>
+    <label for="search_list" class="col-sm-2 col-form-label">Search the entire database:</label>
     <div class="col-sm-10">
       <input type="text" class="form-control" id="search_list" placeholder="">
     </div>
   </div>
 
-        <br/>
+      <br/>
 
         <!-- https://stackoverflow.com/questions/32774118/building-a-bootstrap-table-with-dynamic-elements-in-flask -->
         <!-- https://getbootstrap.com/docs/5.0/utilities/borders/#border-color -->
