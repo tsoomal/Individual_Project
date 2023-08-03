@@ -37,13 +37,18 @@
 
             <div class="btn-group" role="group" aria-label="Third group">
     {% if updatable==True %}
-    <a class="btn btn-primary" href="/update_prices_in_database" role="button">Update Prices in Database</a>
+    <a class="btn btn-primary me-2" href="/update_prices_in_database" role="button">Update Prices in Database</a>
     {% endif %}
     {% if updatable==False %}
     <!-- https://getbootstrap.com/docs/4.0/components/buttons/ -->
     <button type="button" class="btn btn-primary" disabled>Update Prices in Database</button>
     {% endif %}
     </div>
+
+        <div class="btn-group" role="group" aria-label="Fourth group">
+        <a class="btn btn-primary" href="/sync_tables" role="button">Sync Tables</a>
+    </div>
+
     </div>
 
     <br/>

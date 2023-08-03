@@ -365,6 +365,7 @@ def check_ebay_prices_today(file_name, only_create_new_books=False):
                               used_product_price=used_product_price, used_delivery_price=used_delivery_price, used_total_price=used_total_price_raw ,historical_used_total_price=historical_used_total_price)
             app.db.session.add(new_book)
             app.db.session.commit()
+            print("Book added to Ebay table in db.")
 
         except IntegrityError:
             app.db.session.rollback()
@@ -379,6 +380,7 @@ def check_ebay_prices_today(file_name, only_create_new_books=False):
                 book_to_update_ebay.used_total_price = used_total_price_raw
                 book_to_update_ebay.historical_used_total_price=historical_used_total_price
                 app.db.session.commit()
+                print("Book updated in Ebay table in db.")
             except:
                 app.db.session.rollback()
         except:

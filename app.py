@@ -622,6 +622,44 @@ def opportunities():
                            books_amazon_used=books_amazon_used, books_ebay_used=books_ebay_used, profit_new=profit_new,
                            profit_used=profit_used, zip=zip)
 
+@app.route("/sync_tables")
+def sync_tables():
+    try:
+        all_books_ebay = Ebay.query.order_by(Ebay.isbn)
+        all_books_amazon = Amazon.query.order_by(Amazon.isbn)
+
+        for book_ebay in all_books_ebay:
+            isbn = book_ebay.isbn
+            exists = db.session.query(db.exists().where(Amazon.isbn == isbn)).scalar()
+            if exists:
+                pass
+            else:
+                try:
+                    db.session.delete(book_ebay)
+                    db.session.commit()
+                    print("Book deleted from Ebay table!")
+                except:
+                    db.session.rollback()
+
+        for book_amazon in all_books_amazon:
+            isbn = book_amazon.isbn
+            exists = db.session.query(db.exists().where(Ebay.isbn == isbn)).scalar()
+            if exists:
+                pass
+            else:
+                try:
+                    db.session.delete(book_amazon)
+                    db.session.commit()
+                    print("Book deleted from Amazon table!")
+                except:
+                    db.session.rollback()
+
+    except:
+        db.session.rollback()
+        print("Failed to sync tables.")
+
+    return redirect('/books')
+
 
 if __name__ == "__main__":
     db.create_all()
