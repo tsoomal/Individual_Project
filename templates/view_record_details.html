@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}About BookArbitrage4U{% endblock %}
+
+{% block content %}
+    <div class="container">
+    <h1>Record details for ISBN: {{book_ebay.isbn}}</h1>
+        <br/>
+        <a class="btn btn-secondary" href="javascript:history.back()" role="button">Go back</a>
+        <a class="btn btn-primary" href="/update/{{book_ebay.isbn}}" role="button">Update record</a>
+        <br/>
+        <br/>
+
+      <table class="table w-auto">
+      <tbody>
+        <tr>
+          <th scope="row" class="col-1 border-top border-start table-light">Book Name</th>
+          <td class="col-1 border-start border-top border-end">{{book_ebay.book_name}}</td>
+        </tr>
+        <tr>
+          <th scope="row" class="col-1 border-start table-light">ISBN</th>
+          <td class="col-1 border-start border-end">{{book_ebay.isbn}}</td>
+        </tr>
+        <tr>
+          <th scope="row" class="col-1 border-start table-light">Edition Format</th>
+          <td class="col-1 border-start border-end">{{book_ebay.edition_format}}</td>
+        </tr>
+
+        <!-- https://stackoverflow.com/questions/9738876/inserting-a-blank-table-row-with-a-smaller-height -->
+        <tr class="blank_row">
+    <td colspan="2"></td>
+</tr>
+        <tr>
+          <th scope="row" class="col-1 border-start table-light">Amazon Link</th>
+          <td class="col-1 border-start border-end">{{book_amazon.amazon_link}}</td>
+        </tr>
+      <tr>
+          <th scope="row" class="col-1 border-start table-light">Amazon New Product Price</th>
+          <td class="col-1 border-start border-end">{{book_amazon.new_product_price}}</td>
+        </tr>
+      <tr>
+          <th scope="row" class="col-1 border-start table-light">Amazon New Delivery Price</th>
+          <td class="col-1 border-start border-end">{{book_amazon.new_delivery_price}}</td>
+        </tr>
+      <tr class="table-active">
+          <th scope="row" class="col-1 border-start table-light">Amazon New Total Price</th>
+          <td class="col-1 border-start border-end">{{book_amazon.new_total_price}}</td>
+        </tr>
+      <tr>
+          <th scope="row" class="col-1 border-start table-light">Amazon Used Product Price</th>
+          <td class="col-1 border-start border-end">{{book_amazon.used_product_price}}</td>
+        </tr>
+      <tr>
+          <th scope="row" class="col-1 border-start table-light">Amazon Used Delivery Price</th>
+          <td class="col-1 border-start border-end">{{book_amazon.used_delivery_price}}</td>
+        </tr>
+      <tr class="table-active">
+          <th scope="row" class="col-1 border-start table-light">Amazon Used Total Price</th>
+          <td class="col-1 border-start border-end">{{book_amazon.used_total_price}}</td>
+        </tr>
+        <!-- https://stackoverflow.com/questions/9738876/inserting-a-blank-table-row-with-a-smaller-height -->
+        <tr class="blank_row">
+    <td colspan="2"></td>
+</tr>
+      <tr>
+          <th scope="row" class="col-1 border-start table-light">Ebay Link</th>
+          <td class="col-1 border-start border-end">{{book_ebay.ebay_link}}</td>
+        </tr>
+      <tr>
+          <th scope="row" class="col-1 border-start table-light">Ebay New Product Price</th>
+          <td class="col-1 border-start border-end">{{book_ebay.new_product_price}}</td>
+        </tr>
+      <tr>
+          <th scope="row" class="col-1 border-start table-light">Ebay New Delivery Price</th>
+          <td class="col-1 border-start border-end">{{book_ebay.new_delivery_price}}</td>
+        </tr>
+      <tr class="table-active">
+          <th scope="row" class="col-1 border-start table-light">Ebay New Total Price</th>
+          <td class="col-1 border-start border-end">{{book_ebay.new_total_price}}</td>
+        </tr>
+        <tr>
+          <th scope="row" class="col-1 border-start table-light">Ebay Historical New Total Price</th>
+          <td class="col-1 border-start border-end">{{book_ebay.historical_new_total_price}}</td>
+        </tr>
+      <tr>
+          <th scope="row" class="col-1 border-start table-light">Ebay Used Product Price</th>
+          <td class="col-1 border-start border-end">{{book_ebay.used_product_price}}</td>
+        </tr>
+      <tr>
+          <th scope="row" class="col-1 border-start table-light">Ebay Used Delivery Price</th>
+          <td class="col-1 border-start border-end">{{book_ebay.used_delivery_price}}</td>
+        </tr>
+      <tr class="table-active">
+          <th scope="row" class="col-1 border-start table-light">Ebay Used Total Price</th>
+          <td class="col-1 border-start border-end">{{book_ebay.used_total_price}}</td>
+        </tr>
+      <tr>
+          <th scope="row" class="col-1 border-start table-light">Ebay Historical Used Total Price</th>
+          <td class="col-1 border-start border-end">{{book_ebay.historical_used_total_price}}</td>
+        </tr>
+      </tbody>
+    </table>
+
+
+	</div>
+{% endblock %}

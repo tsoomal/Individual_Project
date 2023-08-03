@@ -112,6 +112,20 @@ def index():
 def about():
     return render_template("about.html")
 
+@app.route("/query_database_by_isbn/<string:isbn>")
+def query_database_by_isbn(isbn):
+    try:
+        print("ISBN: " + isbn)
+        book_amazon = Amazon.query.get_or_404(isbn)
+        book_ebay = Ebay.query.get_or_404(isbn)
+        return render_template("view_record_details.html",
+                               book_ebay=book_ebay,
+                               book_amazon=book_amazon)
+    except Exception as e:
+        print(e)
+        return redirect('/opportunities')
+
+
 @app.route("/query_database")
 def query_database():
     return render_template("query_database.html")
@@ -454,6 +468,9 @@ def update(isbn):
             book_to_update_ebay.used_delivery_price = request.form['ebay_used_delivery_price']
         if request.form.get('ebay_used_total_price'):
             book_to_update_ebay.used_total_price = request.form['ebay_used_total_price']
+
+        book_to_update_ebay.historical_new_total_price= get_ebay_historical_price(isbn, "new")
+        book_to_update_ebay.historical_used_total_price = get_ebay_historical_price(isbn, "used")
 
         # Push to database
         try:
