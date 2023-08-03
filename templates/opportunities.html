@@ -5,25 +5,21 @@
 {% block content %}
     <div class="container">
     <h1>Arbitrage Opportunities</h1>
-        <p class="text-start fs-5" >The following arbitrage opportunties were found:</p>
-        <br/>
-        <p class="text-start fs-5" >Number of new book opportunities: {{number_of_new_opps}}</p>
-        <p class="text-start fs-5" >Number of used book opportunities: {{number_of_used_opps}}</p>
-        <p class="text-start fs-5" >Total number of book opportunities: {{number_of_new_opps + number_of_used_opps}}</p>
+        <p class="text-start fs-6" >The following arbitrage opportunties were found:</p>
+        <p class="text-start fs-6" >Number of new book opportunities: {{number_of_new_opps}}</p>
+        <p class="text-start fs-6" >Number of used book opportunities: {{number_of_used_opps}}</p>
+        <p class="text-start fs-6" >Total number of book opportunities: {{number_of_new_opps + number_of_used_opps}}</p>
 
-    <br/>
+        <br/>
         <br/>
 
         <!-- https://getbootstrap.com/docs/5.0/forms/form-control/ -->
       <div class="mb-3 row">
     <label for="search_all" class="col-sm-2 col-form-label">Search all opportunities:</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" id="search_all" placeholder="...">
+      <input type="text" class="form-control" id="search_all" placeholder="">
     </div>
   </div>
-
-
-
 
         <br/>
         <br/>
@@ -33,7 +29,7 @@
            <div class="mb-3 row">
     <label for="search_all" class="col-sm-2 col-form-label">Search new opportunities:</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" id="search_new" placeholder="...">
+      <input type="text" class="form-control" id="search_new" placeholder="">
     </div>
   </div>
 
@@ -78,7 +74,7 @@
            <div class="mb-3 row">
     <label for="search_all" class="col-sm-2 col-form-label">Search used opportunities:</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" id="search_used" placeholder="...">
+      <input type="text" class="form-control" id="search_used" placeholder="">
     </div>
   </div>
 
