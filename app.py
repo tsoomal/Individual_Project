@@ -612,6 +612,9 @@ def opportunities():
             #     # Both books have the same new total prices.
             #     pass
 
+    number_of_new_opps = len(profit_new)
+    number_of_used_opps = len(profit_used)
+
     sorted_lists_new = sorted(izip(books_ebay_new, books_amazon_new, profit_new), reverse=True, key=lambda x: x[2])
     books_ebay_new, books_amazon_new, profit_new = [[x[i] for x in sorted_lists_new] for i in range(3)]
 
@@ -620,10 +623,12 @@ def opportunities():
 
     return render_template("opportunities.html", books_amazon_new=books_amazon_new, books_ebay_new=books_ebay_new,
                            books_amazon_used=books_amazon_used, books_ebay_used=books_ebay_used, profit_new=profit_new,
-                           profit_used=profit_used, zip=zip)
+                           profit_used=profit_used, zip=zip, number_of_new_opps=number_of_new_opps,
+                           number_of_used_opps=number_of_used_opps)
 
 @app.route("/sync_tables")
 def sync_tables():
+    # https://stackoverflow.com/questions/32938475/flask-sqlalchemy-check-if-row-exists-in-table
     try:
         all_books_ebay = Ebay.query.order_by(Ebay.isbn)
         all_books_amazon = Amazon.query.order_by(Amazon.isbn)
