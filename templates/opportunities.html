@@ -11,8 +11,12 @@
         <p class="text-start fs-5" >Number of used book opportunities: {{number_of_used_opps}}</p>
         <p class="text-start fs-5" >Total number of book opportunities: {{number_of_new_opps + number_of_used_opps}}</p>
 
+    <br/>
         <br/>
     <h4>Arbitrage of New Items:</h4>
+        <br/>
+        <input class="form-control" id="search_new" type="text" placeholder="Search new book arbitrage opportunities...">
+        <br/>
     <table class="table table-hover" id="new_opportunities_table">
         <thead>
             <!-- https://stackoverflow.com/questions/61969955/bootstrap-fixed-width-table-columns-in-container-fluid -->
@@ -26,7 +30,7 @@
                 <th class="col-1 border-start border-end border-top align-top" scope="col">Delete Record</th>
             <tr>
         </thead>
-        <tbody>
+        <tbody id="table_new">
             <!--https://stackoverflow.com/questions/1663807/how-do-i-iterate-through-two-lists-in-parallel-->
             {% for book_ebay, book_amazon, profit in zip(books_ebay_new, books_amazon_new, profit_new) %}
             <tr>
@@ -45,7 +49,10 @@
 
     <br/>
     <br/>
-    <h4>Arbitrage of Used Items:</h4>
+        <h4>Arbitrage of Used Items:</h4>
+        <br/>
+        <input class="form-control" id="search_used" type="text" placeholder="Search used book arbitrage opportunities...">
+        <br/>
     <table class="table table-hover" id="used_opportunities_table">
         <thead>
             <!-- https://stackoverflow.com/questions/61969955/bootstrap-fixed-width-table-columns-in-container-fluid -->
@@ -59,7 +66,7 @@
                 <th class="col-1 border-start border-end border-top align-top" scope="col">Delete Record</th>
             <tr>
         </thead>
-        <tbody>
+        <tbody id="table_used">
             <!--https://stackoverflow.com/questions/1663807/how-do-i-iterate-through-two-lists-in-parallel-->
             {% for book_ebay, book_amazon, profit in zip(books_ebay_used, books_amazon_used, profit_used) %}
             <tr>
@@ -74,6 +81,30 @@
             {% endfor %}
         </tbody>
     </table>
-
+        <br/>
+        <br/>
 	</div>
+
+<!-- https://www.w3schools.com/bootstrap/tryit.asp?filename=trybs_filters_table&stacked=h -->
+<script>
+$(document).ready(function(){
+  $("#search_new").on("keyup", function() {
+    var value = $(this).val().toLowerCase();
+    $("#table_new tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+  });
+});
+</script>
+
+<script>
+$(document).ready(function(){
+  $("#search_used").on("keyup", function() {
+    var value = $(this).val().toLowerCase();
+    $("#table_used tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+  });
+});
+</script>
 {% endblock %}
