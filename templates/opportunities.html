@@ -13,6 +13,9 @@
 
     <br/>
         <br/>
+        <input class="form-control" id="search_all" type="text" placeholder="Search all book arbitrage opportunities...">
+        <br/>
+        <br/>
     <h4>Arbitrage of New Items:</h4>
         <br/>
         <input class="form-control" id="search_new" type="text" placeholder="Search new book arbitrage opportunities...">
@@ -109,4 +112,20 @@ $(document).ready(function(){
   });
 });
 </script>
+
+<!-- Search all opps -->
+<script>
+$(document).ready(function(){
+  $("#search_all").on("keyup", function() {
+    var value = $(this).val().toLowerCase();
+    $("#table_new tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+    $("#table_used tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+  });
+});
+</script>
+
 {% endblock %}
