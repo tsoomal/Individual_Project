@@ -116,8 +116,8 @@ def about():
 def query_database():
     return render_template("query_database.html")
 
-@app.route("/query_form", methods=["POST"])
-def query_form():
+@app.route("/isbn_query_form", methods=["POST"])
+def isbn_query_form():
     isbn_input = request.form['isbn_input']
     try:
         book_to_display_amazon = Amazon.query.get_or_404(isbn_input)
@@ -127,6 +127,19 @@ def query_form():
                                book_to_display_amazon=book_to_display_amazon, isbn_input=isbn_input)
     except:
         return render_template("query_database.html", message="Book not found!", isbn_input=isbn_input)
+
+@app.route("/name_query_form", methods=["POST"])
+def name_query_form():
+    name_input = request.form['name_input']
+    try:
+        book_to_display_amazon = Amazon.query.filter(Amazon.book_name.contains(name_input))
+        book_to_display_ebay = Ebay.query.filter(Ebay.book_name.contains(name_input))
+        return render_template("query_database.html", message="Book(s) found!",
+                               book_to_display_ebay=book_to_display_ebay,
+                               book_to_display_amazon=book_to_display_amazon, name_input=name_input, zip=zip, enumerate=enumerate)
+    except Exception as e:
+        print(e)
+        return render_template("query_database.html", message="Book not found!", name_input=name_input)
 
 @app.route("/contact")
 def contact():
