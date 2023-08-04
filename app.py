@@ -17,7 +17,7 @@ from flask_migrate import Migrate
 from sqlalchemy.exc import IntegrityError
 # https://stackoverflow.com/questions/38111620/python-isbn-13-digit-validate
 import isbnlib
-from twisted.python.compat import izip
+
 import psycopg2
 
 from ScrapingFunctionality import check_ebay_prices_today, check_amazon_prices_today, get_ebay_historical_price
@@ -166,11 +166,13 @@ def books():
     try:
         num_records_amazon = db.session.query(func.count(Amazon.isbn)).scalar()
     except:
+        print("num_records_amazon not found!")
         db.session.rollback()
 
     try:
         num_records_ebay = db.session.query(func.count(Ebay.isbn)).scalar()
     except:
+        print("num_records_ebay not found!")
         db.session.rollback()
 
     if request.method == "POST":
@@ -182,17 +184,19 @@ def books():
         except:
             error_statement = "Error with database connection. Please refresh page!"
             db.session.rollback()
-            return render_template("books.html", error_statement=error_statement)
+            return render_template("books.html", error_statement=error_statement, zip=zip, enumerate=enumerate)
     else:
+        # request.method == "GET"
         try:
             books_ebay = Ebay.query.order_by(Ebay.book_name)
             books_amazon = Amazon.query.order_by(Amazon.book_name)
             return render_template("books.html", books_ebay=books_ebay, books_amazon=books_amazon, updatable=updatable,
                                    zip=zip, num_records_ebay=num_records_ebay, num_records_amazon=num_records_amazon)
-        except:
+        except Exception as e:
+            print(e)
             error_statement = "Error with database connection. Please refresh page!"
             db.session.rollback()
-            return render_template("books.html", error_statement=error_statement)
+            return render_template("books.html", error_statement=error_statement, zip=zip, enumerate=enumerate)
 
 
 @app.route("/add_books", methods =['POST','GET'])
@@ -500,132 +504,141 @@ def delete_all_books():
 
 @app.route("/opportunities")
 def opportunities():
-    all_books_ebay = Ebay.query.order_by(Ebay.book_name)
-    all_books_amazon = Amazon.query.order_by(Amazon.book_name)
 
-    books_amazon_new = []
-    books_ebay_new = []
-    books_amazon_used = []
-    books_ebay_used = []
-    profit_new = []
-    profit_used = []
-    # ADD PROFIT
-    # ADD LINKS
-    # BUY NEW, SELL USED BOOKS
+    try:
+        all_books_ebay = Ebay.query.order_by(Ebay.book_name)
+        all_books_amazon = Amazon.query.order_by(Amazon.book_name)
 
-    for book_ebay, book_amazon in zip(all_books_ebay, all_books_amazon):
+        books_amazon_new = []
+        books_ebay_new = []
+        books_amazon_used = []
+        books_ebay_used = []
+        profit_new = []
+        profit_used = []
+        # ADD PROFIT
+        # ADD LINKS
+        # BUY NEW, SELL USED BOOKS
 
-        # NEW BOOKS
-        if book_ebay.new_total_price == -999 and book_amazon.new_total_price == -999:
-            # No arbitrage possible
-            pass
-        elif book_ebay.new_total_price == -999 and book_amazon.new_total_price != -999:
-            # Buy on Amazon, Sell on Ebay
-            # Need to get historical average sold price on eBay.
-            pass
-        elif book_ebay.new_total_price != -999 and book_amazon.new_total_price == -999:
-            # Buy on Ebay, Sell on Amazon
-            pass
-        elif book_ebay.new_total_price > book_amazon.new_total_price:
-            # Buy on Amazon, Sell on Ebay
-            total_selling_price_to_breakeven = (storage_amazon_to_ebay(book_amazon.new_total_price))
-            if book_ebay.new_total_price < book_ebay.historical_new_total_price:
-                if book_ebay.new_total_price > total_selling_price_to_breakeven:
+        for book_ebay, book_amazon in zip(all_books_ebay, all_books_amazon):
+
+            # NEW BOOKS
+            if book_ebay.new_total_price == -999 and book_amazon.new_total_price == -999:
+                # No arbitrage possible
+                pass
+            elif book_ebay.new_total_price == -999 and book_amazon.new_total_price != -999:
+                # Buy on Amazon, Sell on Ebay
+                # Need to get historical average sold price on eBay.
+                pass
+            elif book_ebay.new_total_price != -999 and book_amazon.new_total_price == -999:
+                # Buy on Ebay, Sell on Amazon
+                pass
+            elif book_ebay.new_total_price > book_amazon.new_total_price:
+                # Buy on Amazon, Sell on Ebay
+                total_selling_price_to_breakeven = (storage_amazon_to_ebay(book_amazon.new_total_price))
+                if book_ebay.new_total_price < book_ebay.historical_new_total_price:
+                    if book_ebay.new_total_price > total_selling_price_to_breakeven:
+                        books_amazon_new.append(book_amazon)
+                        books_ebay_new.append(book_ebay)
+                        profit_new.append(book_ebay.new_total_price-book_amazon.new_total_price)
+                elif book_ebay.new_total_price > book_ebay.historical_new_total_price:
+                    if book_ebay.historical_new_total_price > total_selling_price_to_breakeven:
+                        books_amazon_new.append(book_amazon)
+                        books_ebay_new.append(book_ebay)
+                        profit_new.append(round(decimal.Decimal(book_ebay.historical_new_total_price),2)-book_amazon.new_total_price)
+
+            elif book_ebay.new_total_price < book_amazon.new_total_price:
+                # Buy on Ebay, Sell on Amazon
+                total_selling_price_to_breakeven = (storage_ebay_to_amazon(book_ebay.new_total_price))
+                if book_amazon.new_total_price > total_selling_price_to_breakeven:
                     books_amazon_new.append(book_amazon)
                     books_ebay_new.append(book_ebay)
-                    profit_new.append(book_ebay.new_total_price-book_amazon.new_total_price)
-            elif book_ebay.new_total_price > book_ebay.historical_new_total_price:
-                if book_ebay.historical_new_total_price > total_selling_price_to_breakeven:
-                    books_amazon_new.append(book_amazon)
-                    books_ebay_new.append(book_ebay)
-                    profit_new.append(round(decimal.Decimal(book_ebay.historical_new_total_price),2)-book_amazon.new_total_price)
+                    profit_new.append(book_amazon.new_total_price - book_ebay.new_total_price)
+            else:
+                # Both books have the same new total prices.
+                pass
 
-        elif book_ebay.new_total_price < book_amazon.new_total_price:
-            # Buy on Ebay, Sell on Amazon
-            total_selling_price_to_breakeven = (storage_ebay_to_amazon(book_ebay.new_total_price))
-            if book_amazon.new_total_price > total_selling_price_to_breakeven:
-                books_amazon_new.append(book_amazon)
-                books_ebay_new.append(book_ebay)
-                profit_new.append(book_amazon.new_total_price - book_ebay.new_total_price)
-        else:
-            # Both books have the same new total prices.
-            pass
-
-        # USED BOOKS
-        if book_ebay.used_total_price == -999 and book_amazon.used_total_price == -999:
-            # No arbitrage possible
-            pass
-        elif book_ebay.used_total_price == -999 and book_amazon.used_total_price != -999:
-            # Buy on Amazon, Sell on Ebay
-            # Need to get historical average sold price on eBay.
-            pass
-        elif book_ebay.used_total_price != -999 and book_amazon.used_total_price == -999:
-            # Buy on Ebay, Sell on Amazon
-            pass
-        elif book_ebay.used_total_price > book_amazon.used_total_price:
-            # Buy on Amazon, Sell on Ebay
-            total_selling_price_to_breakeven = (storage_amazon_to_ebay(book_amazon.used_total_price))
-            if book_ebay.used_total_price < book_ebay.historical_used_total_price:
-                if book_ebay.used_total_price > total_selling_price_to_breakeven:
+            # USED BOOKS
+            if book_ebay.used_total_price == -999 and book_amazon.used_total_price == -999:
+                # No arbitrage possible
+                pass
+            elif book_ebay.used_total_price == -999 and book_amazon.used_total_price != -999:
+                # Buy on Amazon, Sell on Ebay
+                # Need to get historical average sold price on eBay.
+                pass
+            elif book_ebay.used_total_price != -999 and book_amazon.used_total_price == -999:
+                # Buy on Ebay, Sell on Amazon
+                pass
+            elif book_ebay.used_total_price > book_amazon.used_total_price:
+                # Buy on Amazon, Sell on Ebay
+                total_selling_price_to_breakeven = (storage_amazon_to_ebay(book_amazon.used_total_price))
+                if book_ebay.used_total_price < book_ebay.historical_used_total_price:
+                    if book_ebay.used_total_price > total_selling_price_to_breakeven:
+                        books_amazon_used.append(book_amazon)
+                        books_ebay_used.append(book_ebay)
+                        profit_used.append(book_ebay.used_total_price - book_amazon.used_total_price)
+                elif book_ebay.used_total_price > book_ebay.historical_used_total_price:
+                    if book_ebay.historical_used_total_price > total_selling_price_to_breakeven:
+                        books_amazon_used.append(book_amazon)
+                        books_ebay_used.append(book_ebay)
+                        profit_used.append(round(decimal.Decimal(book_ebay.historical_used_total_price),2) - book_amazon.used_total_price)
+            elif book_ebay.used_total_price < book_amazon.used_total_price:
+                # Buy on Ebay, Sell on Amazon
+                total_selling_price_to_breakeven = (storage_ebay_to_amazon(book_ebay.used_total_price))
+                if book_amazon.used_total_price > total_selling_price_to_breakeven:
                     books_amazon_used.append(book_amazon)
                     books_ebay_used.append(book_ebay)
-                    profit_used.append(book_ebay.used_total_price - book_amazon.used_total_price)
-            elif book_ebay.used_total_price > book_ebay.historical_used_total_price:
-                if book_ebay.historical_used_total_price > total_selling_price_to_breakeven:
-                    books_amazon_used.append(book_amazon)
-                    books_ebay_used.append(book_ebay)
-                    profit_used.append(round(decimal.Decimal(book_ebay.historical_used_total_price),2) - book_amazon.used_total_price)
-        elif book_ebay.used_total_price < book_amazon.used_total_price:
-            # Buy on Ebay, Sell on Amazon
-            total_selling_price_to_breakeven = (storage_ebay_to_amazon(book_ebay.used_total_price))
-            if book_amazon.used_total_price > total_selling_price_to_breakeven:
-                books_amazon_used.append(book_amazon)
-                books_ebay_used.append(book_ebay)
-                profit_used.append(book_amazon.used_total_price - book_ebay.used_total_price)
-        else:
-            # Both books have the same used total prices.
-            pass
+                    profit_used.append(book_amazon.used_total_price - book_ebay.used_total_price)
+            else:
+                # Both books have the same used total prices.
+                pass
 
-            # # BUY NEW, SELL USED BOOKS
-            # if book_ebay.new_total_price == -999 and book_amazon.new_total_price == -999:
-            #     # No arbitrage possible
-            #     pass
-            # elif book_ebay.new_total_price == -999 and book_amazon.new_total_price != -999:
-            #     # Buy on Amazon, Sell on Ebay
-            #     # Need to get historical average sold price on eBay.
-            #     pass
-            # elif book_ebay.new_total_price != -999 and book_amazon.new_total_price == -999:
-            #     # Buy on Ebay, Sell on Amazon
-            #     pass
-            # elif book_ebay.new_total_price > book_amazon.new_total_price:
-            #     # Buy on Amazon, Sell on Ebay
-            #     total_selling_price_to_breakeven = (storage_amazon_to_ebay(book_amazon.new_total_price))
-            #     if book_ebay.new_total_price > total_selling_price_to_breakeven:
-            #         books_amazon_new.append(book_amazon)
-            #         books_ebay_new.append(book_ebay)
-            # elif book_ebay.new_total_price < book_amazon.new_total_price:
-            #     # Buy on Ebay, Sell on Amazon
-            #     total_selling_price_to_breakeven = (storage_ebay_to_amazon(book_ebay.new_total_price))
-            #     if book_amazon.new_total_price > total_selling_price_to_breakeven:
-            #         books_amazon_new.append(book_amazon)
-            #         books_ebay_new.append(book_ebay)
-            # else:
-            #     # Both books have the same new total prices.
-            #     pass
+                # # BUY NEW, SELL USED BOOKS
+                # if book_ebay.new_total_price == -999 and book_amazon.new_total_price == -999:
+                #     # No arbitrage possible
+                #     pass
+                # elif book_ebay.new_total_price == -999 and book_amazon.new_total_price != -999:
+                #     # Buy on Amazon, Sell on Ebay
+                #     # Need to get historical average sold price on eBay.
+                #     pass
+                # elif book_ebay.new_total_price != -999 and book_amazon.new_total_price == -999:
+                #     # Buy on Ebay, Sell on Amazon
+                #     pass
+                # elif book_ebay.new_total_price > book_amazon.new_total_price:
+                #     # Buy on Amazon, Sell on Ebay
+                #     total_selling_price_to_breakeven = (storage_amazon_to_ebay(book_amazon.new_total_price))
+                #     if book_ebay.new_total_price > total_selling_price_to_breakeven:
+                #         books_amazon_new.append(book_amazon)
+                #         books_ebay_new.append(book_ebay)
+                # elif book_ebay.new_total_price < book_amazon.new_total_price:
+                #     # Buy on Ebay, Sell on Amazon
+                #     total_selling_price_to_breakeven = (storage_ebay_to_amazon(book_ebay.new_total_price))
+                #     if book_amazon.new_total_price > total_selling_price_to_breakeven:
+                #         books_amazon_new.append(book_amazon)
+                #         books_ebay_new.append(book_ebay)
+                # else:
+                #     # Both books have the same new total prices.
+                #     pass
 
-    number_of_new_opps = len(profit_new)
-    number_of_used_opps = len(profit_used)
+        number_of_new_opps = len(profit_new)
+        number_of_used_opps = len(profit_used)
 
-    sorted_lists_new = sorted(izip(books_ebay_new, books_amazon_new, profit_new), reverse=True, key=lambda x: x[2])
-    books_ebay_new, books_amazon_new, profit_new = [[x[i] for x in sorted_lists_new] for i in range(3)]
+        sorted_lists_new = sorted(zip(books_ebay_new, books_amazon_new, profit_new), reverse=True, key=lambda x: x[2])
+        books_ebay_new, books_amazon_new, profit_new = [[x[i] for x in sorted_lists_new] for i in range(3)]
 
-    sorted_lists_used = sorted(izip(books_ebay_used, books_amazon_used, profit_used), reverse=True, key=lambda y: y[2])
-    books_ebay_used, books_amazon_used, profit_used = [[y[j] for y in sorted_lists_used] for j in range(3)]
+        sorted_lists_used = sorted(zip(books_ebay_used, books_amazon_used, profit_used), reverse=True, key=lambda y: y[2])
+        books_ebay_used, books_amazon_used, profit_used = [[y[j] for y in sorted_lists_used] for j in range(3)]
 
-    return render_template("opportunities.html", books_amazon_new=books_amazon_new, books_ebay_new=books_ebay_new,
-                           books_amazon_used=books_amazon_used, books_ebay_used=books_ebay_used, profit_new=profit_new,
-                           profit_used=profit_used, zip=zip, number_of_new_opps=number_of_new_opps,
-                           number_of_used_opps=number_of_used_opps)
+        return render_template("opportunities.html", books_amazon_new=books_amazon_new, books_ebay_new=books_ebay_new,
+                               books_amazon_used=books_amazon_used, books_ebay_used=books_ebay_used, profit_new=profit_new,
+                               profit_used=profit_used, zip=zip, number_of_new_opps=number_of_new_opps,
+                               number_of_used_opps=number_of_used_opps)
+    except:
+        error_statement = "Error with connecting to database. Please refresh!"
+        number_of_new_opps = 0
+        number_of_used_opps = 0
+
+        return render_template("opportunities.html", error_statement=error_statement, zip=zip, number_of_new_opps=number_of_new_opps,
+                               number_of_used_opps=number_of_used_opps)
 
 @app.route("/sync_tables")
 def sync_tables():

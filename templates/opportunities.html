@@ -6,6 +6,14 @@
     <div class="container">
     <h1>Arbitrage Opportunities</h1>
         <br/>
+
+        {% if error_statement %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <strong>{{error_statement}}</strong>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
         <h4>Useful Information:</h4>
         <p class="text-start fs-6" >The following arbitrage opportunties were found:</p>
         <p class="text-start fs-6" >Number of new book opportunities: {{number_of_new_opps}}</p>
