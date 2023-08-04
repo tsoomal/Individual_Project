@@ -6,10 +6,9 @@ import decimal
 # Using Postgresql
 # https://stackabuse.com/using-sqlalchemy-with-flask-and-postgresql/
 
-from flask import Flask, render_template, request, redirect, copy_current_request_context
+from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
-from datetime import datetime
 import smtplib
 from email.message import EmailMessage
 import os
@@ -17,12 +16,11 @@ from flask_migrate import Migrate
 from sqlalchemy.exc import IntegrityError
 # https://stackoverflow.com/questions/38111620/python-isbn-13-digit-validate
 import isbnlib
-
 import psycopg2
-
 from ScrapingFunctionality import check_ebay_prices_today, check_amazon_prices_today, get_ebay_historical_price
 import threading
 from PriceModelling import storage_ebay_to_amazon, storage_amazon_to_ebay
+
 
 app = Flask(__name__)
 # https://stackoverflow.com/questions/65888631/how-do-i-use-heroku-postgres-with-my-flask-sqlalchemy-app
