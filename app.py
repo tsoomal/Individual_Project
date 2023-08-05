@@ -17,6 +17,11 @@ from sqlalchemy.exc import IntegrityError
 # https://stackoverflow.com/questions/38111620/python-isbn-13-digit-validate
 import isbnlib
 import psycopg2
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy_utils import CompositeType
+from sqlalchemy.types import TypeDecorator
+from sqlalchemy.dialects.postgresql import ARRAY
+
 from ScrapingFunctionality import check_ebay_prices_today, check_amazon_prices_today, get_ebay_historical_price
 import threading
 from PriceModelling import storage_ebay_to_amazon, storage_amazon_to_ebay
@@ -31,6 +36,21 @@ app.secret_key = 'secret string'
 db = SQLAlchemy(app)
 app.app_context().push()
 migrate = Migrate(app,db)
+
+Base = declarative_base()
+class DateTimeNumeric(TypeDecorator):
+    impl = db.DateTime
+
+    def process_bind_param(self, value, dialect):
+        if value is not None:
+            return f"{value['datetime_field']}::{value['numeric_field']:.2f}"
+        return None
+
+    def process_result_value(self, value, dialect):
+        if value is not None:
+            dt_str, num_str = value.split("::")
+            return {'datetime_field': dt_str, 'numeric_field': float(num_str)}
+        return None
 
 
 global updatable_amazon
@@ -51,6 +71,19 @@ class Amazon(db.Model):
     used_product_price = db.Column(db.Numeric(5, 2), nullable=False)
     used_delivery_price = db.Column(db.Numeric(5, 2), nullable=False)
     used_total_price = db.Column(db.Numeric(5, 2), nullable=False)
+    # used_total_price = db.Column(DateTimeNumeric)
+    # # used_total_price = db.Column(
+    # #         ARRAY(
+    # #             CompositeType(
+    # #                 'datetime_price_type',
+    # #                 [
+    # #                     db.Column('currency', db.DateTime),
+    # #                     db.Column('amount', db.Numeric(5, 2))
+    # #                 ]
+    # #             ),
+    # #             dimensions=1
+    # #         )
+    # #     )
 
     def __init__(self, book_name, amazon_link, isbn, edition_format, new_product_price, new_delivery_price, new_total_price,
                  used_product_price, used_delivery_price, used_total_price):
