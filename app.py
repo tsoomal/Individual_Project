@@ -163,13 +163,15 @@ def books():
 
     try:
         num_records_amazon = db.session.query(func.count(Amazon.isbn)).scalar()
-    except:
+    except Exception as e:
+        print(e)
         print("num_records_amazon not found!")
         db.session.rollback()
 
     try:
         num_records_ebay = db.session.query(func.count(Ebay.isbn)).scalar()
-    except:
+    except Exception as e:
+        print(e)
         print("num_records_ebay not found!")
         db.session.rollback()
 
@@ -179,7 +181,8 @@ def books():
             books_amazon = Amazon.query.order_by(Amazon.book_name)
             return render_template("books.html", books_ebay=books_ebay, books_amazon=books_amazon, updatable=updatable,
                                    zip=zip, num_records_ebay=num_records_ebay, num_records_amazon=num_records_amazon)
-        except:
+        except Exception as e:
+            print(e)
             error_statement = "Error with database connection. Please refresh page!"
             db.session.rollback()
             return render_template("books.html", error_statement=error_statement, zip=zip, enumerate=enumerate)
