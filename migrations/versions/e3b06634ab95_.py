@@ -1,19 +1,17 @@
 """empty message
 
-Revision ID: 6447e96d797e
-Revises: 68f439e304f1
-Create Date: 2023-08-05 21:43:05.227531
+Revision ID: e3b06634ab95
+Revises: 2a888f7484ff
+Create Date: 2023-08-07 17:15:30.186226
 
 """
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.dialects import postgresql
-from sqlalchemy_utils import CompositeType
-from app import db
+
 
 # revision identifiers, used by Alembic.
-revision = '6447e96d797e'
-down_revision = '68f439e304f1'
+revision = 'e3b06634ab95'
+down_revision = '2a888f7484ff'
 branch_labels = None
 depends_on = None
 
@@ -30,7 +28,7 @@ def upgrade():
     sa.Column('new_total_price', sa.Numeric(precision=5, scale=2), nullable=False),
     sa.Column('used_product_price', sa.Numeric(precision=5, scale=2), nullable=False),
     sa.Column('used_delivery_price', sa.Numeric(precision=5, scale=2), nullable=False),
-    sa.Column('used_total_price', postgresql.ARRAY(CompositeType('composite_type', [db.Column('my_datetime_column', db.TIMESTAMP()), db.Column('my_numeric_column', db.Numeric(precision=5, scale=2))]), dimensions=1), nullable=True),
+    sa.Column('used_total_price', sa.ARRAY(sa.Numeric(precision=5, scale=2)), nullable=True),
     sa.PrimaryKeyConstraint('isbn')
     )
     # ### end Alembic commands ###

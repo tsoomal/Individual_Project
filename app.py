@@ -8,7 +8,7 @@ import decimal
 
 from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import func, create_engine
+from sqlalchemy import func, create_engine, ARRAY
 import smtplib
 from email.message import EmailMessage
 import os
@@ -18,7 +18,6 @@ from sqlalchemy.exc import IntegrityError
 import isbnlib
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.types import TypeDecorator
-from sqlalchemy.dialects.postgresql import ARRAY
 
 from ScrapingFunctionality import check_ebay_prices_today, check_amazon_prices_today, get_ebay_historical_price
 import threading
@@ -55,7 +54,9 @@ class Amazon(db.Model):
     new_total_price = db.Column(db.Numeric(5,2), nullable=False)
     used_product_price = db.Column(db.Numeric(5, 2), nullable=False)
     used_delivery_price = db.Column(db.Numeric(5, 2), nullable=False)
-    used_total_price = db.Column(db.Numeric(5, 2), nullable=False)
+    #used_total_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
+    used_total_price = db.Column(ARRAY(db.Numeric(5, 2)))
+    #used_total_price = db.Column(db.Numeric(5, 2), nullable=False)
 
 
     def __init__(self, book_name, amazon_link, isbn, edition_format, new_product_price, new_delivery_price, new_total_price,
@@ -114,6 +115,11 @@ def index():
 
 @app.route("/about")
 def about():
+    try:
+        isbn = 1529391432
+        book_to_update = Amazon.query.get_or_404(str(isbn))
+    except:
+        pass
     return render_template("about.html")
 
 @app.route("/query_database_by_isbn/<string:isbn>")
@@ -131,6 +137,47 @@ def query_database_by_isbn(isbn):
 
 @app.route("/contact")
 def contact():
+    try:
+        new_book = Amazon(book_name="test_book_1", amazon_link="amazon_link",
+                          isbn=1529391432, edition_format="Paperback",
+                          new_product_price=10.99,
+                          new_delivery_price=0.99,
+                          new_total_price=11.98,
+                          used_product_price=-999,
+                          used_delivery_price=-999,
+                          used_total_price=[decimal.Decimal(-999), decimal.Decimal(-998)])
+        db.session.add(new_book)
+        db.session.commit()
+        print("Record added")
+    except Exception as e:
+        print(e)
+        db.session.rollback()
+        try:
+            isbn = 1529391432
+            book_to_update = Amazon.query.get_or_404(str(isbn))
+            print("HERE")
+            # print(book_to_update.used_total_price)
+            # list = book_to_update.used_total_price
+            # list.append(decimal.Decimal(-998))
+            # print(list)
+
+            i= 0
+            new_elements = []
+
+            # while i<1000:
+            #     new_elements += [decimal.Decimal(i),decimal.Decimal(i)]
+            #     i+=1
+            #
+            # book_to_update.used_total_price = book_to_update.used_total_price + new_elements
+            #
+            # db.session.commit()
+            # print("Price added to array.")
+            print(book_to_update.used_total_price[-20])
+        except Exception as e:
+            db.session.rollback()
+            print("There was a problem adding a price to that book from the Amazon table.")
+            print(e)
+
     return render_template("contact.html")
 
 @app.route("/contact_form", methods=["POST"])
