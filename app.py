@@ -16,24 +16,20 @@ from flask_migrate import Migrate
 from sqlalchemy.exc import IntegrityError
 # https://stackoverflow.com/questions/38111620/python-isbn-13-digit-validate
 import isbnlib
-import psycopg2
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy_utils import CompositeType, register_composites
 from sqlalchemy.types import TypeDecorator
 from sqlalchemy.dialects.postgresql import ARRAY
 
 from ScrapingFunctionality import check_ebay_prices_today, check_amazon_prices_today, get_ebay_historical_price
 import threading
 from PriceModelling import storage_ebay_to_amazon, storage_amazon_to_ebay
-from datetime import datetime
-from collections import OrderedDict
 
 
 app = Flask(__name__)
 # https://stackoverflow.com/questions/65888631/how-do-i-use-heroku-postgres-with-my-flask-sqlalchemy-app
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["database_connection_string"]
 engine = create_engine(os.environ['database_connection_string'])
-#engine.connect()
+engine.connect()
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.secret_key = 'secret string'
 # Initialising the database
@@ -41,12 +37,11 @@ db = SQLAlchemy(app)
 app.app_context().push()
 migrate = Migrate(app,db)
 
+
 global updatable_amazon
 updatable_amazon = True
 global updatable_ebay
 updatable_ebay = True
-
-register_composites(engine.connect())
 
 # Creating the database model
 class Amazon(db.Model):
@@ -58,20 +53,10 @@ class Amazon(db.Model):
     new_product_price = db.Column(db.Numeric(5,2), nullable=False)
     new_delivery_price = db.Column(db.Numeric(5,2), nullable=False)
     new_total_price = db.Column(db.Numeric(5,2), nullable=False)
-    used_product_price = db.Column(db.Numeric(5,2), nullable=False)
-    used_delivery_price = db.Column(db.Numeric(5,2), nullable=False)
-    used_total_price = db.Column(
-            ARRAY(
-                CompositeType(
-                    'composite_type',
-                    [
-                        db.Column('my_datetime_column', db.TIMESTAMP),
-                        db.Column('my_numeric_column', db.Numeric(5, 2))
-                    ]
-                ),
-                dimensions=1
-            )
-        )
+    used_product_price = db.Column(db.Numeric(5, 2), nullable=False)
+    used_delivery_price = db.Column(db.Numeric(5, 2), nullable=False)
+    used_total_price = db.Column(db.Numeric(5, 2), nullable=False)
+
 
     def __init__(self, book_name, amazon_link, isbn, edition_format, new_product_price, new_delivery_price, new_total_price,
                  used_product_price, used_delivery_price, used_total_price):
@@ -146,32 +131,6 @@ def query_database_by_isbn(isbn):
 
 @app.route("/contact")
 def contact():
-    try:
-        # book_to_update_amazon = Amazon.query.get_or_404("1529391431")
-        # print(book_to_update_amazon.amazon_link)
-
-
-        # {"(2023-08-05 22:14:02,-999)"}
-        ts = datetime.now()
-        # print(ts)
-        f = '%Y-%m-%d %H:%M:%S'
-        my_timestamp = datetime.strptime(str(ts).split(".")[0], f)
-        # #my_timestamp = ts.timestamp()
-        print(my_timestamp)
-        new_book = Amazon(book_name="test_book_1", amazon_link="amazon_link",
-                              isbn=1529391432, edition_format="Paperback",
-                              new_product_price=10.99,
-                              new_delivery_price=0.99,
-                              new_total_price=11.98,
-                              used_product_price=-999,
-                              used_delivery_price=-999,
-                              used_total_price=-999)
-        db.session.add(new_book)
-        db.session.commit()
-        print("Record added")
-    except Exception as e:
-        print(e)
-        db.session.rollback()
     return render_template("contact.html")
 
 @app.route("/contact_form", methods=["POST"])
