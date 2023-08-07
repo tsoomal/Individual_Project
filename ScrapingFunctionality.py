@@ -360,9 +360,13 @@ def check_ebay_prices_today(file_name, only_create_new_books=False):
         try:
             historical_new_total_price = get_ebay_historical_price(isbn, "new")
             historical_used_total_price = get_ebay_historical_price(isbn, "used")
-            new_book = app.Ebay(book_name=book_name, ebay_link=ebay_link, isbn=isbn, edition_format=edition_format, new_product_price=new_product_price, new_delivery_price=new_delivery_price, new_total_price=new_total_price_raw,
-                                historical_new_total_price=historical_new_total_price,
-                              used_product_price=used_product_price, used_delivery_price=used_delivery_price, used_total_price=used_total_price_raw ,historical_used_total_price=historical_used_total_price)
+            new_book = app.Ebay(book_name=book_name, ebay_link=ebay_link, isbn=isbn, edition_format=edition_format,
+                                new_product_price=[new_product_price], new_delivery_price=[new_delivery_price],
+                                new_total_price=[new_total_price_raw],
+                                historical_new_total_price=[historical_new_total_price],
+                                used_product_price=[used_product_price], used_delivery_price=[used_delivery_price],
+                                used_total_price=[used_total_price_raw],
+                                historical_used_total_price=[historical_used_total_price])
             app.db.session.add(new_book)
             app.db.session.commit()
             print("Book added to Ebay table in db.")
@@ -371,14 +375,14 @@ def check_ebay_prices_today(file_name, only_create_new_books=False):
             app.db.session.rollback()
             try:
                 book_to_update_ebay = app.Ebay.query.get_or_404(isbn)
-                book_to_update_ebay.new_product_price = new_product_price
-                book_to_update_ebay.new_delivery_price = new_delivery_price
-                book_to_update_ebay.new_total_price = new_total_price_raw
-                book_to_update_ebay.historical_new_total_price = historical_new_total_price
-                book_to_update_ebay.used_product_price = used_product_price
-                book_to_update_ebay.used_delivery_price = used_delivery_price
-                book_to_update_ebay.used_total_price = used_total_price_raw
-                book_to_update_ebay.historical_used_total_price=historical_used_total_price
+                book_to_update_ebay.new_product_price = book_to_update_ebay.new_product_price + [new_product_price]
+                book_to_update_ebay.new_delivery_price = book_to_update_ebay.new_delivery_price + [new_delivery_price]
+                book_to_update_ebay.new_total_price = book_to_update_ebay.new_total_price + [new_total_price_raw]
+                book_to_update_ebay.historical_new_total_price = book_to_update_ebay.historical_new_total_price + [historical_new_total_price]
+                book_to_update_ebay.used_product_price = book_to_update_ebay.used_product_price + [used_product_price]
+                book_to_update_ebay.used_delivery_price = book_to_update_ebay.used_delivery_price + [used_delivery_price]
+                book_to_update_ebay.used_total_price = book_to_update_ebay.used_total_price + [used_total_price_raw]
+                book_to_update_ebay.historical_used_total_price = book_to_update_ebay.historical_used_total_price + [historical_used_total_price]
                 app.db.session.commit()
                 print("Book updated in Ebay table in db.")
             except:
@@ -426,9 +430,9 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
                 book_in_amazon_db = app.Amazon.query.get_or_404(isbn)
                 print(row_number + 1)
                 print(book_in_amazon_db)
-                if book_in_amazon_db.new_product_price==-999 and book_in_amazon_db.new_delivery_price==-999 and \
-                        book_in_amazon_db.new_total_price==-999 and book_in_amazon_db.used_product_price==-999 and \
-                        book_in_amazon_db.used_delivery_price==-999 and book_in_amazon_db.used_total_price==-999:
+                if book_in_amazon_db.new_product_price[-1]==-999 and book_in_amazon_db.new_delivery_price[-1]==-999 and \
+                        book_in_amazon_db.new_total_price[-1]==-999 and book_in_amazon_db.used_product_price[-1]==-999 and \
+                        book_in_amazon_db.used_delivery_price[-1]==-999 and book_in_amazon_db.used_total_price[-1]==-999:
                     app.db.session.delete(book_in_amazon_db)
                     try:
                         app.db.session.commit()
@@ -1056,24 +1060,24 @@ def end_of_item_loop(amazon_link, book_name, driver, edition_format, isbn, new_d
     try:
         new_book = app.Amazon(book_name=book_name, amazon_link=amazon_link,
                               isbn=isbn, edition_format=edition_format,
-                              new_product_price=new_product_price,
-                              new_delivery_price=new_delivery_price,
-                              new_total_price=new_total_price_raw,
-                              used_product_price=used_product_price,
-                              used_delivery_price=used_delivery_price,
-                              used_total_price=used_total_price_raw)
+                              new_product_price=[new_product_price],
+                              new_delivery_price=[new_delivery_price],
+                              new_total_price=[new_total_price_raw],
+                              used_product_price=[used_product_price],
+                              used_delivery_price=[used_delivery_price],
+                              used_total_price=[used_total_price_raw])
         app.db.session.add(new_book)
         app.db.session.commit()
 
     except IntegrityError:
         app.db.session.rollback()
         book_to_update_amazon = app.Amazon.query.get_or_404(isbn)
-        book_to_update_amazon.new_product_price = new_product_price
-        book_to_update_amazon.new_delivery_price = new_delivery_price
-        book_to_update_amazon.new_total_price = new_total_price_raw
-        book_to_update_amazon.used_product_price = used_product_price
-        book_to_update_amazon.used_delivery_price = used_delivery_price
-        book_to_update_amazon.used_total_price = used_total_price_raw
+        book_to_update_amazon.new_product_price = book_to_update_amazon.new_product_price + [new_product_price]
+        book_to_update_amazon.new_delivery_price = book_to_update_amazon.new_delivery_price + [new_delivery_price]
+        book_to_update_amazon.new_total_price = book_to_update_amazon.new_total_price + [new_total_price_raw]
+        book_to_update_amazon.used_product_price = book_to_update_amazon.used_product_price + [used_product_price]
+        book_to_update_amazon.used_delivery_price = book_to_update_amazon.used_delivery_price + [used_delivery_price]
+        book_to_update_amazon.used_total_price = book_to_update_amazon.used_total_price + [used_total_price_raw]
         try:
             app.db.session.commit()
         except:

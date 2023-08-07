@@ -49,14 +49,12 @@ class Amazon(db.Model):
     amazon_link = db.Column(db.String(200), nullable=False)
     isbn = db.Column(db.String(13), primary_key=True)
     edition_format = db.Column(db.String(40), nullable=False)
-    new_product_price = db.Column(db.Numeric(5,2), nullable=False)
-    new_delivery_price = db.Column(db.Numeric(5,2), nullable=False)
-    new_total_price = db.Column(db.Numeric(5,2), nullable=False)
-    used_product_price = db.Column(db.Numeric(5, 2), nullable=False)
-    used_delivery_price = db.Column(db.Numeric(5, 2), nullable=False)
-    #used_total_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
-    used_total_price = db.Column(ARRAY(db.Numeric(5, 2)))
-    #used_total_price = db.Column(db.Numeric(5, 2), nullable=False)
+    new_product_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
+    new_delivery_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
+    new_total_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
+    used_product_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
+    used_delivery_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
+    used_total_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
 
 
     def __init__(self, book_name, amazon_link, isbn, edition_format, new_product_price, new_delivery_price, new_total_price,
@@ -81,14 +79,14 @@ class Ebay(db.Model):
     ebay_link = db.Column(db.String(200), nullable=False)
     isbn = db.Column(db.String(13), primary_key=True)
     edition_format = db.Column(db.String(40), nullable=False)
-    new_product_price = db.Column(db.Numeric(5, 2), nullable=False)
-    new_delivery_price = db.Column(db.Numeric(5, 2), nullable=False)
-    new_total_price = db.Column(db.Numeric(5, 2), nullable=False)
-    historical_new_total_price = db.Column(db.Numeric(5, 2), nullable=False)
-    used_product_price = db.Column(db.Numeric(5, 2), nullable=False)
-    used_delivery_price = db.Column(db.Numeric(5, 2), nullable=False)
-    used_total_price = db.Column(db.Numeric(5, 2), nullable=False)
-    historical_used_total_price = db.Column(db.Numeric(5, 2), nullable=False)
+    new_product_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
+    new_delivery_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
+    new_total_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
+    historical_new_total_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
+    used_product_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
+    used_delivery_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
+    used_total_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
+    historical_used_total_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
 
     def __init__(self, book_name, ebay_link, isbn, edition_format, new_product_price, new_delivery_price,
                  new_total_price, historical_new_total_price, used_product_price, used_delivery_price, used_total_price,
@@ -115,11 +113,6 @@ def index():
 
 @app.route("/about")
 def about():
-    try:
-        isbn = 1529391432
-        book_to_update = Amazon.query.get_or_404(str(isbn))
-    except:
-        pass
     return render_template("about.html")
 
 @app.route("/query_database_by_isbn/<string:isbn>")
@@ -137,47 +130,6 @@ def query_database_by_isbn(isbn):
 
 @app.route("/contact")
 def contact():
-    try:
-        new_book = Amazon(book_name="test_book_1", amazon_link="amazon_link",
-                          isbn=1529391432, edition_format="Paperback",
-                          new_product_price=10.99,
-                          new_delivery_price=0.99,
-                          new_total_price=11.98,
-                          used_product_price=-999,
-                          used_delivery_price=-999,
-                          used_total_price=[decimal.Decimal(-999), decimal.Decimal(-998)])
-        db.session.add(new_book)
-        db.session.commit()
-        print("Record added")
-    except Exception as e:
-        print(e)
-        db.session.rollback()
-        try:
-            isbn = 1529391432
-            book_to_update = Amazon.query.get_or_404(str(isbn))
-            print("HERE")
-            # print(book_to_update.used_total_price)
-            # list = book_to_update.used_total_price
-            # list.append(decimal.Decimal(-998))
-            # print(list)
-
-            i= 0
-            new_elements = []
-
-            # while i<1000:
-            #     new_elements += [decimal.Decimal(i),decimal.Decimal(i)]
-            #     i+=1
-            #
-            # book_to_update.used_total_price = book_to_update.used_total_price + new_elements
-            #
-            # db.session.commit()
-            # print("Price added to array.")
-            print(book_to_update.used_total_price[-20])
-        except Exception as e:
-            db.session.rollback()
-            print("There was a problem adding a price to that book from the Amazon table.")
-            print(e)
-
     return render_template("contact.html")
 
 @app.route("/contact_form", methods=["POST"])
@@ -469,37 +421,37 @@ def update(isbn):
             book_to_update_ebay.isbn = request.form['isbn']
 
         if request.form.get('amazon_link'):
-            book_to_update_amazon.amazon_link=request.form['amazon_link']
+            book_to_update_amazon.amazon_link = request.form['amazon_link']
         if request.form.get('amazon_new_product_price'):
-            book_to_update_amazon.new_product_price=request.form['amazon_new_product_price']
+            book_to_update_amazon.new_product_price[-1] = request.form['amazon_new_product_price']
         if request.form.get('amazon_new_delivery_price'):
-            book_to_update_amazon.new_delivery_price=request.form['amazon_new_delivery_price']
+            book_to_update_amazon.new_delivery_price[-1] = request.form['amazon_new_delivery_price']
         if request.form.get('amazon_new_total_price'):
-            book_to_update_amazon.new_total_price=request.form['amazon_new_total_price']
+            book_to_update_amazon.new_total_price[-1] = request.form['amazon_new_total_price']
         if request.form.get('amazon_used_product_price'):
-            book_to_update_amazon.used_product_price = request.form['amazon_used_product_price']
+            book_to_update_amazon.used_product_price[-1] = request.form['amazon_used_product_price']
         if request.form.get('amazon_used_delivery_price'):
-            book_to_update_amazon.used_delivery_price = request.form['amazon_used_delivery_price']
+            book_to_update_amazon.used_delivery_price[-1] = request.form['amazon_used_delivery_price']
         if request.form.get('amazon_used_total_price'):
-            book_to_update_amazon.used_total_price = request.form['amazon_used_total_price']
+            book_to_update_amazon.used_total_price[-1] = request.form['amazon_used_total_price']
 
         if request.form.get('ebay_link'):
             book_to_update_ebay.ebay_link = request.form['ebay_link']
         if request.form.get('ebay_new_product_price'):
-            book_to_update_ebay.new_product_price = request.form['ebay_new_product_price']
+            book_to_update_ebay.new_product_price[-1] = request.form['ebay_new_product_price']
         if request.form.get('ebay_new_delivery_price'):
-            book_to_update_ebay.new_delivery_price = request.form['ebay_new_delivery_price']
+            book_to_update_ebay.new_delivery_price[-1] = request.form['ebay_new_delivery_price']
         if request.form.get('ebay_new_total_price'):
-            book_to_update_ebay.new_total_price = request.form['ebay_new_total_price']
+            book_to_update_ebay.new_total_price[-1] = request.form['ebay_new_total_price']
         if request.form.get('ebay_used_product_price'):
-            book_to_update_ebay.used_product_price = request.form['ebay_used_product_price']
+            book_to_update_ebay.used_product_price[-1] = request.form['ebay_used_product_price']
         if request.form.get('ebay_used_delivery_price'):
-            book_to_update_ebay.used_delivery_price = request.form['ebay_used_delivery_price']
+            book_to_update_ebay.used_delivery_price[-1] = request.form['ebay_used_delivery_price']
         if request.form.get('ebay_used_total_price'):
-            book_to_update_ebay.used_total_price = request.form['ebay_used_total_price']
+            book_to_update_ebay.used_total_price[-1] = request.form['ebay_used_total_price']
 
-        book_to_update_ebay.historical_new_total_price= get_ebay_historical_price(isbn, "new")
-        book_to_update_ebay.historical_used_total_price = get_ebay_historical_price(isbn, "used")
+        book_to_update_ebay.historical_new_total_price[-1] = get_ebay_historical_price(isbn, "new")
+        book_to_update_ebay.historical_used_total_price[-1] = get_ebay_historical_price(isbn, "used")
 
         # Push to database
         try:
