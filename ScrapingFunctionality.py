@@ -374,22 +374,57 @@ def check_ebay_prices_today(file_name, only_create_new_books=False):
         except IntegrityError:
             app.db.session.rollback()
             try:
-                book_to_update_ebay = app.Ebay.query.get_or_404(isbn)
-                book_to_update_ebay.new_product_price = book_to_update_ebay.new_product_price + [new_product_price]
-                book_to_update_ebay.new_delivery_price = book_to_update_ebay.new_delivery_price + [new_delivery_price]
-                book_to_update_ebay.new_total_price = book_to_update_ebay.new_total_price + [new_total_price_raw]
-                book_to_update_ebay.historical_new_total_price = book_to_update_ebay.historical_new_total_price + [historical_new_total_price]
-                book_to_update_ebay.used_product_price = book_to_update_ebay.used_product_price + [used_product_price]
-                book_to_update_ebay.used_delivery_price = book_to_update_ebay.used_delivery_price + [used_delivery_price]
-                book_to_update_ebay.used_total_price = book_to_update_ebay.used_total_price + [used_total_price_raw]
-                book_to_update_ebay.historical_used_total_price = book_to_update_ebay.historical_used_total_price + [historical_used_total_price]
+                book_to_append_ebay = app.Ebay.query.get_or_404(isbn)
+
+                # print(type(new_product_price))
+                # #string
+                # print(type(new_delivery_price))
+                # #string #int
+                # print(type(new_total_price_raw))
+                # #float
+                # print(type(historical_new_total_price))
+                # #float
+                # print(type(used_product_price))
+                # #string #int
+                # print(type(used_delivery_price))
+                # #string #int
+                # print(type(used_total_price_raw))
+                # #float #int
+                # print(type(historical_used_total_price))
+                # #float #int
+
+                # If previous price was found, but not found now, then it means that the book must have sold recently.
+                # Price is set at the last known price.
+                try:
+                    if float(new_total_price_raw)==-999 and book_to_append_ebay.new_total_price[-1]!=-999:
+                        new_product_price = book_to_append_ebay.new_product_price[-1]
+                        new_delivery_price = book_to_append_ebay.new_delivery_price[-1]
+                        new_total_price_raw = book_to_append_ebay.new_total_price[-1]
+                        print("NEW: IDENTIFIED SOLD BOOK PREVIOUSLY. COPYING PREVIOUS PRICE.")
+
+                    if float(used_total_price_raw) == -999 and book_to_append_ebay.used_total_price[-1] != -999:
+                        used_product_price = book_to_append_ebay.used_product_price[-1]
+                        used_delivery_price = book_to_append_ebay.used_delivery_price[-1]
+                        used_total_price_raw = book_to_append_ebay.used_total_price[-1]
+                        print("USED: IDENTIFIED SOLD BOOK PREVIOUSLY. COPYING PREVIOUS PRICE.")
+                except Exception as e:
+                    print("ERROR: Failed to set price at last known price, despite price not found now.")
+                    print(e)
+
+                book_to_append_ebay.new_product_price = book_to_append_ebay.new_product_price + [new_product_price]
+                book_to_append_ebay.new_delivery_price = book_to_append_ebay.new_delivery_price + [new_delivery_price]
+                book_to_append_ebay.new_total_price = book_to_append_ebay.new_total_price + [new_total_price_raw]
+                book_to_append_ebay.historical_new_total_price = book_to_append_ebay.historical_new_total_price + [historical_new_total_price]
+                book_to_append_ebay.used_product_price = book_to_append_ebay.used_product_price + [used_product_price]
+                book_to_append_ebay.used_delivery_price = book_to_append_ebay.used_delivery_price + [used_delivery_price]
+                book_to_append_ebay.used_total_price = book_to_append_ebay.used_total_price + [used_total_price_raw]
+                book_to_append_ebay.historical_used_total_price = book_to_append_ebay.historical_used_total_price + [historical_used_total_price]
                 app.db.session.commit()
                 print("Book updated in Ebay table in db.")
             except:
                 app.db.session.rollback()
         except:
             app.db.session.rollback()
-
 
 
 
@@ -1071,13 +1106,32 @@ def end_of_item_loop(amazon_link, book_name, driver, edition_format, isbn, new_d
 
     except IntegrityError:
         app.db.session.rollback()
-        book_to_update_amazon = app.Amazon.query.get_or_404(isbn)
-        book_to_update_amazon.new_product_price = book_to_update_amazon.new_product_price + [new_product_price]
-        book_to_update_amazon.new_delivery_price = book_to_update_amazon.new_delivery_price + [new_delivery_price]
-        book_to_update_amazon.new_total_price = book_to_update_amazon.new_total_price + [new_total_price_raw]
-        book_to_update_amazon.used_product_price = book_to_update_amazon.used_product_price + [used_product_price]
-        book_to_update_amazon.used_delivery_price = book_to_update_amazon.used_delivery_price + [used_delivery_price]
-        book_to_update_amazon.used_total_price = book_to_update_amazon.used_total_price + [used_total_price_raw]
+        book_to_append_amazon = app.Amazon.query.get_or_404(isbn)
+
+        # If previous price was found, but not found now, then it means that the book must have sold recently.
+        # Price is set at the last known price.
+        try:
+            if float(new_total_price_raw) == -999 and book_to_append_amazon.new_total_price[-1] != -999:
+                new_product_price = book_to_append_amazon.new_product_price[-1]
+                new_delivery_price = book_to_append_amazon.new_delivery_price[-1]
+                new_total_price_raw = book_to_append_amazon.new_total_price[-1]
+                print("NEW: IDENTIFIED SOLD BOOK PREVIOUSLY. COPYING PREVIOUS PRICE.")
+
+            if float(used_total_price_raw) == -999 and book_to_append_amazon.used_total_price[-1] != -999:
+                used_product_price = book_to_append_amazon.used_product_price[-1]
+                used_delivery_price = book_to_append_amazon.used_delivery_price[-1]
+                used_total_price_raw = book_to_append_amazon.used_total_price[-1]
+                print("USED: IDENTIFIED SOLD BOOK PREVIOUSLY. COPYING PREVIOUS PRICE.")
+        except Exception as e:
+            print("ERROR: Failed to set price at last known price, despite price not found now.")
+            print(e)
+
+        book_to_append_amazon.new_product_price = book_to_append_amazon.new_product_price + [new_product_price]
+        book_to_append_amazon.new_delivery_price = book_to_append_amazon.new_delivery_price + [new_delivery_price]
+        book_to_append_amazon.new_total_price = book_to_append_amazon.new_total_price + [new_total_price_raw]
+        book_to_append_amazon.used_product_price = book_to_append_amazon.used_product_price + [used_product_price]
+        book_to_append_amazon.used_delivery_price = book_to_append_amazon.used_delivery_price + [used_delivery_price]
+        book_to_append_amazon.used_total_price = book_to_append_amazon.used_total_price + [used_total_price_raw]
         try:
             app.db.session.commit()
         except:
