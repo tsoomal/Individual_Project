@@ -20,20 +20,20 @@
             <span class="label">ISBN:</span> &nbsp <input type="text" placeholder="ISBN" name="isbn" value="{{book_to_update.isbn}}" pattern="([0-9]{10})|([0-9]{9}[X]{1})|([0-9]{13})" oninvalid="this.setCustomValidity('Please use either ISBN-10 or ISBN-13 format. Capitalise any \'X\' character.')" oninput="setCustomValidity('')"/> <br/><br/>
 
             <span class="label">Amazon link:</span> &nbsp <input type="text" name="amazon_link" value="{{book_to_update_amazon.amazon_link}}" size="40"> <br/>
-            <span class="label">Amazon new product price:</span> &nbsp <input type="text" name="amazon_new_product_price" value="{{book_to_update_amazon.new_product_price}}"> <br/>
-            <span class="label">Amazon new delivery price:</span> &nbsp <input type="text" name="amazon_new_delivery_price" value="{{book_to_update_amazon.new_delivery_price}}"> <br/>
-            <span class="label">Amazon new total price:</span> &nbsp <input type="text" name="amazon_new_total_price" value="{{book_to_update_amazon.new_total_price}}"> <br/>
-            <span class="label">Amazon used product price:</span> &nbsp <input type="text" name="amazon_used_product_price" value="{{book_to_update_amazon.used_product_price}}"> <br/>
-            <span class="label">Amazon used delivery price:</span> &nbsp <input type="text" name="amazon_used_delivery_price" value="{{book_to_update_amazon.used_delivery_price}}"> <br/>
-            <span class="label">Amazon used total price:</span> &nbsp <input type="text" name="amazon_used_total_price" value="{{book_to_update_amazon.used_total_price}}"> <br/><br/>
+            <span class="label">Amazon new product price:</span> &nbsp <input type="text" name="amazon_new_product_price" value="{{book_to_update_amazon.new_product_price[-1]}}"> <br/>
+            <span class="label">Amazon new delivery price:</span> &nbsp <input type="text" name="amazon_new_delivery_price" value="{{book_to_update_amazon.new_delivery_price[-1]}}"> <br/>
+            <span class="label">Amazon new total price:</span> &nbsp <input type="text" name="amazon_new_total_price" value="{{book_to_update_amazon.new_total_price[-1]}}"> <br/>
+            <span class="label">Amazon used product price:</span> &nbsp <input type="text" name="amazon_used_product_price" value="{{book_to_update_amazon.used_product_price[-1]}}"> <br/>
+            <span class="label">Amazon used delivery price:</span> &nbsp <input type="text" name="amazon_used_delivery_price" value="{{book_to_update_amazon.used_delivery_price[-1]}}"> <br/>
+            <span class="label">Amazon used total price:</span> &nbsp <input type="text" name="amazon_used_total_price" value="{{book_to_update_amazon.used_total_price[-1]}}"> <br/><br/>
 
             <span class="label">Ebay link:</span> &nbsp <input type="text" name="ebay_link" value="{{book_to_update_ebay.ebay_link}}" size="40"> <br/>
-            <span class="label">Ebay new product price:</span> &nbsp <input type="text" name="ebay_new_product_price" value="{{book_to_update_ebay.new_product_price}}"> <br/>
-            <span class="label">Ebay new delivery price:</span> &nbsp <input type="text" name="ebay_new_delivery_price" value="{{book_to_update_ebay.new_delivery_price}}"> <br/>
-            <span class="label">Ebay new total price:</span> &nbsp <input type="text" name="ebay_new_total_price" value="{{book_to_update_ebay.new_total_price}}"> <br/>
-            <span class="label">Ebay used product price:</span> &nbsp <input type="text" name="ebay_used_product_price" value="{{book_to_update_ebay.used_product_price}}"> <br/>
-            <span class="label">Ebay used delivery price:</span> &nbsp <input type="text" name="ebay_used_delivery_price" value="{{book_to_update_ebay.used_delivery_price}}"> <br/>
-            <span class="label">Ebay used total price:</span> &nbsp <input type="text" name="ebay_used_total_price" value="{{book_to_update_ebay.used_total_price}}"> <br/><br/>
+            <span class="label">Ebay new product price:</span> &nbsp <input type="text" name="ebay_new_product_price" value="{{book_to_update_ebay.new_product_price[-1]}}"> <br/>
+            <span class="label">Ebay new delivery price:</span> &nbsp <input type="text" name="ebay_new_delivery_price" value="{{book_to_update_ebay.new_delivery_price[-1]}}"> <br/>
+            <span class="label">Ebay new total price:</span> &nbsp <input type="text" name="ebay_new_total_price" value="{{book_to_update_ebay.new_total_price[-1]}}"> <br/>
+            <span class="label">Ebay used product price:</span> &nbsp <input type="text" name="ebay_used_product_price" value="{{book_to_update_ebay.used_product_price[-1]}}"> <br/>
+            <span class="label">Ebay used delivery price:</span> &nbsp <input type="text" name="ebay_used_delivery_price" value="{{book_to_update_ebay.used_delivery_price[-1]}}"> <br/>
+            <span class="label">Ebay used total price:</span> &nbsp <input type="text" name="ebay_used_total_price" value="{{book_to_update_ebay.used_total_price[-1]}}"> <br/><br/>
             <input type="submit" value="Update Book Details" class="btn btn-primary"> <br/>
         </form>
 	</div>
