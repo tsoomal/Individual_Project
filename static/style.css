@@ -38,7 +38,7 @@ img_index {
   padding:30px; /* only needed for this demo */
 }
 .covered-img {
-  opacity: .02;
+  opacity: .04;
 
   background-size:cover; /* cover will scale the image so that the smallest dimension = the widest dimension of the box */
   background-position:center; /* vs the top-left that is default */
