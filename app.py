@@ -111,10 +111,6 @@ class Ebay(db.Model):
 def index():
     return render_template("index.html")
 
-@app.route("/about")
-def about():
-    return render_template("about.html")
-
 @app.route("/query_database_by_isbn/<string:isbn>")
 def query_database_by_isbn(isbn):
     try:
