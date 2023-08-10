@@ -36,7 +36,7 @@ img_index {
 /* https://stackoverflow.com/questions/48255229/background-image-not-100-height-when-scrolling-down-page */
 
 .covered-img {
-  opacity: .06;
+  opacity: .04;
 
   background-size:cover; /* cover will scale the image so that the smallest dimension = the widest dimension of the box */
   background-position:center; /* vs the top-left that is default */
