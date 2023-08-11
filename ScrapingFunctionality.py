@@ -1152,7 +1152,28 @@ def setup_database(links,base_file_name="scraped_database_data", new_list=False)
         get_ISBN_from_list("./"+ base_file_name +"_amazon.csv")
 
     create_blank_csv("./" + base_file_name + "_ebay.csv")
+
+    # Copy to ebay Excel file
     df = pd.read_csv("./" + base_file_name + "_amazon.csv")
+    isbn_column = df.iloc[:, [3]]
+    number_of_rows = df.shape[0]
+    new_links_list = []
+    used_links_list = []
+    for row_number in range(number_of_rows):
+        isbn_in_row = df.iloc[row_number, [3]]
+        isbn_element = isbn_in_row[0]
+        isbn_element = isbn_element.zfill(10)
+        new_link = "https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw=" + str(
+            isbn_element) + "&_sacat=0&_sop=15&LH_ItemCondition=3&LH_PrefLoc=2&rt=nc&LH_BIN=1"
+        used_link = "https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw=" + str(
+            isbn_element) + "&_sacat=0&_sop=15&LH_BIN=1&LH_PrefLoc=1&rt=nc&LH_ItemCondition=4"
+        new_links_list.append(new_link)
+        used_links_list.append(used_link)
+    df["New Link"] = new_links_list
+    df["Used Link"] = used_links_list
+    df = df.drop('Link', axis=1)
+    # https://stackoverflow.com/questions/13148429/how-to-change-the-order-of-dataframe-columns
+    df = df[['Title', 'New Link', 'Used Link', 'Edition Format', 'ISBN']]
     df.to_csv("./" + base_file_name + "_ebay.csv", index=False)
 
     check_amazon_prices_today("./" + base_file_name + "_amazon.csv", only_create_new_books=False)
@@ -1340,8 +1361,11 @@ def main():
         "https://www.amazon.co.uk/gp/bestsellers/books/14909604031/ref=pd_zg_hrsr_books",
         "https://www.amazon.co.uk/best-sellers-books-Amazon/zgbs/books/14909604031/ref=zg_bs_pg_2_books?_encoding=UTF8&pg=2"]
 
-    check_amazon_prices_today("./scraped_database_data_amazon.csv", only_create_new_books=False)
+    #check_amazon_prices_today("./scraped_database_data_amazon.csv", only_create_new_books=False)
     #check_ebay_prices_today("./scraped_database_data_ebay.csv", only_create_new_books=False)
+
+
+
 
 
 
