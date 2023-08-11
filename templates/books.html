@@ -53,8 +53,14 @@
         <!-- https://www.w3schools.com/html/html_lists.asp -->
         <ul>
           <li>This is a list of all books in the database, sorted by default alphabetically by name.</li>
-          <li>Number of records in Ebay table: {{num_records_ebay}}</li>
-          <li>Number of records in Amazon table: {{num_records_amazon}}</li>
+          <li>Number of records:</li>
+            <!-- https://stackoverflow.com/questions/4465562/how-to-write-w3c-compliant-multi-level-bullet-points-in-html -->
+          <li style="list-style-type:none">
+            <ul>
+                <li>In Ebay table: {{num_records_ebay}}</li>
+                <li>In Amazon table: {{num_records_amazon}}</li>
+            </ul>
+          </li>
           <li>"-" represents unobtainable values. This is not the same as a value of "£0.00"!</li>
         </ul>
 
