@@ -34,14 +34,7 @@
 
         <br/>
     <h4>Arbitrage of New-Condition Books:</h4>
-        <br/>
 
-           <div class="mb-3 row">
-    <label for="search_all" class="col-sm-2 col-form-label">Search opportunities for new-condition books:</label>
-    <div class="col-sm-10">
-      <input type="text" class="form-control" id="search_new" placeholder="">
-    </div>
-  </div>
 
         <br/>
     <table class="table table-hover" id="new_opportunities_table">
@@ -57,7 +50,7 @@
                 <th class="col border-start border-top align-top" scope="col">Update Record</th>
                 <th class="col border-start border-top align-top" scope="col">Delete Record</th>
                 <th class="col border-start border-end border-top align-top" scope="col">View all Details</th>
-            <tr>
+            </tr>
         </thead>
         <tbody id="table_new">
             <!--https://stackoverflow.com/questions/1663807/how-do-i-iterate-through-two-lists-in-parallel-->
@@ -86,14 +79,6 @@
     <br/>
     <br/>
         <h4>Arbitrage of Used-Condition Books:</h4>
-        <br/>
-
-           <div class="mb-3 row">
-    <label for="search_all" class="col-sm-2 col-form-label">Search opportunities for used-condition books:</label>
-    <div class="col-sm-10">
-      <input type="text" class="form-control" id="search_used" placeholder="">
-    </div>
-  </div>
 
         <br/>
     <table class="table table-hover" id="used_opportunities_table">
@@ -109,7 +94,7 @@
                 <th class="col border-start border-top align-top" scope="col">Update Record</th>
                 <th class="col border-start border-top align-top" scope="col">Delete Record</th>
                 <th class="col border-start border-end border-top align-top" scope="col">View all Details</th>
-            <tr>
+            </tr>
         </thead>
         <tbody id="table_used">
             <!--https://stackoverflow.com/questions/1663807/how-do-i-iterate-through-two-lists-in-parallel-->
@@ -138,30 +123,6 @@
 	</div>
 
 <!-- https://www.w3schools.com/bootstrap/tryit.asp?filename=trybs_filters_table&stacked=h -->
-<!-- Search for new opps -->
-<script>
-$(document).ready(function(){
-  $("#search_new").on("keyup", function() {
-    var value = $(this).val().toLowerCase();
-    $("#table_new tr").filter(function() {
-      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-    });
-  });
-});
-</script>
-
-<!-- Search for used opps -->
-<script>
-$(document).ready(function(){
-  $("#search_used").on("keyup", function() {
-    var value = $(this).val().toLowerCase();
-    $("#table_used tr").filter(function() {
-      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-    });
-  });
-});
-</script>
-
 <!-- Search all opps -->
 <script>
 $(document).ready(function(){
@@ -174,6 +135,42 @@ $(document).ready(function(){
       $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
     });
   });
+});
+</script>
+
+<!-- Datatables for new opps table-->
+<script>
+$(document).ready(function () {
+    $('#new_opportunities_table').DataTable(
+    {
+    "pageLength": 50,
+    lengthMenu: [
+        [10, 50, 100, 250, 500, -1],
+        [10, 50, 100, 250, 500, 'All']],
+
+         "language": {
+    "search": "Search opportunities for new-condition books:"
+  }
+    }
+    );
+});
+</script>
+
+<!-- Datatables for used opps table-->
+<script>
+$(document).ready(function () {
+    $('#used_opportunities_table').DataTable(
+    {
+    "pageLength": 50,
+    lengthMenu: [
+        [10, 50, 100, 250, 500, -1],
+        [10, 50, 100, 250, 500, 'All']],
+
+         "language": {
+    "search": "Search opportunities for used-condition books:"
+  }
+    }
+    );
 });
 </script>
 
