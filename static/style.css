@@ -31,6 +31,14 @@ img_index {
   opacity: 0.25;
 }
 
+/* https://www.w3schools.com/html/html_links_colors.asp */
+.unformatted_link {
+    /* Don't change colour */
+    color: inherit;
+    /* Remove underline */
+    text-decoration: none;
+}
+
 /* https://stackoverflow.com/questions/40493964/bootstrap-content-with-opaque-background-image */
 /* NEEDED TO CHANGE POSITION TO FIXED- https://stackoverflow.com/questions/31258011/need-background-image-to-fill-screen-to-bottom-even-when-scrolling */
 /* https://stackoverflow.com/questions/48255229/background-image-not-100-height-when-scrolling-down-page */

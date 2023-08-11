@@ -86,25 +86,25 @@
                 {% if book_ebay.new_total_price[-1] == -999 %}
                 <td class="col-1 border-start">-</td>
                 {% else %}
-                <td class="col-1 border-start">£{{ book_ebay.new_total_price[-1] }}</td>
+                <td class="col-1 border-start"><a href={{book_ebay.new_ebay_link}} class="unformatted_link">£{{ book_ebay.new_total_price[-1] }}</a></td>
                 {% endif %}
 
                 {% if book_ebay.used_total_price[-1] == -999 %}
                 <td class="col-1 border-start">-</td>
                 {% else %}
-                <td class="col-1 border-start">£{{ book_ebay.used_total_price[-1] }}</td>
+                <td class="col-1 border-start"><a href={{book_ebay.used_ebay_link}} class="unformatted_link">£{{ book_ebay.used_total_price[-1] }}</a></td>
                 {% endif %}
 
                      {% if book_amazon.new_total_price[-1] == -999 %}
                 <td class="col-1 border-start">-</td>
                 {% else %}
-                <td class="col-1 border-start">£{{ book_amazon.new_total_price[-1] }}</td>
+                <td class="col-1 border-start"><a href={{book_amazon.amazon_link}} class="unformatted_link">£{{ book_amazon.new_total_price[-1] }}</a></td>
                 {% endif %}
 
                 {% if book_amazon.used_total_price[-1] == -999 %}
                 <td class="col-1 border-start">-</td>
                 {% else %}
-                <td class="col-1 border-start">£{{ book_amazon.used_total_price[-1] }}</td>
+                <td class="col-1 border-start"><a href={{book_amazon.amazon_link}} class="unformatted_link">£{{ book_amazon.used_total_price[-1] }}</a></td>
                 {% endif %}
 
                 <td class="col border-start"> <div class="text-center"><a href="/update/{{book_ebay.isbn}}" class="btn btn-outline-secondary btn-sm">Update</a> </div></td>
