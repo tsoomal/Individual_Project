@@ -53,23 +53,25 @@
                 <th class="col-1 border-start border-top align-top" scope="col">Ebay New Total Price</th>
                 <th class="col-1 border-start border-top align-top" scope="col">Amazon New Total Price</th>
                 <th class="col-1 border-start border-top align-top" scope="col" data-sortable="true" data-sorter="alphanum">Estimated Profit</th>
-                <th class="col-1 border-start border-top align-top" scope="col">Update Record</th>
-                <th class="col-1 border-start border-top align-top" scope="col">Delete Record</th>
-                <th class="col-1 border-start border-end border-top align-top" scope="col">View all Details</th>
+                <th class="col-4 border-start border-top align-top" scope="col">Guidance</th>
+                <th class="col border-start border-top align-top" scope="col">Update Record</th>
+                <th class="col border-start border-top align-top" scope="col">Delete Record</th>
+                <th class="col border-start border-end border-top align-top" scope="col">View all Details</th>
             <tr>
         </thead>
         <tbody id="table_new">
             <!--https://stackoverflow.com/questions/1663807/how-do-i-iterate-through-two-lists-in-parallel-->
-            {% for book_ebay, book_amazon, profit in zip(books_ebay_new, books_amazon_new, profit_new) %}
+            {% for book_ebay, book_amazon, profit, guidance in zip(books_ebay_new, books_amazon_new, profit_new, guidance_new) %}
             <tr>
                 <td class="col-4 border-start">{{ book_ebay.book_name }}</td>
                 <td class="col-1 border-start">{{ book_ebay.isbn }}</td>
                 <td class="col-1 border-start">£{{ book_ebay.new_total_price[-1] }} <div class="text-left"><a href="https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw={{book_ebay.isbn}}&_sacat=0&LH_BIN=1&_sop=15&rt=nc&LH_ItemCondition=3" class="btn btn-outline-secondary btn-sm">Ebay Link</a></div> </td>
                 <td class="col-1 border-start">£{{ book_amazon.new_total_price[-1] }} <div class="text-left"><a href="https://{{book_amazon.amazon_link}}" class="btn btn-outline-secondary btn-sm">Amazon Link</a></div> </td>
                 <td class="col-1 border-start">£{{ profit }}</td>
-                <td class="col-1 border-start"> <div class="text-center"><a href="/update/{{book_ebay.isbn}}" class="btn btn-outline-secondary btn-sm">Update</a> </div></td>
-                <td class="col-1 border-start"><div class="text-center"><a href="/delete/{{book_ebay.isbn}}" class="btn btn-outline-danger btn-sm">Delete</a></div> </td>
-                <td class="col-1 border-start border-end align-top"> <div class="text-center"><a href="/query_database_by_isbn/{{book_ebay.isbn}}" class="btn btn-outline-secondary btn-sm">View</a></div> </td>
+                <td class="col-4 border-start">{{ guidance }}</td>
+                <td class="col border-start"> <div class="text-center"><a href="/update/{{book_ebay.isbn}}" class="btn btn-outline-secondary btn-sm">Update</a> </div></td>
+                <td class="col border-start"><div class="text-center"><a href="/delete/{{book_ebay.isbn}}" class="btn btn-outline-danger btn-sm">Delete</a></div> </td>
+                <td class="col border-start border-end align-top"> <div class="text-center"><a href="/query_database_by_isbn/{{book_ebay.isbn}}" class="btn btn-outline-secondary btn-sm">View</a></div> </td>
             </tr>
             {% endfor %}
         </tbody>
@@ -98,23 +100,25 @@
                 <th class="col-1 border-start border-top align-top" scope="col">Ebay Used Total Price</th>
                 <th class="col-1 border-start border-top align-top" scope="col">Amazon Used Total Price</th>
                 <th class="col-1 border-start border-top align-top" scope="col">Estimated Profit</th>
-                <th class="col-1 border-start border-top align-top" scope="col">Update Record</th>
-                <th class="col-1 border-start border-top align-top" scope="col">Delete Record</th>
-                <th class="col-1 border-start border-end border-top align-top" scope="col">View all Details</th>
+                <th class="col-4 border-start border-top align-top" scope="col">Guidance</th>
+                <th class="col border-start border-top align-top" scope="col">Update Record</th>
+                <th class="col border-start border-top align-top" scope="col">Delete Record</th>
+                <th class="col border-start border-end border-top align-top" scope="col">View all Details</th>
             <tr>
         </thead>
         <tbody id="table_used">
             <!--https://stackoverflow.com/questions/1663807/how-do-i-iterate-through-two-lists-in-parallel-->
-            {% for book_ebay, book_amazon, profit in zip(books_ebay_used, books_amazon_used, profit_used) %}
+            {% for book_ebay, book_amazon, profit, guidance in zip(books_ebay_used, books_amazon_used, profit_used, guidance_used) %}
             <tr>
                 <td class="col-4 border-start">{{ book_ebay.book_name }}</td>
                 <td class="col-1 border-start">{{ book_ebay.isbn }}</td>
                 <td class="col-1 border-start">£{{ book_ebay.used_total_price[-1] }} <div class="text-left"><a href="https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw={{book_ebay.isbn}}&_sacat=0&LH_ItemCondition=4&LH_BIN=1&_sop=15" class="btn btn-outline-secondary btn-sm">Ebay Link</a></div> </td>
                 <td class="col-1 border-start">£{{ book_amazon.used_total_price[-1]}} <div class="text-left"><a href="https://{{book_amazon.amazon_link}}" class="btn btn-outline-secondary btn-sm">Amazon Link</a></div> </td>
                 <td class="col-1 border-start">£{{ profit }}</td>
-                <td class="col-1 border-start"> <div class="text-center"><a href="/update/{{book_ebay.isbn}}" class="btn btn-outline-secondary btn-sm">Update</a> </div></td>
-                <td class="col-1 border-start"><div class="text-center"><a href="/delete/{{book_ebay.isbn}}" class="btn btn-outline-danger btn-sm">Delete</a></div> </td>
-                <td class="col-1 border-start border-end align-top"> <div class="text-center"><a href="/query_database_by_isbn/{{book_ebay.isbn}}" class="btn btn-outline-secondary btn-sm">View</a></div> </td>
+                <td class="col-4 border-start">{{ guidance }}</td>
+                <td class="col border-start"> <div class="text-center"><a href="/update/{{book_ebay.isbn}}" class="btn btn-outline-secondary btn-sm">Update</a> </div></td>
+                <td class="col border-start"><div class="text-center"><a href="/delete/{{book_ebay.isbn}}" class="btn btn-outline-danger btn-sm">Delete</a></div> </td>
+                <td class="col border-start border-end align-top"> <div class="text-center"><a href="/query_database_by_isbn/{{book_ebay.isbn}}" class="btn btn-outline-secondary btn-sm">View</a></div> </td>
             </tr>
             {% endfor %}
         </tbody>
