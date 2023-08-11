@@ -5,14 +5,13 @@
 {% block content %}
     <div class="container">
     <h1>Contact Form Submitted!</h1>
-       <small>Details submitted:<small/>
-           <br/>
-           Name: {{name}}
-           <br/>
-           Email Address: {{email_address}}
-           <br/>
-           Message: {{message}}
-           <br/>
+       Details submitted:
+       <br/>
+        <ul>
+          <li><b>Name:</b> {{name}}</li>
+          <li><b>Email Address:</b> {{email_address}}</li>
+            <li><b>Message:</b> {{message}}</li>
+        </ul>
 
 	</div>
 {% endblock %}
