@@ -116,7 +116,6 @@ def index():
 @app.route("/query_database_by_isbn/<string:isbn>")
 def query_database_by_isbn(isbn):
     try:
-        print("ISBN: " + isbn)
         book_amazon = Amazon.query.get_or_404(isbn)
         book_ebay = Ebay.query.get_or_404(isbn)
         return render_template("view_record_details.html",
@@ -209,7 +208,8 @@ def add_books():
         book_name = request.form['book_name']
         isbn = request.form['isbn']
         edition_format = request.form['edition_format']
-        ebay_link = request.form['ebay_link']
+        new_ebay_link = request.form['new_ebay_link']
+        used_ebay_link = request.form['used_ebay_link']
         ebay_new_product_price = request.form['ebay_new_product_price']
         ebay_new_delivery_price = request.form['ebay_new_delivery_price']
         ebay_new_total_price = request.form['ebay_new_total_price']
@@ -227,15 +227,13 @@ def add_books():
         if "www." in amazon_link:
             amazon_link = amazon_link.split("www.",1)[1]
 
-        if "www." in ebay_link:
-            ebay_link = ebay_link.split("www.",1)[1]
-
         # Validate Book Name
         if len(book_name) == 0:
             error_statement = "Please enter a book name!"
             return render_template("add_books.html", error_statement=error_statement, book_name=book_name, isbn=isbn,
                                    edition_format=edition_format,
-                                   ebay_link=ebay_link, ebay_new_product_price=ebay_new_product_price,
+                                   new_ebay_link=new_ebay_link, used_ebay_link=used_ebay_link,
+                                   ebay_new_product_price=ebay_new_product_price,
                                    ebay_new_delivery_price=ebay_new_delivery_price,
                                    ebay_new_total_price=ebay_new_total_price,
                                    ebay_used_product_price=ebay_used_product_price,
@@ -268,7 +266,8 @@ def add_books():
             error_statement = "ISBN has to be in either ISBN-10 or ISBN-13 format!"
             return render_template("add_books.html", error_statement=error_statement, book_name=book_name,
                                    isbn=isbn, edition_format=edition_format,
-                                   ebay_link=ebay_link, ebay_new_product_price=ebay_new_product_price,
+                                   new_ebay_link=new_ebay_link, used_ebay_link=used_ebay_link,
+                                   ebay_new_product_price=ebay_new_product_price,
                                    ebay_new_delivery_price=ebay_new_delivery_price,
                                    ebay_new_total_price=ebay_new_total_price,
                                    ebay_used_product_price=ebay_used_product_price,
@@ -295,7 +294,8 @@ def add_books():
             db.session.add(new_book)
             db.session.commit()
 
-            new_book = Ebay(book_name=book_name, ebay_link=ebay_link, isbn=isbn, edition_format=edition_format,
+            new_book = Ebay(book_name=book_name, new_ebay_link=new_ebay_link, used_ebay_link=used_ebay_link,
+                            isbn=isbn, edition_format=edition_format,
                             new_product_price=ebay_new_product_price,
                             new_delivery_price=ebay_new_delivery_price, new_total_price=ebay_new_total_price,
                             historical_new_total_price=historical_new_total_price,
@@ -312,7 +312,7 @@ def add_books():
                 writer.writerow(data)
 
             # Add to Ebay csv of books.
-            data = [book_name, ebay_link, edition_format, isbn]
+            data = [book_name, new_ebay_link, used_ebay_link, edition_format, isbn]
             with open("scraped_database_data_ebay.csv", "a+", newline="", encoding="UTF8") as f:
                 writer = csv.writer(f)
                 writer.writerow(data)
@@ -433,8 +433,10 @@ def update(isbn):
         if request.form.get('amazon_used_total_price'):
             book_to_update_amazon.used_total_price[-1] = request.form['amazon_used_total_price']
 
-        if request.form.get('ebay_link'):
-            book_to_update_ebay.ebay_link = request.form['ebay_link']
+        if request.form.get('new_ebay_link'):
+            book_to_update_ebay.new_ebay_link = request.form['new_ebay_link']
+        if request.form.get('used_ebay_link'):
+            book_to_update_ebay.used_ebay_link = request.form['used_ebay_link']
         if request.form.get('ebay_new_product_price'):
             book_to_update_ebay.new_product_price[-1] = request.form['ebay_new_product_price']
         if request.form.get('ebay_new_delivery_price'):
