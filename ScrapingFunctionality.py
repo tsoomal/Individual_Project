@@ -190,14 +190,15 @@ def check_ebay_prices_today(file_name, only_create_new_books=False):
 
     df = pd.read_csv(file_name)
     number_of_rows = df.shape[0]
-    isbn_col = df.iloc[:, [3]]
+    isbn_col = df.iloc[:, [4]]
 
     for row_number in range(number_of_rows):
         book_name = df.iloc[row_number, [0]][0]
-        ebay_link = df.iloc[row_number, [1]][0]
-        edition_format = df.iloc[row_number, [2]][0]
+        new_ebay_link = df.iloc[row_number, [1]][0]
+        used_ebay_link = df.iloc[row_number, [2]][0]
+        edition_format = df.iloc[row_number, [3]][0]
         # https://stackoverflow.com/questions/27387415/how-would-i-get-everything-before-a-in-a-string-python
-        isbn = str((df.iloc[row_number,[3]])[0]).split(".")[0]
+        isbn = str((df.iloc[row_number,[4]])[0]).split(".")[0]
         isbn = isbn.zfill(10)
 
         if only_create_new_books==True:
@@ -221,7 +222,6 @@ def check_ebay_prices_today(file_name, only_create_new_books=False):
         time1 = datetime.now()
         print("Item: " + str(row_number+1))
         print(book_name)
-        print(ebay_link)
         print(edition_format)
 
         # New Products
@@ -360,7 +360,8 @@ def check_ebay_prices_today(file_name, only_create_new_books=False):
         try:
             historical_new_total_price = get_ebay_historical_price(isbn, "new")
             historical_used_total_price = get_ebay_historical_price(isbn, "used")
-            new_book = app.Ebay(book_name=book_name, ebay_link=ebay_link, isbn=isbn, edition_format=edition_format,
+            new_book = app.Ebay(book_name=book_name, new_ebay_link=new_ebay_link, used_ebay_link=used_ebay_link,
+                                isbn=isbn, edition_format=edition_format,
                                 new_product_price=[new_product_price], new_delivery_price=[new_delivery_price],
                                 new_total_price=[new_total_price_raw],
                                 historical_new_total_price=[historical_new_total_price],
@@ -1363,9 +1364,6 @@ def main():
 
     #check_amazon_prices_today("./scraped_database_data_amazon.csv", only_create_new_books=False)
     #check_ebay_prices_today("./scraped_database_data_ebay.csv", only_create_new_books=False)
-
-
-
 
 
 
