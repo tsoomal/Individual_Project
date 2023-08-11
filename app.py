@@ -76,7 +76,8 @@ class Amazon(db.Model):
 class Ebay(db.Model):
     __tablename__ = 'Ebay'
     book_name = db.Column(db.String(200), nullable=False)
-    ebay_link = db.Column(db.String(200), nullable=False)
+    new_ebay_link = db.Column(db.String(200), nullable=False)
+    used_ebay_link = db.Column(db.String(200), nullable=False)
     isbn = db.Column(db.String(13), primary_key=True)
     edition_format = db.Column(db.String(40), nullable=False)
     new_product_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
@@ -88,11 +89,12 @@ class Ebay(db.Model):
     used_total_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
     historical_used_total_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
 
-    def __init__(self, book_name, ebay_link, isbn, edition_format, new_product_price, new_delivery_price,
+    def __init__(self, book_name, new_ebay_link, used_ebay_link, isbn, edition_format, new_product_price, new_delivery_price,
                  new_total_price, historical_new_total_price, used_product_price, used_delivery_price, used_total_price,
                  historical_used_total_price):
         self.book_name = book_name
-        self.ebay_link = ebay_link
+        self.new_ebay_link = new_ebay_link
+        self.used_ebay_link = used_ebay_link
         self.isbn = isbn
         self.edition_format = edition_format
         self.new_product_price = new_product_price
