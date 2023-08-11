@@ -6,7 +6,8 @@
     <div class="container">
     <h1>Record details for ISBN: {{book_ebay.isbn}}</h1>
         <br/>
-        <a class="btn btn-secondary" href="javascript:history.back()" role="button">Go back</a>
+        <!-- https://stackoverflow.com/questions/30848203/creating-a-back-link -->
+        <a class="btn btn-secondary" href="#" role="button" onclick="window.history.back();return false;">Go back</a>
         <a class="btn btn-primary" href="/update/{{book_ebay.isbn}}" role="button">Update record</a>
         <a class="btn btn-danger" href="/delete/{{book_ebay.isbn}}" role="button">Delete record</a>
         <br/>
