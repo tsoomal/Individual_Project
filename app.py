@@ -619,11 +619,11 @@ def opportunities():
         number_of_new_opps = len(profit_new)
         number_of_used_opps = len(profit_used)
 
-        sorted_lists_new = sorted(zip(books_ebay_new, books_amazon_new, profit_new), reverse=True, key=lambda x: x[2])
-        books_ebay_new, books_amazon_new, profit_new = [[x[i] for x in sorted_lists_new] for i in range(3)]
+        sorted_lists_new = sorted(zip(books_ebay_new, books_amazon_new, profit_new, guidance_new), reverse=True, key=lambda x: x[2])
+        books_ebay_new, books_amazon_new, profit_new, guidance_new = [[x[i] for x in sorted_lists_new] for i in range(4)]
 
-        sorted_lists_used = sorted(zip(books_ebay_used, books_amazon_used, profit_used), reverse=True, key=lambda y: y[2])
-        books_ebay_used, books_amazon_used, profit_used = [[y[j] for y in sorted_lists_used] for j in range(3)]
+        sorted_lists_used = sorted(zip(books_ebay_used, books_amazon_used, profit_used, guidance_used), reverse=True, key=lambda y: y[2])
+        books_ebay_used, books_amazon_used, profit_used, guidance_used = [[y[j] for y in sorted_lists_used] for j in range(4)]
 
         return render_template("opportunities.html", books_amazon_new=books_amazon_new, books_ebay_new=books_ebay_new,
                                books_amazon_used=books_amazon_used, books_ebay_used=books_ebay_used, profit_new=profit_new,
