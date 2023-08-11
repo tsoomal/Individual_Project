@@ -70,7 +70,7 @@
 
         <!-- https://stackoverflow.com/questions/32774118/building-a-bootstrap-table-with-dynamic-elements-in-flask -->
         <!-- https://getbootstrap.com/docs/5.0/utilities/borders/#border-color -->
-    <table class="table table-hover">
+    <table class="table table-hover" id="tbl">
         <thead>
             <!-- https://stackoverflow.com/questions/61969955/bootstrap-fixed-width-table-columns-in-container-fluid -->
             <tr class="table-light">
@@ -83,7 +83,7 @@
                 <th class="col border-start border-top align-top" scope="col">Update Record</th>
                 <th class="col border-start border-top align-top" scope="col">Delete Record</th>
                 <th class="col border-start border-end border-top align-top" scope="col">View all Details</th>
-            <tr>
+            </tr>
         </thead>
         <tbody id=table_body>
             <!--https://stackoverflow.com/questions/1663807/how-do-i-iterate-through-two-lists-in-parallel-->
@@ -144,4 +144,17 @@ $(document).ready(function(){
   });
 });
 </script>
+
+<!-- https://stackoverflow.com/questions/37259682/how-to-enable-bootstrap-table-pagination-and-search -->
+<script>
+$(document).ready(function () {
+    $('#tbl').DataTable(
+    {
+    "pageLength": 1,
+    "LengthMenu": [[1, 2, 5, 10,  -1], [1, 2, 5, 10, "All"]]
+    }
+    );
+});
+</script>
+
 {% endblock %}
