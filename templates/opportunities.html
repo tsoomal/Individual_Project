@@ -15,12 +15,20 @@
     {% endif %}
 
         <h4>Useful Information:</h4>
-        <p class="text-start fs-6" >The following arbitrage opportunties were found:</p>
-        <p class="text-start fs-6" >Number of new book opportunities: {{number_of_new_opps}}</p>
-        <p class="text-start fs-6" >Number of used book opportunities: {{number_of_used_opps}}</p>
-        <p class="text-start fs-6" >Total number of book opportunities: {{number_of_new_opps + number_of_used_opps}}</p>
 
-        <br/>
+        <ul>
+          <li>The following arbitrage opportunties were found:</li>
+          <li style="list-style-type:none">
+            <ul>
+                <li>Number of new book opportunities: {{number_of_new_opps}}</li>
+                <li>Number of used book opportunities: {{number_of_used_opps}}</li>
+                <li>Total number of book opportunities: {{number_of_new_opps + number_of_used_opps}}</li>
+            </ul>
+          </li>
+          <li>Item 2...</li>
+          <li>Item 3...</li>
+        </ul>
+
         <br/>
 
         <!-- https://getbootstrap.com/docs/5.0/forms/form-control/ -->
