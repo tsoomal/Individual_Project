@@ -96,7 +96,7 @@
                 <td class="col-1 border-start"><a href={{book_ebay.used_ebay_link}} class="unformatted_link" target="_blank" rel="noopener noreferrer">£{{ book_ebay.used_total_price[-1] }}</a></td>
                 {% endif %}
 
-                     {% if book_amazon.new_total_price[-1] == -999 %}
+                {% if book_amazon.new_total_price[-1] == -999 %}
                 <td class="col-1 border-start">-</td>
                 {% else %}
                 <td class="col-1 border-start"><a href=https://{{book_amazon.amazon_link}} class="unformatted_link" target="_blank" rel="noopener noreferrer">£{{ book_amazon.new_total_price[-1] }}</a></td>
