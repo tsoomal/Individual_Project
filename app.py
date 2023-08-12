@@ -524,20 +524,21 @@ def opportunities():
         guidance_new = []
         guidance_used = []
 
-        # TODO: BUY NEW, SELL USED BOOKS
+        # TODO: BUY NEW BOOKS TO SELL AS USED
+        # TODO: If Used price is higher than New price, book wont sell.
 
         for book_ebay, book_amazon in zip(all_books_ebay, all_books_amazon):
 
             # NEW BOOKS
             if book_ebay.new_total_price[-1] == -999 and book_amazon.new_total_price[-1] == -999:
-                # No arbitrage possible
+                # No arbitrage possible because book not available on either Ebay or Amazon
                 pass
             elif book_ebay.new_total_price[-1] == -999 and book_amazon.new_total_price[-1] != -999:
-                # Buy on Amazon, Sell on Ebay
+                # Buy on Amazon, Sell on Ebay where no listing exists
                 # Need to get historical average sold price on eBay.
                 pass
             elif book_ebay.new_total_price[-1] != -999 and book_amazon.new_total_price[-1] == -999:
-                # Buy on Ebay, Sell on Amazon
+                # Buy on Ebay, Sell on Amazon where no listing exists
                 pass
             elif book_ebay.new_total_price[-1] > book_amazon.new_total_price[-1]:
                 # Buy on Amazon, Sell on Ebay
@@ -571,19 +572,19 @@ def opportunities():
                     profit_new.append(round(book_amazon.new_total_price[-1] - total_selling_price_to_breakeven,2))
                     guidance_new.append("Buy from eBay, sell on Amazon (historical eBay price supports this)")
             else:
-                # Both books have the same new total prices.
+                # Both books have the same new total prices. No arbitrage is possible.
                 pass
 
             # USED BOOKS
             if book_ebay.used_total_price[-1] == -999 and book_amazon.used_total_price[-1] == -999:
-                # No arbitrage possible
+                # No arbitrage possible because book not available on either Ebay or Amazon
                 pass
             elif book_ebay.used_total_price[-1] == -999 and book_amazon.used_total_price[-1] != -999:
-                # Buy on Amazon, Sell on Ebay
+                # Buy on Amazon, Sell on Ebay where no listing exists
                 # Need to get historical average sold price on eBay.
                 pass
             elif book_ebay.used_total_price[-1] != -999 and book_amazon.used_total_price[-1] == -999:
-                # Buy on Ebay, Sell on Amazon
+                # Buy on Ebay, Sell on Amazon where no listing exists
                 pass
             elif book_ebay.used_total_price[-1] > book_amazon.used_total_price[-1]:
                 # Buy on Amazon, Sell on Ebay
