@@ -23,7 +23,8 @@
             <ul>
                 <li>Number of new book opportunities: {{number_of_new_opps}}</li>
                 <li>Number of used book opportunities: {{number_of_used_opps}}</li>
-                <li>Total number of book opportunities: {{number_of_new_opps + number_of_used_opps}}</li>
+                <li>Number of cross book opportunities: {{number_of_cross_opps}}</li>
+                <li>Total number of book opportunities: {{number_of_new_opps + number_of_used_opps + number_of_cross_opps}}</li>
             </ul>
           </li>
           <li>Item 2...</li>
@@ -146,7 +147,80 @@
     </table>
         <br/>
         <br/>
+
+
+
+
+        <br/>
+    <br/>
+        <h4>Arbitrage of Cross-Condition Books:</h4>
+
+        <br/>
+    <table class="table table-hover" id="cross_opportunities_table">
+        <thead>
+            <!-- https://stackoverflow.com/questions/61969955/bootstrap-fixed-width-table-columns-in-container-fluid -->
+            <tr class="table-light">
+                <th class="col-4 border-start border-top align-top" scope="col">Name</th>
+                <th class="col-1 border-start border-top align-top" scope="col">ISBN</th>
+                <th class="col-1 border-start border-top align-top" scope="col">Ebay Total Price</th>
+                <th class="col-1 border-start border-top align-top" scope="col">Amazon Total Price</th>
+                <th class="col-1 border-start border-top align-top" scope="col">Estimated Profit</th>
+                <th class="col-4 border-start border-top align-top" scope="col">Guidance</th>
+                <th class="col border-start border-top align-top" scope="col">View all Details</th>
+                <th class="col border-start border-top align-top" scope="col">Update Record</th>
+                <th class="col border-start border-end border-top align-top" scope="col">Delete Record</th>
+            </tr>
+        </thead>
+        <tbody id="table_cross">
+            <!--https://stackoverflow.com/questions/1663807/how-do-i-iterate-through-two-lists-in-parallel-->
+            {% for book_ebay, book_amazon, book_ebay_price, book_amazon_price, book_ebay_link, book_amazon_link, profit, guidance in zip(books_ebay_cross, books_amazon_cross, books_ebay_cross_price, books_amazon_cross_price, books_ebay_cross_link, books_amazon_cross_link, profit_cross, guidance_cross) %}
+            <tr>
+                <td class="col-4 border-start">{{ book_ebay.book_name }}</td>
+                <td class="col-1 border-start">{{ book_ebay.isbn }}</td>
+                <td class="col-1 border-start">£{{ book_ebay_price }}<div class="text-left"><a href="{{book_ebay_link}}" class="btn btn-outline-secondary btn-sm">Ebay Link</a></div> </td>
+                <td class="col-1 border-start">£{{ book_amazon_price }}<div class="text-left"><a href="https://{{book_amazon_link}}" class="btn btn-outline-secondary btn-sm">Amazon Link</a></div> </td>
+                <td class="col-1 border-start">£{{ profit }}</td>
+                <td class="col-4 border-start">{{ guidance }}</td>
+                <td class="col border-start"><div class="text-center"><a href="/query_database_by_isbn/{{book_ebay.isbn}}" class="btn btn-outline-secondary btn-sm">View</a></div> </td>
+                <td class="col border-start"><div class="text-center"><a href="/update/{{book_ebay.isbn}}" class="btn btn-outline-secondary btn-sm">Update</a> </div></td>
+                <td class="col border-start border-end align-top">
+                    <div class="text-center">
+                    <button type="button" class="btn btn-outline-danger dropdown-toggle btn-sm" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Delete?</button>
+                    <div class="dropdown-menu"><a class="dropdown-item" href="/delete/{{book_ebay.isbn}}">Yes! Delete record</a> </div>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+
+
+
+
+
+
+
+
+
 	</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 <!-- https://www.w3schools.com/bootstrap/tryit.asp?filename=trybs_filters_table&stacked=h -->
 <!-- Search all opps -->
@@ -195,6 +269,25 @@ $(document).ready(function () {
 
          "language": {
     "search": "Search opportunities for used-condition books:"
+  },
+  "order": [[ 4, 'desc' ], [ 0, 'asc' ]],
+    }
+    );
+});
+</script>
+
+<!-- Datatables for cross opps table-->
+<script>
+$(document).ready(function () {
+    $('#cross_opportunities_table').DataTable(
+    {
+    "pageLength": 50,
+    lengthMenu: [
+        [10, 50, 100, 250, 500, -1],
+        [10, 50, 100, 250, 500, 'All']],
+
+         "language": {
+    "search": "Search opportunities for cross-condition books:"
   },
   "order": [[ 4, 'desc' ], [ 0, 'asc' ]],
     }
