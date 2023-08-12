@@ -56,9 +56,9 @@
                 <th class="col-1 border-start border-top align-top" scope="col">Amazon New Total Price</th>
                 <th class="col-1 border-start border-top align-top" scope="col" data-sortable="true" data-sorter="alphanum">Estimated Profit</th>
                 <th class="col-4 border-start border-top align-top" scope="col">Guidance</th>
-                <th class="col border-start border-end border-top align-top" scope="col">View all Details</th>
+                <th class="col border-start border-top align-top" scope="col">View all Details</th>
                 <th class="col border-start border-top align-top" scope="col">Update Record</th>
-                <th class="col border-start border-top align-top" scope="col">Delete Record</th>
+                <th class="col border-start border-end border-top align-top" scope="col">Delete Record</th>
             </tr>
         </thead>
         <tbody id="table_new">
@@ -71,9 +71,9 @@
                 <td class="col-1 border-start">£{{ book_amazon.new_total_price[-1] }} <div class="text-left"><a href="https://{{book_amazon.amazon_link}}" class="btn btn-outline-secondary btn-sm">Amazon Link</a></div> </td>
                 <td class="col-1 border-start">£{{ profit }}</td>
                 <td class="col-4 border-start">{{ guidance }}</td>
-                <td class="col border-start border-end align-top"> <div class="text-center"><a href="/query_database_by_isbn/{{book_ebay.isbn}}" class="btn btn-outline-secondary btn-sm">View</a></div> </td>
+                <td class="col border-start"> <div class="text-center"><a href="/query_database_by_isbn/{{book_ebay.isbn}}" class="btn btn-outline-secondary btn-sm">View</a></div> </td>
                 <td class="col border-start"> <div class="text-center"><a href="/update/{{book_ebay.isbn}}" class="btn btn-outline-secondary btn-sm">Update</a> </div></td>
-                <td class="col border-start">
+                <td class="col border-start border-end align-top">
                     <div class="text-center">
                     <button type="button" class="btn btn-outline-danger dropdown-toggle btn-sm" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Delete?</button>
                     <div class="dropdown-menu"> <a class="dropdown-item" href="/delete/{{book_ebay.isbn}}">Yes! Delete record</a> </div>
@@ -100,9 +100,9 @@
                 <th class="col-1 border-start border-top align-top" scope="col">Amazon Used Total Price</th>
                 <th class="col-1 border-start border-top align-top" scope="col">Estimated Profit</th>
                 <th class="col-4 border-start border-top align-top" scope="col">Guidance</th>
-                <th class="col border-start border-end border-top align-top" scope="col">View all Details</th>
+                <th class="col border-start border-top align-top" scope="col">View all Details</th>
                 <th class="col border-start border-top align-top" scope="col">Update Record</th>
-                <th class="col border-start border-top align-top" scope="col">Delete Record</th>
+                <th class="col border-start border-end border-top align-top" scope="col">Delete Record</th>
             </tr>
         </thead>
         <tbody id="table_used">
@@ -115,9 +115,9 @@
                 <td class="col-1 border-start">£{{ book_amazon.used_total_price[-1]}} <div class="text-left"><a href="https://{{book_amazon.amazon_link}}" class="btn btn-outline-secondary btn-sm">Amazon Link</a></div> </td>
                 <td class="col-1 border-start">£{{ profit }}</td>
                 <td class="col-4 border-start">{{ guidance }}</td>
-                <td class="col border-start border-end align-top"> <div class="text-center"><a href="/query_database_by_isbn/{{book_ebay.isbn}}" class="btn btn-outline-secondary btn-sm">View</a></div> </td>
+                <td class="col border-start"> <div class="text-center"><a href="/query_database_by_isbn/{{book_ebay.isbn}}" class="btn btn-outline-secondary btn-sm">View</a></div> </td>
                 <td class="col border-start"> <div class="text-center"><a href="/update/{{book_ebay.isbn}}" class="btn btn-outline-secondary btn-sm">Update</a> </div></td>
-                <td class="col border-start">
+                <td class="col border-start border-end align-top">
                     <div class="text-center">
                     <button type="button" class="btn btn-outline-danger dropdown-toggle btn-sm" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Delete?</button>
                     <div class="dropdown-menu"> <a class="dropdown-item" href="/delete/{{book_ebay.isbn}}">Yes! Delete record</a> </div>
