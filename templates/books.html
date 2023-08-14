@@ -90,7 +90,9 @@
             <!--https://stackoverflow.com/questions/1663807/how-do-i-iterate-through-two-lists-in-parallel-->
             {% for book_ebay, book_amazon in zip(books_ebay, books_amazon) %}
             <tr>
-                <td class="col-4 border-start">{{ book_ebay.book_name }}</td>
+                <!-- <td class="col-4 border-start">{{ book_ebay.book_name }}</td> -->
+                <td class="col-4 border-start"><a href=https://{{book_amazon.amazon_link}} class="unformatted_link" target="_blank" rel="noopener noreferrer">{{ book_ebay.book_name }}</a></td>
+
                 <td class="col-1 border-start">{{ book_ebay.isbn }}</td>
 
                 {% if book_ebay.new_total_price[-1] == -999 %}
