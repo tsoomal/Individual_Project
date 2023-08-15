@@ -1420,7 +1420,7 @@ def main():
     # setup_database(links, new_list=True, scrape_prices=False)
 
     #check_amazon_prices_today("./scraped_database_data_amazon.csv", only_create_new_books=False)
-    #check_ebay_prices_today("./scraped_database_data_ebay.csv", only_create_new_books=False)
+    check_ebay_prices_today("./scraped_database_data_ebay.csv", only_create_new_books=True)
 
 
 
