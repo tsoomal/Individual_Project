@@ -1364,11 +1364,12 @@ def main():
         "https://www.amazon.co.uk/gp/bestsellers/books/14909604031/ref=pd_zg_hrsr_books",
         "https://www.amazon.co.uk/best-sellers-books-Amazon/zgbs/books/14909604031/ref=zg_bs_pg_2_books?_encoding=UTF8&pg=2"]
 
+    # Only setup CSV files. Note, deletes old files!
+    # setup_database(links, new_list=True, scrape_prices=False)
+
     #check_amazon_prices_today("./scraped_database_data_amazon.csv", only_create_new_books=False)
     #check_ebay_prices_today("./scraped_database_data_ebay.csv", only_create_new_books=False)
-    #setup_list_one_page_from_amazon_test("test_name_setup.csv", "https://www.amazon.co.uk/best-sellers-books-Amazon/zgbs/books/503400/ref=zg_bs_pg_2_books?_encoding=UTF8&pg=2")
 
-    setup_database(links,"test_csv", new_list=True, scrape_prices=False)
 
 
 if __name__ == "__main__":

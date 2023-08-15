@@ -91,7 +91,7 @@
             {% for book_ebay, book_amazon in zip(books_ebay, books_amazon) %}
             <tr>
                 <!-- <td class="col-4 border-start">{{ book_ebay.book_name }}</td> -->
-                <td class="col-4 border-start"><a href=https://{{book_amazon.amazon_link}} class="unformatted_link" target="_blank" rel="noopener noreferrer">{{ book_ebay.book_name }}</a></td>
+                <td class="col-4 border-start"><a href={{book_amazon.amazon_link}} class="unformatted_link" target="_blank" rel="noopener noreferrer">{{ book_ebay.book_name }}</a></td>
 
                 <td class="col-1 border-start">{{ book_ebay.isbn }}</td>
 
@@ -111,13 +111,13 @@
                 {% if book_amazon.new_total_price[-1] == -999 %}
                 <td class="col-1 border-start">-</td>
                 {% else %}
-                <td class="col-1 border-start"><a href=https://{{book_amazon.amazon_link}} class="unformatted_link" target="_blank" rel="noopener noreferrer">£{{ book_amazon.new_total_price[-1] }}</a></td>
+                <td class="col-1 border-start"><a href={{book_amazon.amazon_link}} class="unformatted_link" target="_blank" rel="noopener noreferrer">£{{ book_amazon.new_total_price[-1] }}</a></td>
                 {% endif %}
 
                 {% if book_amazon.used_total_price[-1] == -999 %}
                 <td class="col-1 border-start">-</td>
                 {% else %}
-                <td class="col-1 border-start"><a href=https://{{book_amazon.amazon_link}} class="unformatted_link" target="_blank" rel="noopener noreferrer">£{{ book_amazon.used_total_price[-1] }}</a></td>
+                <td class="col-1 border-start"><a href={{book_amazon.amazon_link}} class="unformatted_link" target="_blank" rel="noopener noreferrer">£{{ book_amazon.used_total_price[-1] }}</a></td>
                 {% endif %}
 
                 <td class="col border-start"> <div class="text-center"><a href="/query_database_by_isbn/{{book_ebay.isbn}}" class="btn btn-outline-secondary btn-sm">View</a></div> </td>
