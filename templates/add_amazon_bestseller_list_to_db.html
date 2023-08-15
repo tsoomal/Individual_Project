@@ -1,0 +1,25 @@
+<!-- getbootstrap.com for bootstrap-->
+
+{% extends 'base.html' %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+    <div class="container-xxl">
+    <h1>Add Amazon Bestseller List to Database</h1>
+        <br/>
+
+        {% if error_statement %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <strong>{{error_statement}}</strong>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
+
+    <form action="/add_amazon_bestseller_list_to_db" METHOD="POST">
+        <span class="label">Amazon link:</span> &nbsp <input type="text" name="amazon_bestseller_list_link" value="{{link}}" size="40"> <br/><br/>
+        <input type="submit" value="Add to Database" class="btn btn-primary"> <br/>
+    </form>
+
+	</div>
+{% endblock %}

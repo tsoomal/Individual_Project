@@ -516,6 +516,25 @@ def update(isbn):
     return render_template("update.html",
                     book_to_update_ebay=book_to_update_ebay, book_to_update_amazon=book_to_update_amazon)
 
+
+@app.route("/add_amazon_bestseller_list_to_db", methods =['POST','GET'])
+def add_amazon_bestseller_link_to_db():
+    if request.method == "POST":
+        if request.form.get('amazon_bestseller_list_link'):
+            link = request.form.get('amazon_bestseller_list_link')
+            # Do setup.
+
+            return redirect('/books')
+
+        else:
+            error_statement = "Please enter a link!"
+            return render_template("add_amazon_bestseller_list_to_db.html", error_statement=error_statement)
+
+
+    else:
+        return render_template("add_amazon_bestseller_list_to_db.html")
+
+
 @app.route("/delete/<string:isbn>")
 def delete(isbn):
     book_to_delete = Amazon.query.get_or_404(isbn)
