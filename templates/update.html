@@ -13,14 +13,21 @@
     </div>
     {% endif %}
 
+        <br/>
+
+    <a class="btn btn-secondary" href="/automated_update/{{book_to_update_amazon.isbn}}" role="button">Automated Update</a>
+
+        <br/>
+        <br/>
+
         <!-- https://www.computerhope.com/issues/ch001391.htm -->
         <p><mark>NOTE:</mark> "-999.00" values denote an unobtainable/missing value. A value of "-999.00" is not the same as a value of "0.00"!</p>
 
         <br/>
-        <form action="/update/{{book_to_update.isbn}}" METHOD="POST">
-            <span class="label">Book Name:</span> &nbsp <input type="text" placeholder="Name" name="book_name" value="{{book_to_update.book_name}}" size="40"> <br/>
+        <form action="/update/{{book_to_update_ebay.isbn}}" METHOD="POST">
+            <span class="label">Book Name:</span> &nbsp <input type="text" placeholder="Name" name="book_name" value="{{book_to_update_ebay.book_name}}" size="40"> <br/>
 			<!-- https://stackoverflow.com/questions/5601647/html5-email-input-pattern-attribute -->
-            <span class="label">ISBN:</span> &nbsp <input type="text" placeholder="ISBN" name="isbn" value="{{book_to_update.isbn}}" pattern="([0-9]{10})|([0-9]{9}[X]{1})|([0-9]{13})" oninvalid="this.setCustomValidity('Please use either ISBN-10 or ISBN-13 format. Capitalise any \'X\' character.')" oninput="setCustomValidity('')"/> <br/><br/>
+            <span class="label">ISBN:</span> &nbsp <input type="text" placeholder="ISBN" name="isbn" value="{{book_to_update_ebay.isbn}}" pattern="([0-9]{10})|([0-9]{9}[X]{1})|([0-9]{13})" oninvalid="this.setCustomValidity('Please use either ISBN-10 or ISBN-13 format. Capitalise any \'X\' character.')" oninput="setCustomValidity('')"/> <br/><br/>
 
             <span class="label">Amazon link:</span> &nbsp <input type="text" name="amazon_link" value="{{book_to_update_amazon.amazon_link}}" size="40"> <br/>
             <span class="label">Amazon new product price:</span> &nbsp <input type="text" name="amazon_new_product_price" value="{{book_to_update_amazon.new_product_price[-1]}}"> <br/>

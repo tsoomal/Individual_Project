@@ -6,7 +6,7 @@ import decimal
 # Using Postgresql
 # https://stackabuse.com/using-sqlalchemy-with-flask-and-postgresql/
 
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func, create_engine, ARRAY
 import smtplib
@@ -19,7 +19,7 @@ import isbnlib
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.types import TypeDecorator
 
-from ScrapingFunctionality import check_ebay_prices_today, check_amazon_prices_today, get_ebay_historical_price
+from ScrapingFunctionality import check_ebay_prices_today, check_amazon_prices_today, get_ebay_historical_price, check_ebay_prices_today_isbn, check_amazon_prices_today_isbn
 import threading
 from PriceModelling import storage_ebay_to_amazon, storage_amazon_to_ebay
 
@@ -378,6 +378,52 @@ def update_prices_in_database():
 
     return redirect('books')
 
+
+class UpdateAmazonBook(threading.Thread):
+    def __init__(self, book_amazon):
+        super(UpdateAmazonBook, self).__init__()
+        self.isbn = book_amazon.isbn
+        self.amazon_link = book_amazon.amazon_link
+        self.book_name = book_amazon.book_name
+        self.edition_format = book_amazon.edition_format
+
+    def run(self):
+        # https://stackoverflow.com/questions/73999854/flask-error-runtimeerror-working-outside-of-application-context
+        # https://realpython.com/python-use-global-variable-in-function/#:~:text=If%20you%20want%20to%20modify,built%2Din%20globals()%20function
+        try:
+            with app.app_context():
+                check_amazon_prices_today_isbn(self.isbn, self.amazon_link, self.book_name, self.edition_format)
+            print('Threaded task for updating Amazon prices for book has been completed')
+        except:
+            print('Threaded task for updating Amazon prices for book has FAILED')
+
+class UpdateEbayBook(threading.Thread):
+    def __init__(self, isbn):
+        super(UpdateEbayBook, self).__init__()
+        self.isbn = isbn
+    def run(self):
+        # https://stackoverflow.com/questions/73999854/flask-error-runtimeerror-working-outside-of-application-context
+        with app.app_context():
+            check_ebay_prices_today_isbn(self.isbn)
+        print('Threaded task for updating Ebay prices for book has been completed')
+
+@app.route("/automated_update/<string:isbn>", methods =['POST','GET'])
+def automated_update(isbn):
+    t_update_ebay_book = UpdateEbayBook(isbn)
+    t_update_ebay_book.start()
+    # https://stackoverflow.com/questions/11968689/python-multithreading-wait-till-all-threads-finished
+    t_update_ebay_book.join()
+
+    book_amazon = Amazon.query.get_or_404(isbn)
+    t_update_amazon_book = UpdateAmazonBook(book_amazon)
+    t_update_amazon_book.start()
+    # https://stackoverflow.com/questions/11968689/python-multithreading-wait-till-all-threads-finished
+    t_update_amazon_book.join()
+
+    # https://stackoverflow.com/questions/17057191/redirect-while-passing-arguments
+    return redirect(url_for('.update', isbn=isbn))
+
+
 @app.route("/update/<string:isbn>", methods =['POST','GET'])
 def update(isbn):
     book_to_update_amazon = Amazon.query.get_or_404(isbn)
@@ -442,9 +488,11 @@ def update(isbn):
         if request.form.get('ebay_new_delivery_price'):
             book_to_update_ebay.new_delivery_price[-1] = request.form['ebay_new_delivery_price']
         if request.form.get('ebay_new_total_price'):
-            book_to_update_ebay.new_total_price[-1] = request.form['ebay_new_total_price']
+            print("HERE")
+            book_to_update_ebay.new_total_price = book_to_update_ebay.new_total_price + [request.form['ebay_new_total_price']]
         if request.form.get('ebay_used_product_price'):
-            book_to_update_ebay.used_product_price[-1] = request.form['ebay_used_product_price']
+            print("HERE2")
+            book_to_update_ebay.used_product_price = book_to_update_ebay.used_product_price + [request.form['ebay_used_product_price']]
         if request.form.get('ebay_used_delivery_price'):
             book_to_update_ebay.used_delivery_price[-1] = request.form['ebay_used_delivery_price']
         if request.form.get('ebay_used_total_price'):
@@ -456,14 +504,19 @@ def update(isbn):
         # Push to database
         try:
             db.session.commit()
-        except:
+        except Exception as e:
             db.session.rollback()
-            return "There was an error updating that book in the database"
+            print(e)
+            error_statement =  ("There was an error updating that book in the database! Make sure all figures are < £999.00.")
+            return render_template("update.html",
+                                   book_to_update_ebay=book_to_update_ebay, book_to_update_amazon=book_to_update_amazon,
+                                   error_statement=error_statement)
     else:
-        return render_template("update.html", book_to_update=book_to_update_amazon,
+        return render_template("update.html",
                                book_to_update_ebay=book_to_update_ebay, book_to_update_amazon=book_to_update_amazon)
 
-    return redirect('/books')
+    return render_template("update.html",
+                    book_to_update_ebay=book_to_update_ebay, book_to_update_amazon=book_to_update_amazon)
 
 @app.route("/delete/<string:isbn>")
 def delete(isbn):
