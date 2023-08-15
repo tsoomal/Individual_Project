@@ -533,9 +533,11 @@ def opportunities():
         profit_cross = []
         guidance_cross = []
 
-        # TODO: BUY NEW BOOKS TO SELL AS USED
-
         for book_ebay, book_amazon in zip(all_books_ebay, all_books_amazon):
+
+            # Discard all Amazon books where both used and new-condition prices are -999.
+            if book_amazon.new_total_price[-1] == -999 and book_amazon.used_total_price[-1] == -999:
+                continue
 
             # NEW BOOKS
             if book_ebay.new_total_price[-1] == -999 and book_amazon.new_total_price[-1] == -999:
