@@ -1354,6 +1354,58 @@ def get_used_delivery_price(index, soup):
     return used_delivery_price
 
 
+def update_names_in_database():
+    books_amazon = app.Amazon.query.order_by(app.Amazon.book_name)
+
+    for book in books_amazon:
+        link = book.amazon_link
+        old_book_name = book.book_name
+
+        service = Service("..\chromedriver_win32")
+        options = webdriver.ChromeOptions()
+        options.add_argument("--headless=new")
+        options.add_argument("--window-size=1920,1200")
+        driver = webdriver.Chrome(service=service, options=options)
+        driver.get(link)
+
+        # Accept Cookies
+        wait = WebDriverWait(driver, 10)
+        try:
+            # https://stackoverflow.com/questions/67274590/click-accept-cookies-popup-with-selenium-in-python
+            wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="sp-cc-accept"]')))
+            driver.find_element("xpath", '//*[@id="sp-cc-accept"]').click()
+        except:
+            print("Cookies timeout!")
+
+        scroll_to_bottom(driver)
+
+        html = driver.page_source
+        driver.quit()
+
+        soup = BeautifulSoup(html, features="lxml")
+
+        # title
+        span_element = soup.findAll("span", id="productTitle")
+
+        if len(span_element) != 0:
+            title = span_element[0].get_text()
+            print(title)
+        else:
+            print("ERROR!")
+            print(link)
+            title = ""
+
+        print()
+
+        book.book_name = title
+        try:
+            app.db.session.commit()
+            print("Book name updated from: \"" + old_book_name + "\" to \"" + title + "\".")
+        except:
+            app.db.session.rollback()
+            return "There was an error updating that book in the database"
+
+
 
 def main():
     links = [
@@ -1369,6 +1421,7 @@ def main():
 
     #check_amazon_prices_today("./scraped_database_data_amazon.csv", only_create_new_books=False)
     #check_ebay_prices_today("./scraped_database_data_ebay.csv", only_create_new_books=False)
+
 
 
 
