@@ -89,11 +89,11 @@ def setup_list_one_page_from_amazon(file_name, URL=None):
         print(counter)
 
         # title
-        span_element = book_element.findAll("div", class_="_cDEzb_p13n-sc-css-line-clamp-1_1Fn1y")
+        span_element = book_element.findAll("div", class_="_cDEzb_p13n-sc-css-line-clamp-2_EWgCb")
         # author = span_element[1].get_text()
         if not span_element:
             print("IF STATEMENT")
-            span_element = book_element.findAll("div", class_="_cDEzb_p13n-sc-css-line-clamp-2_EWgCb")
+            span_element = book_element.findAll("div", class_="_cDEzb_p13n-sc-css-line-clamp-1_1Fn1y")
             if not span_element:
                 print("IF2 STATEMENT")
                 span_element = book_element.findAll("div", class_="_cDEzb_p13n-sc-css-line-clamp-3_g3dy1")
@@ -111,7 +111,7 @@ def setup_list_one_page_from_amazon(file_name, URL=None):
         # link
         link_element = book_element.find("a", class_="a-link-normal")
         href = link_element["href"]
-        link = "amazon.co.uk" + href
+        link = "https://www.amazon.co.uk" + href
         print(link)
 
         # Edition Format
@@ -1143,7 +1143,7 @@ def end_of_item_loop(amazon_link, book_name, driver, edition_format, isbn, new_d
     driver.quit()
 
 
-def setup_database(links,base_file_name="scraped_database_data", new_list=False):
+def setup_database(links,base_file_name="scraped_database_data", new_list=False, scrape_prices=True):
 
     if new_list:
         create_blank_csv("./"+ base_file_name +"_amazon.csv", createHeader=True)
@@ -1178,8 +1178,9 @@ def setup_database(links,base_file_name="scraped_database_data", new_list=False)
     df = df[['Title', 'New Link', 'Used Link', 'Edition Format', 'ISBN']]
     df.to_csv("./" + base_file_name + "_ebay.csv", index=False)
 
-    check_amazon_prices_today("./" + base_file_name + "_amazon.csv", only_create_new_books=False)
-    check_ebay_prices_today("./" + base_file_name + "_ebay.csv", only_create_new_books=False)
+    if scrape_prices:
+        check_amazon_prices_today("./" + base_file_name + "_amazon.csv", only_create_new_books=False)
+        check_ebay_prices_today("./" + base_file_name + "_ebay.csv", only_create_new_books=False)
 
 
 def get_ebay_historical_price(isbn, condition):
@@ -1365,7 +1366,9 @@ def main():
 
     #check_amazon_prices_today("./scraped_database_data_amazon.csv", only_create_new_books=False)
     #check_ebay_prices_today("./scraped_database_data_ebay.csv", only_create_new_books=False)
+    #setup_list_one_page_from_amazon_test("test_name_setup.csv", "https://www.amazon.co.uk/best-sellers-books-Amazon/zgbs/books/503400/ref=zg_bs_pg_2_books?_encoding=UTF8&pg=2")
 
+    setup_database(links,"test_csv", new_list=True, scrape_prices=False)
 
 
 if __name__ == "__main__":

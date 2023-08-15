@@ -158,6 +158,20 @@ def contact_form():
 
 @app.route("/books", methods =['POST','GET'])
 def books():
+
+    # Convert amazon links to have https:// in front.
+    #books_amazon = Amazon.query.order_by(Amazon.book_name)
+
+    # for book in books_amazon:
+    #     link = book.amazon_link
+    #     new_link = "https://" + link
+    #     book.amazon_link = new_link
+    #     try:
+    #         db.session.commit()
+    #     except:
+    #         db.session.rollback()
+    #         return "There was an error updating that book in the database"
+
     if updatable_amazon and updatable_ebay:
         updatable = True
     else:
