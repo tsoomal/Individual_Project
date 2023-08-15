@@ -1186,8 +1186,12 @@ def setup_database(links,base_file_name="scraped_database_data", new_list=False,
 def get_ebay_historical_price(isbn, condition):
 
     if condition.lower()=="new":
-        URL = "https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw=" + str(
-            isbn) + "&_sacat=0&LH_Sold=1&LH_Complete=1&LH_PrefLoc=1&rt=nc"
+        # URL = "https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw=" + str(
+        #     isbn) + "&_sacat=0&LH_Sold=1&LH_Complete=1&LH_PrefLoc=1&rt=nc"
+
+        # https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw=%091622127226&_sacat=0&LH_ItemCondition=3&LH_PrefLoc=2&rt=nc&LH_Sold=1&LH_Complete=1
+        URL = "https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw=%09" + str(isbn) + "&_sacat=0&LH_ItemCondition=3&LH_PrefLoc=2&rt=nc&LH_Sold=1&LH_Complete=1"
+
         page = requests.get(URL)
         html = page.text
         soup = BeautifulSoup(html, features="lxml")
@@ -1241,8 +1245,14 @@ def get_ebay_historical_price(isbn, condition):
 
 
     elif condition.lower()=="used":
+        # URL = "https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw=" + str(
+        #     isbn) + "&_sacat=0&LH_ItemCondition=4&LH_Sold=1&LH_Complete=1&rt=nc&LH_PrefLoc=1"
+
+        # https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw=1622127226&_sacat=0&LH_ItemCondition=4&LH_PrefLoc=2&rt=nc&LH_Sold=1&LH_Complete=1
         URL = "https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw=" + str(
-            isbn) + "&_sacat=0&LH_ItemCondition=4&LH_Sold=1&LH_Complete=1&rt=nc&LH_PrefLoc=1"
+                    isbn) + "&_sacat=0&LH_ItemCondition=4&LH_PrefLoc=2&rt=nc&LH_Sold=1&LH_Complete=1"
+
+
         page = requests.get(URL)
         html = page.text
         soup = BeautifulSoup(html, features="lxml")
@@ -1405,6 +1415,30 @@ def update_names_in_database():
             app.db.session.rollback()
             return "There was an error updating that book in the database"
 
+def update_ebay_historical_prices_in_database():
+    books_ebay = app.Ebay.query.order_by(app.Ebay.book_name)
+
+    for book in books_ebay:
+        print(book.book_name)
+        isbn = book.isbn
+        used_historical_price = get_ebay_historical_price(isbn, "new")
+        print(used_historical_price)
+        book.historical_new_total_price = book.historical_new_total_price + [used_historical_price]
+
+        new_historical_price = get_ebay_historical_price(isbn, "used")
+        print(new_historical_price)
+        book.historical_used_total_price = book.historical_used_total_price + [new_historical_price]
+
+        try:
+            app.db.session.commit()
+            print("Committed.")
+            print()
+        except Exception as e:
+            app.db.session.rollback()
+            print ("There was an error updating that book in the database")
+            print(e)
+
+
 
 
 def main():
@@ -1421,6 +1455,7 @@ def main():
 
     #check_amazon_prices_today("./scraped_database_data_amazon.csv", only_create_new_books=False)
     check_ebay_prices_today("./scraped_database_data_ebay.csv", only_create_new_books=True)
+
 
 
 
