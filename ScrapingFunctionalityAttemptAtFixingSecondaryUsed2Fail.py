@@ -89,11 +89,11 @@ def setup_list_one_page_from_amazon(file_name, URL=None):
         print(counter)
 
         # title
-        span_element = book_element.findAll("div", class_="_cDEzb_p13n-sc-css-line-clamp-1_1Fn1y")
+        span_element = book_element.findAll("div", class_="_cDEzb_p13n-sc-css-line-clamp-2_EWgCb")
         # author = span_element[1].get_text()
         if not span_element:
             print("IF STATEMENT")
-            span_element = book_element.findAll("div", class_="_cDEzb_p13n-sc-css-line-clamp-2_EWgCb")
+            span_element = book_element.findAll("div", class_="_cDEzb_p13n-sc-css-line-clamp-1_1Fn1y")
             if not span_element:
                 print("IF2 STATEMENT")
                 span_element = book_element.findAll("div", class_="_cDEzb_p13n-sc-css-line-clamp-3_g3dy1")
@@ -111,7 +111,7 @@ def setup_list_one_page_from_amazon(file_name, URL=None):
         # link
         link_element = book_element.find("a", class_="a-link-normal")
         href = link_element["href"]
-        link = "amazon.co.uk" + href
+        link = "https://www.amazon.co.uk" + href
         print(link)
 
         # Edition Format
@@ -988,60 +988,41 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
 def click_used_link(driver, soup):
     results = soup.find("div", id="tmmSwatches")
     results2 = results.findAll("li")
-    print("LENGTH OF RESULTS2: " + str(len(results2)))
-    if len(results2)==0:
-        counter = 0
-        found_selected_button = False
-        results3 = results.findAll("div")
-        for div_item in results3:
-            if div_item.get("class")[4] == "selected":
-                found_selected_button = True
-                print("FOUND SELECTED!")
-                break
-            else:
-                counter += 1
-        #print(results2[counter].prettify())
-        # used_product_price = results2[counter].find(class_='slot-price').get_text(strip=True)
-        # print(used_product_price)
+    counter = 0
+    found_selected_button = False
+    for list_item in results2:
+        if list_item.get("class")[1] == "selected":
+            found_selected_button = True
+            break
+        else:
+            counter += 1
+    span_block = results2[counter].findAll("span",
+                                           attrs={'data-show-all-offers-display': True})
+    for loop_counter, block in enumerate(span_block):
+        stringer = (block['data-show-all-offers-display'])
+
+        if "used" in stringer:
+            index_of_used = loop_counter
+        elif "new" in stringer:
+            pass
+    if found_selected_button == True:
+        counter = counter
+        index_of_used = index_of_used
+        if counter == 0:
+            xpath_string = "//*[@id='tmmSwatches']/ul/li/span/span[3]/span[" + str(
+                index_of_used + 1) + "]/span/a"
+        else:
+            xpath_string = "//*[@id='tmmSwatches']/ul/li[" + str(
+                counter + 1) + "]/span/span[3]/span[" + str(
+                index_of_used + 1) + "]/span/a"
+
+        WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable(
+                (By.XPATH, xpath_string))).click()
 
     else:
-        counter = 0
-        found_selected_button = False
-        for list_item in results2:
-            print(list_item.get("class"))
-            if list_item.get("class")[1] == "selected":
-                found_selected_button = True
-                break
-            else:
-                counter += 1
-        span_block = results2[counter].findAll("span",
-                                               attrs={'data-show-all-offers-display': True})
-        for loop_counter, block in enumerate(span_block):
-            stringer = (block['data-show-all-offers-display'])
-
-            if "used" in stringer:
-                index_of_used = loop_counter
-            elif "new" in stringer:
-                pass
-        if found_selected_button == True:
-            counter = counter
-            index_of_used = index_of_used
-            if counter == 0:
-                xpath_string = "//*[@id='tmmSwatches']/ul/li/span/span[3]/span[" + str(
-                    index_of_used + 1) + "]/span/a"
-            else:
-                xpath_string = "//*[@id='tmmSwatches']/ul/li[" + str(
-                    counter + 1) + "]/span/span[3]/span[" + str(
-                    index_of_used + 1) + "]/span/a"
-
-            WebDriverWait(driver, 10).until(
-                EC.element_to_be_clickable(
-                    (By.XPATH, xpath_string))).click()
-
-            time.sleep(3)
-
-        else:
-            raise Exception
+        raise Exception
+    time.sleep(3)
     return
 
 
@@ -1162,7 +1143,7 @@ def end_of_item_loop(amazon_link, book_name, driver, edition_format, isbn, new_d
     driver.quit()
 
 
-def setup_database(links,base_file_name="scraped_database_data", new_list=False):
+def setup_database(links,base_file_name="scraped_database_data", new_list=False, scrape_prices=True):
 
     if new_list:
         create_blank_csv("./"+ base_file_name +"_amazon.csv", createHeader=True)
@@ -1197,15 +1178,20 @@ def setup_database(links,base_file_name="scraped_database_data", new_list=False)
     df = df[['Title', 'New Link', 'Used Link', 'Edition Format', 'ISBN']]
     df.to_csv("./" + base_file_name + "_ebay.csv", index=False)
 
-    check_amazon_prices_today("./" + base_file_name + "_amazon.csv", only_create_new_books=False)
-    check_ebay_prices_today("./" + base_file_name + "_ebay.csv", only_create_new_books=False)
+    if scrape_prices:
+        check_amazon_prices_today("./" + base_file_name + "_amazon.csv", only_create_new_books=False)
+        check_ebay_prices_today("./" + base_file_name + "_ebay.csv", only_create_new_books=False)
 
 
 def get_ebay_historical_price(isbn, condition):
 
     if condition.lower()=="new":
-        URL = "https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw=" + str(
-            isbn) + "&_sacat=0&LH_Sold=1&LH_Complete=1&LH_PrefLoc=1&rt=nc"
+        # URL = "https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw=" + str(
+        #     isbn) + "&_sacat=0&LH_Sold=1&LH_Complete=1&LH_PrefLoc=1&rt=nc"
+
+        # https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw=%091622127226&_sacat=0&LH_ItemCondition=3&LH_PrefLoc=2&rt=nc&LH_Sold=1&LH_Complete=1
+        URL = "https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw=%09" + str(isbn) + "&_sacat=0&LH_ItemCondition=3&LH_PrefLoc=2&rt=nc&LH_Sold=1&LH_Complete=1"
+
         page = requests.get(URL)
         html = page.text
         soup = BeautifulSoup(html, features="lxml")
@@ -1259,8 +1245,14 @@ def get_ebay_historical_price(isbn, condition):
 
 
     elif condition.lower()=="used":
+        # URL = "https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw=" + str(
+        #     isbn) + "&_sacat=0&LH_ItemCondition=4&LH_Sold=1&LH_Complete=1&rt=nc&LH_PrefLoc=1"
+
+        # https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw=1622127226&_sacat=0&LH_ItemCondition=4&LH_PrefLoc=2&rt=nc&LH_Sold=1&LH_Complete=1
         URL = "https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw=" + str(
-            isbn) + "&_sacat=0&LH_ItemCondition=4&LH_Sold=1&LH_Complete=1&rt=nc&LH_PrefLoc=1"
+                    isbn) + "&_sacat=0&LH_ItemCondition=4&LH_PrefLoc=2&rt=nc&LH_Sold=1&LH_Complete=1"
+
+
         page = requests.get(URL)
         html = page.text
         soup = BeautifulSoup(html, features="lxml")
@@ -1370,6 +1362,81 @@ def get_used_delivery_price(index, soup):
         except Exception as e:
             used_delivery_price = -999
     return used_delivery_price
+
+
+def update_names_in_database():
+    books_amazon = app.Amazon.query.order_by(app.Amazon.book_name)
+
+    for book in books_amazon:
+        link = book.amazon_link
+        old_book_name = book.book_name
+
+        service = Service("..\chromedriver_win32")
+        options = webdriver.ChromeOptions()
+        options.add_argument("--headless=new")
+        options.add_argument("--window-size=1920,1200")
+        driver = webdriver.Chrome(service=service, options=options)
+        driver.get(link)
+
+        # Accept Cookies
+        wait = WebDriverWait(driver, 10)
+        try:
+            # https://stackoverflow.com/questions/67274590/click-accept-cookies-popup-with-selenium-in-python
+            wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="sp-cc-accept"]')))
+            driver.find_element("xpath", '//*[@id="sp-cc-accept"]').click()
+        except:
+            print("Cookies timeout!")
+
+        scroll_to_bottom(driver)
+
+        html = driver.page_source
+        driver.quit()
+
+        soup = BeautifulSoup(html, features="lxml")
+
+        # title
+        span_element = soup.findAll("span", id="productTitle")
+
+        if len(span_element) != 0:
+            title = span_element[0].get_text()
+            print(title)
+        else:
+            print("ERROR!")
+            print(link)
+            title = ""
+
+        print()
+
+        book.book_name = title
+        try:
+            app.db.session.commit()
+            print("Book name updated from: \"" + old_book_name + "\" to \"" + title + "\".")
+        except:
+            app.db.session.rollback()
+            return "There was an error updating that book in the database"
+
+def update_ebay_historical_prices_in_database():
+    books_ebay = app.Ebay.query.order_by(app.Ebay.book_name)
+
+    for book in books_ebay:
+        print(book.book_name)
+        isbn = book.isbn
+        used_historical_price = get_ebay_historical_price(isbn, "new")
+        print(used_historical_price)
+        book.historical_new_total_price = book.historical_new_total_price + [used_historical_price]
+
+        new_historical_price = get_ebay_historical_price(isbn, "used")
+        print(new_historical_price)
+        book.historical_used_total_price = book.historical_used_total_price + [new_historical_price]
+
+        try:
+            app.db.session.commit()
+            print("Committed.")
+            print()
+        except Exception as e:
+            app.db.session.rollback()
+            print ("There was an error updating that book in the database")
+            print(e)
 
 
 
@@ -1870,6 +1937,13 @@ def isbn_check_amazon_prices_today(isbn):
 
 
 
+
+
+
+
+
+
+
 def main():
     links = [
         "https://www.amazon.co.uk/Best-Sellers-Books-Role-Playing-War-Games/zgbs/books/270509/ref=zg_bs_nav_books_3_270453",
@@ -1879,44 +1953,13 @@ def main():
         "https://www.amazon.co.uk/gp/bestsellers/books/14909604031/ref=pd_zg_hrsr_books",
         "https://www.amazon.co.uk/best-sellers-books-Amazon/zgbs/books/14909604031/ref=zg_bs_pg_2_books?_encoding=UTF8&pg=2"]
 
-    #check_amazon_prices_today("./scraped_database_data_amazon.csv", only_create_new_books=False)
-    #check_ebay_prices_today("./scraped_database_data_ebay.csv", only_create_new_books=False)
+    # Only setup CSV files. Note, deletes old files!
+    # setup_database(links, new_list=True, scrape_prices=False)
 
-    # isbn_check_amazon_prices_today("1852860820")
-    # isbn_check_amazon_prices_today("1580441688")
-    # isbn_check_amazon_prices_today("110842001X")
-    # isbn_check_amazon_prices_today("1782010726")
-    isbn_check_amazon_prices_today("1932386009")
-    isbn_check_amazon_prices_today("1852860820")
-    isbn_check_amazon_prices_today("1840230541")
-    # isbn_check_amazon_prices_today("1840231580")
-    # isbn_check_amazon_prices_today("1852865164")
-    # isbn_check_amazon_prices_today("1801262098")
-    # isbn_check_amazon_prices_today("1108739555")
-    # isbn_check_amazon_prices_today("0062659650")
-    # isbn_check_amazon_prices_today("1474601901")
-    # isbn_check_amazon_prices_today("1841138460")
-    # isbn_check_amazon_prices_today("1840231769")
-    # isbn_check_amazon_prices_today("0195372778")
-    # isbn_check_amazon_prices_today("0198812612")
-    # isbn_check_amazon_prices_today("0875804195")
-    # isbn_check_amazon_prices_today("1910232890")
-    # isbn_check_amazon_prices_today("1640785299")
-    # isbn_check_amazon_prices_today("0854902945")
-    # isbn_check_amazon_prices_today("0241953375")
-    # isbn_check_amazon_prices_today("1473610079")
-    # isbn_check_amazon_prices_today("1779509529")
-    # isbn_check_amazon_prices_today("0198787200")
-    # isbn_check_amazon_prices_today("1858755832")
-    # isbn_check_amazon_prices_today("1908906103")
-    # isbn_check_amazon_prices_today("0753801523")
-    # isbn_check_amazon_prices_today("1852868562")
-    # isbn_check_amazon_prices_today("1421409887")
-    # isbn_check_amazon_prices_today("1948174987")
-    # isbn_check_amazon_prices_today("0521079438")
-    # isbn_check_amazon_prices_today("0521178681")
-    # isbn_check_amazon_prices_today("1398503274")
-    # isbn_check_amazon_prices_today("1852862912")
+    #check_amazon_prices_today("./scraped_database_data_amazon.csv", only_create_new_books=False)
+    #check_ebay_prices_today("./scraped_database_data_ebay.csv", only_create_new_books=True)
+
+    isbn_check_amazon_prices_today("1108739555")
 
 
 
@@ -1924,5 +1967,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
 
