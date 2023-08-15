@@ -467,39 +467,37 @@ def update(isbn):
         if request.form.get('amazon_link'):
             book_to_update_amazon.amazon_link = request.form['amazon_link']
         if request.form.get('amazon_new_product_price'):
-            book_to_update_amazon.new_product_price[-1] = request.form['amazon_new_product_price']
+            book_to_update_amazon.new_product_price = book_to_update_amazon.new_product_price + [request.form['amazon_new_product_price']]
         if request.form.get('amazon_new_delivery_price'):
-            book_to_update_amazon.new_delivery_price[-1] = request.form['amazon_new_delivery_price']
+            book_to_update_amazon.new_delivery_price = book_to_update_amazon.new_delivery_price + [request.form['amazon_new_delivery_price']]
         if request.form.get('amazon_new_total_price'):
-            book_to_update_amazon.new_total_price[-1] = request.form['amazon_new_total_price']
+            book_to_update_amazon.new_total_price = book_to_update_amazon.new_total_price + [request.form['amazon_new_total_price']]
         if request.form.get('amazon_used_product_price'):
-            book_to_update_amazon.used_product_price[-1] = request.form['amazon_used_product_price']
+            book_to_update_amazon.used_product_price = book_to_update_amazon.used_product_price + [request.form['amazon_used_product_price']]
         if request.form.get('amazon_used_delivery_price'):
-            book_to_update_amazon.used_delivery_price[-1] = request.form['amazon_used_delivery_price']
+            book_to_update_amazon.used_delivery_price = book_to_update_amazon.used_delivery_price + [request.form['amazon_used_delivery_price']]
         if request.form.get('amazon_used_total_price'):
-            book_to_update_amazon.used_total_price[-1] = request.form['amazon_used_total_price']
+            book_to_update_amazon.used_total_price = book_to_update_amazon.used_total_price + [request.form['amazon_used_total_price']]
 
         if request.form.get('new_ebay_link'):
             book_to_update_ebay.new_ebay_link = request.form['new_ebay_link']
         if request.form.get('used_ebay_link'):
             book_to_update_ebay.used_ebay_link = request.form['used_ebay_link']
         if request.form.get('ebay_new_product_price'):
-            book_to_update_ebay.new_product_price[-1] = request.form['ebay_new_product_price']
+            book_to_update_ebay.new_product_price = book_to_update_ebay.new_product_price + [request.form['ebay_new_product_price']]
         if request.form.get('ebay_new_delivery_price'):
-            book_to_update_ebay.new_delivery_price[-1] = request.form['ebay_new_delivery_price']
+            book_to_update_ebay.new_delivery_price = book_to_update_ebay.new_delivery_price + [request.form['ebay_new_delivery_price']]
         if request.form.get('ebay_new_total_price'):
-            print("HERE")
             book_to_update_ebay.new_total_price = book_to_update_ebay.new_total_price + [request.form['ebay_new_total_price']]
         if request.form.get('ebay_used_product_price'):
-            print("HERE2")
             book_to_update_ebay.used_product_price = book_to_update_ebay.used_product_price + [request.form['ebay_used_product_price']]
         if request.form.get('ebay_used_delivery_price'):
-            book_to_update_ebay.used_delivery_price[-1] = request.form['ebay_used_delivery_price']
+            book_to_update_ebay.used_delivery_price = book_to_update_ebay.used_delivery_price + [request.form['ebay_used_delivery_price']]
         if request.form.get('ebay_used_total_price'):
-            book_to_update_ebay.used_total_price[-1] = request.form['ebay_used_total_price']
+            book_to_update_ebay.used_total_price = book_to_update_ebay.used_total_price + [request.form['ebay_used_total_price']]
 
-        book_to_update_ebay.historical_new_total_price[-1] = get_ebay_historical_price(isbn, "new")
-        book_to_update_ebay.historical_used_total_price[-1] = get_ebay_historical_price(isbn, "used")
+        book_to_update_ebay.historical_new_total_price = book_to_update_ebay.historical_new_total_price + [get_ebay_historical_price(isbn, "new")]
+        book_to_update_ebay.historical_used_total_price = book_to_update_ebay.historical_used_total_price + [get_ebay_historical_price(isbn, "used")]
 
         # Push to database
         try:
