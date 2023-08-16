@@ -708,7 +708,7 @@ def opportunities():
                     books_amazon_new.append(book_amazon)
                     books_ebay_new.append(book_ebay)
                     profit_new.append(round(book_amazon.new_total_price[-1] - total_selling_price_to_breakeven,2))
-                    guidance_new.append("Buy from eBay, sell on Amazon (historical eBay price supports this)")
+                    guidance_new.append("Buy from eBay, sell on Amazon.")
             else:
                 # Both books have the same new total prices. No arbitrage is possible.
                 pass
@@ -819,7 +819,7 @@ def opportunities():
                         books_amazon_used.append(book_amazon)
                         books_ebay_used.append(book_ebay)
                         profit_used.append(round(book_amazon.used_total_price[-1] - total_selling_price_to_breakeven,2))
-                        guidance_used.append("Buy from eBay, sell on Amazon at listed prices (historical eBay price supports this)")
+                        guidance_used.append("Buy from eBay, sell on Amazon at listed prices")
 
             else:
                 # Both books have the same used total prices.

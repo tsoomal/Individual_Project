@@ -15,6 +15,14 @@
     </div>
     {% endif %}
 
+        Useful information:
+        <ul>
+          <li>Only enter bestseller page links from Amazon</li>
+          <li>Each page requires a separate link. For example, page 1 and page 2 of the same bestseller list requires two links.</li>
+          <li>Make sure each link begins with "https://www."</li>
+          <li>Clicking "Add to Database" will add the books from the bestseller list into the database, including all price details.</li>
+        </ul>
+
 
     <form action="/add_amazon_bestseller_list_to_db" METHOD="POST">
         <span class="label">Bestseller page link 1:</span> &nbsp <input type="text" name="amazon_bestseller_list_link_1" size="40"> <br/><br/>
