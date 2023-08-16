@@ -530,22 +530,35 @@ class AddBestsellerLinkToDB(threading.Thread):
 @app.route("/add_amazon_bestseller_list_to_db", methods =['POST','GET'])
 def add_amazon_bestseller_link_to_db():
     if request.method == "POST":
-        if request.form.get('amazon_bestseller_list_link'):
-            link = request.form.get('amazon_bestseller_list_link')
-            links = []
+        links = []
+        if request.form.get('amazon_bestseller_list_link_1'):
+            link = request.form.get('amazon_bestseller_list_link_1')
+            links.append(link)
+        if request.form.get('amazon_bestseller_list_link_2'):
+            link = request.form.get('amazon_bestseller_list_link_2')
+            links.append(link)
+        if request.form.get('amazon_bestseller_list_link_3'):
+            link = request.form.get('amazon_bestseller_list_link_3')
+            links.append(link)
+        if request.form.get('amazon_bestseller_list_link_4'):
+            link = request.form.get('amazon_bestseller_list_link_4')
+            links.append(link)
+        if request.form.get('amazon_bestseller_list_link_5'):
+            link = request.form.get('amazon_bestseller_list_link_5')
+            links.append(link)
+        if request.form.get('amazon_bestseller_list_link_6'):
+            link = request.form.get('amazon_bestseller_list_link_6')
             links.append(link)
 
+        if len(links) == 0:
+            error_statement = "Please enter at least one link! Make sure it starts with \"https://www.\""
+            return render_template("add_amazon_bestseller_list_to_db.html", error_statement=error_statement)
+        else:
             # Do setup.
             t_add_bestseller_list_to_db = AddBestsellerLinkToDB(links)
             t_add_bestseller_list_to_db.start()
 
-            # https://www.amazon.co.uk/Best-Sellers-Books-Manga/zgbs/books/503412/ref=zg_bs_nav_books_2_274081
-
             return redirect('/books')
-
-        else:
-            error_statement = "Please enter a link! Make sure it starts with \"https://www.\""
-            return render_template("add_amazon_bestseller_list_to_db.html", error_statement=error_statement)
 
     else:
         return render_template("add_amazon_bestseller_list_to_db.html")
