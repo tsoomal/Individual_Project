@@ -1353,11 +1353,20 @@ def check_amazon_prices_today_isbn(isbn, amazon_link, book_name, edition_format)
 
                 html = driver.page_source
                 soup = BeautifulSoup(html, features="lxml")
+                print("HERE1")
                 results = soup.find("div", id="tmmSwatches")
+                print(results.prettify())
+                # https://www.amazon.co.uk/Batman-Arkham-Talia-al-Ghul/dp/1779509154/ref=tmm_pap_swatch_0?_encoding=UTF8&qid=&sr=Add
+                print("HERE2")
                 results2 = results.findAll("li")
+                print("HERE3")
                 counter = 0
                 found_selected_button = False
                 for list_item in results2:
+                    print(list_item)
+                    print()
+                    print()
+                    print()
                     if list_item.get("class")[1] == "selected":
                         found_selected_button = True
                         break
@@ -1399,7 +1408,9 @@ def check_amazon_prices_today_isbn(isbn, amazon_link, book_name, edition_format)
 
                 html = driver.page_source
                 soup = BeautifulSoup(html, features="lxml")
+                print("HERE4")
                 results = soup.find("div", id="aod-offer")
+                print("HERE5")
                 price_text = results.find("span", class_="a-offscreen").get_text()
 
                 if results is not None:
