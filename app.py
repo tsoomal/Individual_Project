@@ -19,7 +19,7 @@ import isbnlib
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.types import TypeDecorator
 
-from ScrapingFunctionality import check_ebay_prices_today, check_amazon_prices_today, get_ebay_historical_price, check_ebay_prices_today_isbn, check_amazon_prices_today_isbn
+from ScrapingFunctionality import check_ebay_prices_today, check_amazon_prices_today, get_ebay_historical_price, check_ebay_prices_today_isbn, check_amazon_prices_today_isbn, setup_database
 import threading
 from PriceModelling import storage_ebay_to_amazon, storage_amazon_to_ebay
 
@@ -516,20 +516,36 @@ def update(isbn):
     return render_template("update.html",
                     book_to_update_ebay=book_to_update_ebay, book_to_update_amazon=book_to_update_amazon)
 
+class AddBestsellerLinkToDB(threading.Thread):
+    def __init__(self, links):
+        super(AddBestsellerLinkToDB, self).__init__()
+        self.links = links
+    def run(self):
+        # https://stackoverflow.com/questions/73999854/flask-error-runtimeerror-working-outside-of-application-context
+        with app.app_context():
+            setup_database(self.links, base_file_name="scraped_database_data", create_new_csv=False,
+                           add_bestseller_link=True, scrape_prices=True, scrape_only_new_books=True)
+        print('Threaded task for updating Ebay prices for book has been completed')
 
 @app.route("/add_amazon_bestseller_list_to_db", methods =['POST','GET'])
 def add_amazon_bestseller_link_to_db():
     if request.method == "POST":
         if request.form.get('amazon_bestseller_list_link'):
             link = request.form.get('amazon_bestseller_list_link')
+            links = []
+            links.append(link)
+
             # Do setup.
+            t_add_bestseller_list_to_db = AddBestsellerLinkToDB(links)
+            t_add_bestseller_list_to_db.start()
+
+            # https://www.amazon.co.uk/Best-Sellers-Books-Manga/zgbs/books/503412/ref=zg_bs_nav_books_2_274081
 
             return redirect('/books')
 
         else:
-            error_statement = "Please enter a link!"
+            error_statement = "Please enter a link! Make sure it starts with \"https://www.\""
             return render_template("add_amazon_bestseller_list_to_db.html", error_statement=error_statement)
-
 
     else:
         return render_template("add_amazon_bestseller_list_to_db.html")

@@ -1828,11 +1828,17 @@ def end_of_item_loop(amazon_link, book_name, driver, edition_format, isbn, new_d
     driver.quit()
 
 
-def setup_database(links,base_file_name="scraped_database_data", new_list=False, scrape_prices=True):
+def setup_database(links,base_file_name="scraped_database_data", create_new_csv=False, add_bestseller_link=False, scrape_prices=True, scrape_only_new_books=False):
 
-    if new_list:
+    if create_new_csv:
         create_blank_csv("./"+ base_file_name +"_amazon.csv", createHeader=True)
 
+        for link in links:
+            setup_list_one_page_from_amazon("./"+ base_file_name +"_amazon.csv",link)
+
+        get_ISBN_from_list("./"+ base_file_name +"_amazon.csv")
+
+    if add_bestseller_link:
         for link in links:
             setup_list_one_page_from_amazon("./"+ base_file_name +"_amazon.csv",link)
 
@@ -1863,7 +1869,11 @@ def setup_database(links,base_file_name="scraped_database_data", new_list=False,
     df = df[['Title', 'New Link', 'Used Link', 'Edition Format', 'ISBN']]
     df.to_csv("./" + base_file_name + "_ebay.csv", index=False)
 
-    if scrape_prices:
+    if scrape_prices and scrape_only_new_books:
+        check_amazon_prices_today("./" + base_file_name + "_amazon.csv", only_create_new_books=True)
+        check_ebay_prices_today("./" + base_file_name + "_ebay.csv", only_create_new_books=True)
+
+    if scrape_prices and not scrape_only_new_books:
         check_amazon_prices_today("./" + base_file_name + "_amazon.csv", only_create_new_books=False)
         check_ebay_prices_today("./" + base_file_name + "_ebay.csv", only_create_new_books=False)
 
