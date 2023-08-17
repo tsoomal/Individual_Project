@@ -21,15 +21,16 @@
             <!-- https://stackoverflow.com/questions/4465562/how-to-write-w3c-compliant-multi-level-bullet-points-in-html -->
           <li style="list-style-type:none">
             <ul>
-                <li>Number of new book opportunities: {{number_of_new_opps}}</li>
-                <li>Number of used book opportunities: {{number_of_used_opps}}</li>
-                <li>Number of cross book opportunities: {{number_of_cross_opps}}</li>
-                <li>Total number of book opportunities: {{number_of_new_opps + number_of_used_opps + number_of_cross_opps}}</li>
+                <li>Number of new-condition opportunities: {{number_of_new_opps}}</li>
+                <li>Number of used-condition opportunities: {{number_of_used_opps}}</li>
+                <li>Number of cross-condition opportunities: {{number_of_cross_opps}}</li>
+                <li>Total number of opportunities: {{number_of_new_opps + number_of_used_opps + number_of_cross_opps}}</li>
             </ul>
           </li>
+            <br/>
           <li>Any "-" symbols means that this application hasn't been able to find that particular price. Please double-check that this price doesn't exist as this price may indeed exist, leading to false opportunities. By using the "Automated Update" button on the update page for each record, a price might be found easily.</li>
           <li>"Arbitrage of Cross-Condition Books" shows the books where arbitrage can occur across different conditions. For example, a new book on one platform, may be sold on another platform as used, for a profit. Used-condition books will never be suggested to be sold as new-condition.</li>
-          <li>eBay prices are checked that they are obtainable based on previously sold eBay listings. Amazon prices are assumed to be always obtainable due to a lack of Amazon data on sold item listings.</li>
+          <li>eBay prices are checked to determine whether they are obtainable based on previously sold eBay listings; if so, they are recorded as opportunities. Amazon prices are assumed to be always obtainable due to a lack of Amazon data on sold item listings.</li>
         </ul>
 
         <br/>

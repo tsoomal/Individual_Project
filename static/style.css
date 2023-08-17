@@ -57,3 +57,9 @@ img_index {
     overflow: auto
     background-repeat: no-repeat;
 }
+
+/* https://www.educba.com/html-image-padding/ */
+.img_index {
+padding: 0px 15px 0px 15px; //padding positions
+}
+
