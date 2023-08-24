@@ -85,6 +85,8 @@ class Amazon(db.Model):
     book_name = db.Column(db.String(200), nullable=False)
     amazon_link = db.Column(db.String(200), nullable=False)
     isbn = db.Column(db.String(13), ForeignKey(Ebay.isbn), primary_key=True)
+    # IMPORTANT NOTE:
+    # Ebay book records have to be created first, and then Amazon book records can be created for the same book.
     edition_format = db.Column(db.String(40), nullable=False)
     new_product_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
     new_delivery_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
