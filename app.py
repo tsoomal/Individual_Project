@@ -942,8 +942,21 @@ def opportunities():
 def sync_tables():
     # https://stackoverflow.com/questions/32938475/flask-sqlalchemy-check-if-row-exists-in-table
     try:
-        all_books_ebay = Ebay.query.order_by(Ebay.isbn)
         all_books_amazon = Amazon.query.order_by(Amazon.isbn)
+        all_books_ebay = Ebay.query.order_by(Ebay.isbn)
+
+        for book_amazon in all_books_amazon:
+            isbn = book_amazon.isbn
+            exists = db.session.query(db.exists().where(Ebay.isbn == isbn)).scalar()
+            if exists:
+                pass
+            else:
+                try:
+                    db.session.delete(book_amazon)
+                    db.session.commit()
+                    print("Book deleted from Amazon table!")
+                except:
+                    db.session.rollback()
 
         for book_ebay in all_books_ebay:
             isbn = book_ebay.isbn
@@ -958,18 +971,6 @@ def sync_tables():
                 except:
                     db.session.rollback()
 
-        for book_amazon in all_books_amazon:
-            isbn = book_amazon.isbn
-            exists = db.session.query(db.exists().where(Ebay.isbn == isbn)).scalar()
-            if exists:
-                pass
-            else:
-                try:
-                    db.session.delete(book_amazon)
-                    db.session.commit()
-                    print("Book deleted from Amazon table!")
-                except:
-                    db.session.rollback()
 
     except:
         db.session.rollback()
