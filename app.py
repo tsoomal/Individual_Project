@@ -8,7 +8,7 @@ import decimal
 
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import func, create_engine, ARRAY
+from sqlalchemy import func, create_engine, ARRAY, ForeignKey
 import smtplib
 from email.message import EmailMessage
 import os
@@ -43,36 +43,6 @@ global updatable_ebay
 updatable_ebay = True
 
 # Creating the database model
-class Amazon(db.Model):
-    __tablename__ = 'Amazon'
-    book_name = db.Column(db.String(200), nullable=False)
-    amazon_link = db.Column(db.String(200), nullable=False)
-    isbn = db.Column(db.String(13), primary_key=True)
-    edition_format = db.Column(db.String(40), nullable=False)
-    new_product_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
-    new_delivery_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
-    new_total_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
-    used_product_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
-    used_delivery_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
-    used_total_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
-
-
-    def __init__(self, book_name, amazon_link, isbn, edition_format, new_product_price, new_delivery_price, new_total_price,
-                 used_product_price, used_delivery_price, used_total_price):
-        self.book_name = book_name
-        self.amazon_link = amazon_link
-        self.isbn = isbn
-        self.edition_format = edition_format
-        self.new_product_price = new_product_price
-        self.new_delivery_price = new_delivery_price
-        self.new_total_price = new_total_price
-        self.used_product_price = used_product_price
-        self.used_delivery_price = used_delivery_price
-        self.used_total_price = used_total_price
-
-    def __repr__(self):
-        return f"<Book: {self.book_name}>"
-
 class Ebay(db.Model):
     __tablename__ = 'Ebay'
     book_name = db.Column(db.String(200), nullable=False)
@@ -108,6 +78,38 @@ class Ebay(db.Model):
 
     def __repr__(self):
         return f"<Book: {self.book_name}>"
+
+
+class Amazon(db.Model):
+    __tablename__ = 'Amazon'
+    book_name = db.Column(db.String(200), nullable=False)
+    amazon_link = db.Column(db.String(200), nullable=False)
+    isbn = db.Column(db.String(13), ForeignKey(Ebay.isbn), primary_key=True)
+    edition_format = db.Column(db.String(40), nullable=False)
+    new_product_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
+    new_delivery_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
+    new_total_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
+    used_product_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
+    used_delivery_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
+    used_total_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
+
+
+    def __init__(self, book_name, amazon_link, isbn, edition_format, new_product_price, new_delivery_price, new_total_price,
+                 used_product_price, used_delivery_price, used_total_price):
+        self.book_name = book_name
+        self.amazon_link = amazon_link
+        self.isbn = isbn
+        self.edition_format = edition_format
+        self.new_product_price = new_product_price
+        self.new_delivery_price = new_delivery_price
+        self.new_total_price = new_total_price
+        self.used_product_price = used_product_price
+        self.used_delivery_price = used_delivery_price
+        self.used_total_price = used_total_price
+
+    def __repr__(self):
+        return f"<Book: {self.book_name}>"
+
 
 @app.route("/")
 def index():
@@ -286,14 +288,6 @@ def add_books():
 
         # Push to database
         try:
-            new_book = Amazon(book_name=book_name, amazon_link=amazon_link, isbn=isbn, edition_format=edition_format,
-                              new_product_price=amazon_new_product_price,
-                              new_delivery_price=amazon_new_delivery_price, new_total_price=amazon_new_total_price,
-                              used_product_price=amazon_used_product_price,
-                              used_delivery_price=amazon_used_delivery_price, used_total_price=amazon_used_total_price)
-            db.session.add(new_book)
-            db.session.commit()
-
             new_book = Ebay(book_name=book_name, new_ebay_link=new_ebay_link, used_ebay_link=used_ebay_link,
                             isbn=isbn, edition_format=edition_format,
                             new_product_price=ebay_new_product_price,
@@ -302,6 +296,14 @@ def add_books():
                             used_product_price=ebay_used_product_price, used_delivery_price=ebay_used_delivery_price,
                             used_total_price=ebay_used_total_price,
                             historical_used_total_price=historical_used_total_price)
+            db.session.add(new_book)
+            db.session.commit()
+
+            new_book = Amazon(book_name=book_name, amazon_link=amazon_link, isbn=isbn, edition_format=edition_format,
+                              new_product_price=amazon_new_product_price,
+                              new_delivery_price=amazon_new_delivery_price, new_total_price=amazon_new_total_price,
+                              used_product_price=amazon_used_product_price,
+                              used_delivery_price=amazon_used_delivery_price, used_total_price=amazon_used_total_price)
             db.session.add(new_book)
             db.session.commit()
 
@@ -341,14 +343,7 @@ class UpdateAmazonDB(threading.Thread):
         globals()["updatable_amazon"] = False
         try:
             with app.app_context():
-                check_amazon_prices_today("./scraped_database_data_amazon.csv", only_create_new_books=False)
-                #check_amazon_prices_today("./scraped_database_data_amazon.csv", only_create_new_books=True)
-
-                # NEED TO ADD COLUMN FOR DAY LAST UPDATED.
-                # status = check_amazon_prices_today("./scraped_database_data_amazon.csv", only_create_new_books=False)
-                # while status == False:
-                #     status = check_amazon_prices_today("./scraped_database_data_amazon.csv",
-                #                                        only_create_new_books=True)
+                check_amazon_prices_today("./scraped_database_data_amazon.csv")
 
             print('Threaded task for updating Amazon DB has been completed')
             globals()["updatable_amazon"] = True
@@ -362,19 +357,30 @@ class UpdateEbayDB(threading.Thread):
         # https://stackoverflow.com/questions/73999854/flask-error-runtimeerror-working-outside-of-application-context
         globals()["updatable_ebay"] = False
         with app.app_context():
-            check_ebay_prices_today("./scraped_database_data_ebay.csv", only_create_new_books=False)
+            check_ebay_prices_today("./scraped_database_data_ebay.csv")
         print('Threaded task for updating Ebay DB has been completed')
         globals()["updatable_ebay"] = True
+
+class RunUpdateDB(threading.Thread):
+    def __init__(self):
+        super(RunUpdateDB, self).__init__()
+    def run(self):
+        with app.app_context():
+            t_ebay = UpdateEbayDB()
+            t_ebay.start()
+            t_ebay.join()
+
+            t_amazon = UpdateAmazonDB()
+            t_amazon.start()
+            t_amazon.join()
+        print('Sub-Threaded task for updating Ebay DB has been completed')
 
 @app.route("/update_prices_in_database")
 def update_prices_in_database():
     # https://stackoverflow.com/questions/62435134/how-to-run-a-function-in-background-without-blocking-main-thread-and-serving-fla
 
-    t_ebay = UpdateEbayDB()
-    t_ebay.start()
-
-    #t_amazon = UpdateAmazonDB()
-    #t_amazon.start()
+    t_update_db = RunUpdateDB()
+    t_update_db.start()
 
     return redirect('books')
 
@@ -824,10 +830,6 @@ def opportunities():
             else:
                 # Both books have the same used total prices.
                 pass
-
-
-
-
 
 
             # BUY NEW, SELL AS USED BOOKS

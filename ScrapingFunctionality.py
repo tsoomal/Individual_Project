@@ -185,7 +185,7 @@ def get_ISBN_from_list(file_name):
               index=False)
 
 
-def check_ebay_prices_today(file_name, only_create_new_books=False):
+def check_ebay_prices_today(file_name):
     now = datetime.now()
 
     df = pd.read_csv(file_name)
@@ -200,24 +200,6 @@ def check_ebay_prices_today(file_name, only_create_new_books=False):
         # https://stackoverflow.com/questions/27387415/how-would-i-get-everything-before-a-in-a-string-python
         isbn = str((df.iloc[row_number,[4]])[0]).split(".")[0]
         isbn = isbn.zfill(10)
-
-        if only_create_new_books==True:
-            try:
-                book_in_ebay_db = app.Ebay.query.get_or_404(isbn)
-                print(row_number)
-                print(book_in_ebay_db)
-                if book_in_ebay_db.new_product_price==-999 and book_in_ebay_db.new_delivery_price==-999 and \
-                        book_in_ebay_db.new_total_price==-999 and book_in_ebay_db.used_product_price==-999 and \
-                        book_in_ebay_db.used_delivery_price==-999 and book_in_ebay_db.used_total_price==-999:
-                    try:
-                        app.db.session.delete(book_in_ebay_db)
-                        app.db.session.commit()
-                    except:
-                        app.db.session.rollback()
-                else:
-                    continue
-            except werkzeug.exceptions.NotFound:
-                pass
 
         time1 = datetime.now()
         print("Item: " + str(row_number+1))
@@ -589,7 +571,7 @@ def check_ebay_prices_today_isbn(isbn):
 
 
 
-def check_amazon_prices_today(file_name, only_create_new_books=False):
+def check_amazon_prices_today(file_name):
 
     df = pd.read_csv(file_name)
     number_of_rows = df.shape[0]
@@ -620,25 +602,6 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
         # https://stackoverflow.com/questions/27387415/how-would-i-get-everything-before-a-in-a-string-python
         isbn = str((df.iloc[row_number,[3]])[0]).split(".")[0]
         isbn = isbn.zfill(10)
-
-        if only_create_new_books==True:
-            try:
-                book_in_amazon_db = app.Amazon.query.get_or_404(isbn)
-                print(row_number + 1)
-                print(book_in_amazon_db)
-                if book_in_amazon_db.new_product_price[-1]==-999 and book_in_amazon_db.new_delivery_price[-1]==-999 and \
-                        book_in_amazon_db.new_total_price[-1]==-999 and book_in_amazon_db.used_product_price[-1]==-999 and \
-                        book_in_amazon_db.used_delivery_price[-1]==-999 and book_in_amazon_db.used_total_price[-1]==-999:
-                    app.db.session.delete(book_in_amazon_db)
-                    try:
-                        app.db.session.commit()
-                    except:
-                        app.db.session.rollback()
-                else:
-                    continue
-            except werkzeug.exceptions.NotFound:
-                pass
-
 
         time1 = datetime.now()
         print("Item: " + str(row_number+1))
@@ -1869,13 +1832,9 @@ def setup_database(links,base_file_name="scraped_database_data", create_new_csv=
     df = df[['Title', 'New Link', 'Used Link', 'Edition Format', 'ISBN']]
     df.to_csv("./" + base_file_name + "_ebay.csv", index=False)
 
-    if scrape_prices and scrape_only_new_books:
-        check_amazon_prices_today("./" + base_file_name + "_amazon.csv", only_create_new_books=True)
-        check_ebay_prices_today("./" + base_file_name + "_ebay.csv", only_create_new_books=True)
-
-    if scrape_prices and not scrape_only_new_books:
-        check_amazon_prices_today("./" + base_file_name + "_amazon.csv", only_create_new_books=False)
-        check_ebay_prices_today("./" + base_file_name + "_ebay.csv", only_create_new_books=False)
+    if scrape_prices:
+        check_ebay_prices_today("./" + base_file_name + "_ebay.csv")
+        check_amazon_prices_today("./" + base_file_name + "_amazon.csv")
 
 
 def get_ebay_historical_price(isbn, condition):
@@ -2148,8 +2107,9 @@ def main():
     # Only setup CSV files. Note, deletes old files!
     # setup_database(links, new_list=True, scrape_prices=False)
 
-    #check_amazon_prices_today("./scraped_database_data_amazon.csv", only_create_new_books=False)
-    check_ebay_prices_today("./scraped_database_data_ebay.csv", only_create_new_books=True)
+    check_ebay_prices_today("./scraped_database_data_ebay.csv")
+    #check_amazon_prices_today("./scraped_database_data_amazon.csv")
+
 
 
 
