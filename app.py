@@ -95,7 +95,6 @@ class Amazon(db.Model):
     used_delivery_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
     used_total_price = db.Column(ARRAY(db.Numeric(5, 2)), nullable=False)
 
-
     def __init__(self, book_name, amazon_link, isbn, edition_format, new_product_price, new_delivery_price, new_total_price,
                  used_product_price, used_delivery_price, used_total_price):
         self.book_name = book_name
