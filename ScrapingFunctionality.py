@@ -394,7 +394,7 @@ def check_ebay_prices_today(file_name):
             app.db.session.rollback()
 
 
-def check_ebay_prices_today_isbn(isbn):
+def check_ebay_prices_today_isbn(isbn, used_ebay_link=None, new_ebay_link=None, book_name=None, edition_format=None):
 
     isbn = isbn.zfill(10)
 
@@ -533,6 +533,23 @@ def check_ebay_prices_today_isbn(isbn):
 
     historical_new_total_price = get_ebay_historical_price(isbn, "new")
     historical_used_total_price = get_ebay_historical_price(isbn, "used")
+
+    if isbn and used_ebay_link and new_ebay_link and book_name and edition_format:
+        try:
+            new_book = app.Ebay(book_name=book_name, new_ebay_link=new_ebay_link, used_ebay_link=used_ebay_link,
+                                isbn=isbn, edition_format=edition_format,
+                                new_product_price=[new_product_price], new_delivery_price=[new_delivery_price],
+                                new_total_price=[new_total_price_raw],
+                                historical_new_total_price=[historical_new_total_price],
+                                used_product_price=[used_product_price], used_delivery_price=[used_delivery_price],
+                                used_total_price=[used_total_price_raw],
+                                historical_used_total_price=[historical_used_total_price])
+            app.db.session.add(new_book)
+            app.db.session.commit()
+            print("Book added to Ebay table in db.")
+        except:
+            pass
+
     try:
         book_to_append_ebay = app.Ebay.query.get_or_404(isbn)
 

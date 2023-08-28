@@ -3,6 +3,7 @@
 import csv
 import decimal
 
+import pandas as pd
 # Using Postgresql
 # https://stackabuse.com/using-sqlalchemy-with-flask-and-postgresql/
 
@@ -205,50 +206,58 @@ def books():
             return render_template("books.html", error_statement=error_statement, zip=zip, enumerate=enumerate)
 
 
+class AddAmazonBook(threading.Thread):
+    def __init__(self, isbn, amazon_link, book_name, edition_format):
+        super(AddAmazonBook, self).__init__()
+        self.isbn = isbn
+        self.amazon_link = amazon_link
+        self.book_name = book_name
+        self.edition_format = edition_format
+
+    def run(self):
+        # https://stackoverflow.com/questions/73999854/flask-error-runtimeerror-working-outside-of-application-context
+        # https://realpython.com/python-use-global-variable-in-function/#:~:text=If%20you%20want%20to%20modify,built%2Din%20globals()%20function
+        try:
+            with app.app_context():
+                check_amazon_prices_today_isbn(self.isbn, self.amazon_link, self.book_name, self.edition_format)
+            print('Threaded task for adding Amazon book has been completed')
+        except Exception as e:
+            raise Exception
+            print('Threaded task for adding Amazon book has FAILED')
+            print(e)
+
+class AddEbayBook(threading.Thread):
+    def __init__(self, isbn, used_ebay_link, new_ebay_link, book_name, edition_format):
+        super(AddEbayBook, self).__init__()
+        self.isbn = isbn
+        self.used_ebay_link = used_ebay_link
+        self.new_ebay_link = new_ebay_link
+        self.book_name = book_name
+        self.edition_format = edition_format
+
+    def run(self):
+        # https://stackoverflow.com/questions/73999854/flask-error-runtimeerror-working-outside-of-application-context
+        with app.app_context():
+            check_ebay_prices_today_isbn(self.isbn, self.used_ebay_link, self.new_ebay_link, self.book_name,
+                                         self.edition_format)
+        print('Threaded task for adding eBay book has been completed')
+
+
+
 @app.route("/add_books", methods =['POST','GET'])
 def add_books():
     if request.method == "POST":
         book_name = request.form['book_name']
         isbn = request.form['isbn']
         edition_format = request.form['edition_format']
-        new_ebay_link = request.form['new_ebay_link']
-        used_ebay_link = request.form['used_ebay_link']
-        ebay_new_product_price = request.form['ebay_new_product_price']
-        ebay_new_delivery_price = request.form['ebay_new_delivery_price']
-        ebay_new_total_price = request.form['ebay_new_total_price']
-        ebay_used_product_price = request.form['ebay_used_product_price']
-        ebay_used_delivery_price = request.form['ebay_used_delivery_price']
-        ebay_used_total_price = request.form['ebay_used_total_price']
-        amazon_link = request.form['amazon_link']
-        amazon_new_product_price = request.form['amazon_new_product_price']
-        amazon_new_delivery_price = request.form['amazon_new_delivery_price']
-        amazon_new_total_price = request.form['amazon_new_total_price']
-        amazon_used_product_price = request.form['amazon_used_product_price']
-        amazon_used_delivery_price = request.form['amazon_used_delivery_price']
-        amazon_used_total_price = request.form['amazon_used_total_price']
 
-        if "www." in amazon_link:
-            amazon_link = amazon_link.split("www.",1)[1]
+        isbn = isbn.zfill(10)
 
         # Validate Book Name
         if len(book_name) == 0:
             error_statement = "Please enter a book name!"
             return render_template("add_books.html", error_statement=error_statement, book_name=book_name, isbn=isbn,
-                                   edition_format=edition_format,
-                                   new_ebay_link=new_ebay_link, used_ebay_link=used_ebay_link,
-                                   ebay_new_product_price=ebay_new_product_price,
-                                   ebay_new_delivery_price=ebay_new_delivery_price,
-                                   ebay_new_total_price=ebay_new_total_price,
-                                   ebay_used_product_price=ebay_used_product_price,
-                                   ebay_used_delivery_price=ebay_used_delivery_price,
-                                   ebay_used_total_price=ebay_used_total_price,
-                                   amazon_link=amazon_link, amazon_new_product_price=amazon_new_product_price,
-                                   amazon_new_delivery_price=amazon_new_delivery_price,
-                                   amazon_new_total_price=amazon_new_total_price,
-                                   amazon_used_product_price=amazon_used_product_price,
-                                   amazon_used_delivery_price=amazon_used_delivery_price,
-                                   amazon_used_total_price=amazon_used_total_price
-                                   )
+                                   edition_format=edition_format)
 
         # Validate ISBN
         try:
@@ -268,68 +277,59 @@ def add_books():
         except:
             error_statement = "ISBN has to be in either ISBN-10 or ISBN-13 format!"
             return render_template("add_books.html", error_statement=error_statement, book_name=book_name,
-                                   isbn=isbn, edition_format=edition_format,
-                                   new_ebay_link=new_ebay_link, used_ebay_link=used_ebay_link,
-                                   ebay_new_product_price=ebay_new_product_price,
-                                   ebay_new_delivery_price=ebay_new_delivery_price,
-                                   ebay_new_total_price=ebay_new_total_price,
-                                   ebay_used_product_price=ebay_used_product_price,
-                                   ebay_used_delivery_price=ebay_used_delivery_price,
-                                   ebay_used_total_price=ebay_used_total_price,
-                                   amazon_link=amazon_link, amazon_new_product_price=amazon_new_product_price,
-                                   amazon_new_delivery_price=amazon_new_delivery_price,
-                                   amazon_new_total_price=amazon_new_total_price,
-                                   amazon_used_product_price=amazon_used_product_price,
-                                   amazon_used_delivery_price=amazon_used_delivery_price,
-                                   amazon_used_total_price=amazon_used_total_price)
+                                   isbn=isbn, edition_format=edition_format)
 
-        # Get historical prices
-        historical_new_total_price = get_ebay_historical_price(isbn, "new")
-        historical_used_total_price = get_ebay_historical_price(isbn, "used")
+        # Define links
+        new_ebay_link = "https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw=" + str(
+                isbn) + "&_sacat=0&_sop=15&LH_ItemCondition=3&LH_PrefLoc=2&rt=nc&LH_BIN=1"
+        used_ebay_link = "https://www.ebay.co.uk/sch/i.html?_from=R40&_nkw=" + str(
+                isbn) + "&_sacat=0&_sop=15&LH_BIN=1&LH_PrefLoc=1&rt=nc&LH_ItemCondition=4"
+        amazon_link = "https://www.amazon.co.uk/dp/" + str(isbn)
 
-        # Push to database
+
+        # Scrape prices and add to DB
         try:
-            new_book = Ebay(book_name=book_name, new_ebay_link=new_ebay_link, used_ebay_link=used_ebay_link,
-                            isbn=isbn, edition_format=edition_format,
-                            new_product_price=ebay_new_product_price,
-                            new_delivery_price=ebay_new_delivery_price, new_total_price=ebay_new_total_price,
-                            historical_new_total_price=historical_new_total_price,
-                            used_product_price=ebay_used_product_price, used_delivery_price=ebay_used_delivery_price,
-                            used_total_price=ebay_used_total_price,
-                            historical_used_total_price=historical_used_total_price)
-            db.session.add(new_book)
-            db.session.commit()
+            t_ebay = AddEbayBook(isbn, used_ebay_link, new_ebay_link, book_name, edition_format)
+            t_ebay.start()
+            t_ebay.join()
 
-            new_book = Amazon(book_name=book_name, amazon_link=amazon_link, isbn=isbn, edition_format=edition_format,
-                              new_product_price=amazon_new_product_price,
-                              new_delivery_price=amazon_new_delivery_price, new_total_price=amazon_new_total_price,
-                              used_product_price=amazon_used_product_price,
-                              used_delivery_price=amazon_used_delivery_price, used_total_price=amazon_used_total_price)
-            db.session.add(new_book)
-            db.session.commit()
+            t_amazon = AddAmazonBook(isbn, amazon_link, book_name, edition_format)
+            t_amazon.start()
+            t_amazon.join()
 
-            # Add to Amazon csv of books.
-            data = [book_name, amazon_link, edition_format, isbn]
-            with open("scraped_database_data_amazon.csv", "a+", newline="", encoding="UTF8") as f:
-                writer = csv.writer(f)
-                writer.writerow(data)
+            book_amazon = Amazon.query.get_or_404(isbn)
+            book_ebay = Ebay.query.get_or_404(isbn)
 
-            # Add to Ebay csv of books.
-            data = [book_name, new_ebay_link, used_ebay_link, edition_format, isbn]
-            with open("scraped_database_data_ebay.csv", "a+", newline="", encoding="UTF8") as f:
-                writer = csv.writer(f)
-                writer.writerow(data)
+            try:
+                # Add to Amazon csv of books.
+                data = [book_name, amazon_link, edition_format, isbn]
+                with open("scraped_database_data_amazon.csv", "a+", newline="", encoding="UTF8") as f:
+                    writer = csv.writer(f)
+                    writer.writerow(data)
 
-            return redirect('/books')
-        except IntegrityError:
-            db.session.rollback()
-            error_statement = "That book already exists in the database, " \
-                              "or there is another cause for an integrity error."
-            return render_template("add_books.html", error_statement=error_statement)
+                # Add to Ebay csv of books.
+                data = [book_name, new_ebay_link, used_ebay_link, edition_format, isbn]
+                with open("scraped_database_data_ebay.csv", "a+", newline="", encoding="UTF8") as f:
+                    writer = csv.writer(f)
+                    writer.writerow(data)
+
+                # Delete row from CSVs if duplicate.
+                df = pd.read_csv("scraped_database_data_amazon.csv")
+                df.drop_duplicates(subset=["ISBN"], inplace=True, keep='first')
+                df.to_csv("scraped_database_data_amazon.csv", index=False)
+
+                df = pd.read_csv("scraped_database_data_ebay.csv")
+                df.drop_duplicates(subset=["ISBN"], inplace=True, keep='first')
+                df.to_csv("scraped_database_data_ebay.csv", index=False)
+            except:
+                raise Exception
+
+            return render_template("add_books.html", error_statement="Book added to database!")
+
         except:
-            db.session.rollback()
             error_statement = "There was an error adding that book to the database."
-            return render_template("add_books.html", error_statement=error_statement)
+            return render_template("add_books.html", book_name=book_name, edition_format=edition_format, isbn=isbn,
+                                   error_statement=error_statement)
 
     return render_template("add_books.html")
 
