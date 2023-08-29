@@ -618,9 +618,6 @@ def delete_all_books():
 def opportunities():
 
     try:
-        all_books_ebay = Ebay.query.order_by(Ebay.book_name)
-        all_books_amazon = Amazon.query.order_by(Amazon.book_name)
-
         books_amazon_new = []
         books_ebay_new = []
         books_amazon_used = []
@@ -638,6 +635,9 @@ def opportunities():
         books_ebay_cross_link = []
         profit_cross = []
         guidance_cross = []
+
+        all_books_ebay = Ebay.query.order_by(Ebay.book_name)
+        all_books_amazon = Amazon.query.order_by(Amazon.book_name)
 
         for book_ebay, book_amazon in zip(all_books_ebay, all_books_amazon):
 
@@ -688,25 +688,26 @@ def opportunities():
             elif book_ebay.new_total_price[-1] > book_amazon.new_total_price[-1]:
                 # Buy on Amazon, Sell on Ebay
                 total_selling_price_to_breakeven = (storage_amazon_to_ebay(book_amazon.new_total_price[-1]))
-                if book_ebay.new_total_price[-1] < book_ebay.historical_new_total_price[-1]:
-                    # Listed Ebay new total price is reasonable considering Ebay sold price history.
-                    # Sell at listed Ebay new total price.
-                    if book_ebay.new_total_price[-1] > total_selling_price_to_breakeven:
-                        books_amazon_new.append(book_amazon)
-                        books_ebay_new.append(book_ebay)
-                        profit_new.append(round(decimal.Decimal(book_ebay.new_total_price[-1])-total_selling_price_to_breakeven,2))
-                        guidance_new.append("Buy from Amazon, sell on eBay at listed prices (historical eBay price supports this)")
-                elif book_ebay.new_total_price[-1] > book_ebay.historical_new_total_price[-1]:
-                    # Listed ebay new total price is unreasonable considering Ebay sold price history, however, can
-                    # sell at historical new total price for a profit.
-                    if book_ebay.historical_new_total_price[-1] > total_selling_price_to_breakeven:
-                        books_amazon_new.append(book_amazon)
-                        books_ebay_new.append(book_ebay)
-                        profit_new.append(round(decimal.Decimal(book_ebay.historical_new_total_price[-1])-total_selling_price_to_breakeven,2))
-                        guidance_new.append("Buy from Amazon at £" + str(book_amazon.new_total_price[-1]) + ", sell on eBay at £"
-                                            + str(book_ebay.historical_new_total_price[-1])
-                                            + ": the historical eBay price doesn't support eBay listed price, but profit can still be " +
-                                            "made if book is sold at historical eBay price.")
+                if book_ebay.historical_new_total_price[-1] != -999:
+                    if book_ebay.new_total_price[-1] < book_ebay.historical_new_total_price[-1]:
+                        # Listed Ebay new total price is reasonable considering Ebay sold price history.
+                        # Sell at listed Ebay new total price.
+                        if book_ebay.new_total_price[-1] > total_selling_price_to_breakeven:
+                            books_amazon_new.append(book_amazon)
+                            books_ebay_new.append(book_ebay)
+                            profit_new.append(round(decimal.Decimal(book_ebay.new_total_price[-1])-total_selling_price_to_breakeven,2))
+                            guidance_new.append("Buy from Amazon, sell on eBay at listed prices (historical eBay price supports this)")
+                    elif book_ebay.new_total_price[-1] > book_ebay.historical_new_total_price[-1]:
+                        # Listed ebay new total price is unreasonable considering Ebay sold price history, however, can
+                        # sell at historical new total price for a profit.
+                        if book_ebay.historical_new_total_price[-1] > total_selling_price_to_breakeven:
+                            books_amazon_new.append(book_amazon)
+                            books_ebay_new.append(book_ebay)
+                            profit_new.append(round(decimal.Decimal(book_ebay.historical_new_total_price[-1])-total_selling_price_to_breakeven,2))
+                            guidance_new.append("Buy from Amazon at £" + str(book_amazon.new_total_price[-1]) + ", sell on eBay at £"
+                                                + str(book_ebay.historical_new_total_price[-1])
+                                                + ": the historical eBay price doesn't support eBay listed price, but profit can still be " +
+                                                "made if book is sold at historical eBay price.")
 
             elif book_ebay.new_total_price[-1] < book_amazon.new_total_price[-1]:
                 # Buy on Ebay, Sell on Amazon
@@ -775,42 +776,43 @@ def opportunities():
             elif book_ebay.used_total_price[-1] > book_amazon.used_total_price[-1]:
                 # Buy on Amazon, Sell on Ebay
                 total_selling_price_to_breakeven = (storage_amazon_to_ebay(book_amazon.used_total_price[-1]))
-                if book_ebay.used_total_price[-1] < book_ebay.historical_used_total_price[-1]:
-                    # Listed Ebay used total price is reasonable considering Ebay sold price history.
-                    # Sell at listed Ebay used total price.
-                    if book_ebay.used_total_price[-1] > total_selling_price_to_breakeven:
-                        if book_ebay.new_total_price[-1] != -999 and book_ebay.used_total_price[-1] >= book_ebay.new_total_price[-1]:
-                            # New Ebay price exists, and used price is more than new total price.
-                            # Opp is not valid as customers will buy the new book at a cheaper price than this used book.
-                            # Can used book undercut new book price? Ebay used price is more than Amazon used price and more than Ebay new price.
-                            # Can't buy as used and sell as new. Have to buy used and sell as used. Therefore, no alternative possible method.
-                            pass
-                        else:
-                            # Ebay used price is more than Amazon used price, so buy on Amazon and sell on Ebay.
-                            # Ebay used price is less than Ebay new price (if it exists), so opp is valid.
-                            books_amazon_used.append(book_amazon)
-                            books_ebay_used.append(book_ebay)
-                            profit_used.append(round(book_ebay.used_total_price[-1] - total_selling_price_to_breakeven,2))
-                            guidance_used.append("Buy from Amazon, sell on eBay at listed prices (historical eBay price supports this)")
-                elif book_ebay.used_total_price[-1] > book_ebay.historical_used_total_price[-1]:
-                    # Listed ebay used total price is unreasonable considering Ebay sold price history, however, can
-                    # still sell at historical used total price for a profit.
-                    if book_ebay.historical_used_total_price[-1] > total_selling_price_to_breakeven:
-                        if book_ebay.new_total_price[-1] != -999 and book_ebay.historical_used_total_price[-1] >= book_ebay.new_total_price[-1]:
-                            # New Ebay price exists, and historical used price is more than new total price.
-                            # Opp is not valid as customers will buy the new book at a cheaper price than this used book.
-                            # Can used book undercut new book price? Ebay historical used price is more than Amazon used price and more than Ebay new price.
-                            # Can't buy as used and sell as new. Have to buy used and sell as used. Therefore, no alternative possible method.
-                            pass
-                        else:
-                            books_amazon_used.append(book_amazon)
-                            books_ebay_used.append(book_ebay)
-                            profit_used.append(round(decimal.Decimal(book_ebay.historical_used_total_price[-1]) - total_selling_price_to_breakeven,2))
-                            guidance_used.append(
-                                "Buy from Amazon at £" + str(book_amazon.used_total_price[-1]) + ", sell on eBay at £"
-                                + str(book_ebay.historical_used_total_price[-1])
-                                + ": the historical eBay price doesn't support eBay listed price, but profit can still be " +
-                                "made if book is sold at historical eBay price.")
+                if book_ebay.historical_used_total_price[-1] != -999:
+                    if book_ebay.used_total_price[-1] < book_ebay.historical_used_total_price[-1]:
+                        # Listed Ebay used total price is reasonable considering Ebay sold price history.
+                        # Sell at listed Ebay used total price.
+                        if book_ebay.used_total_price[-1] > total_selling_price_to_breakeven:
+                            if book_ebay.new_total_price[-1] != -999 and book_ebay.used_total_price[-1] >= book_ebay.new_total_price[-1]:
+                                # New Ebay price exists, and used price is more than new total price.
+                                # Opp is not valid as customers will buy the new book at a cheaper price than this used book.
+                                # Can used book undercut new book price? Ebay used price is more than Amazon used price and more than Ebay new price.
+                                # Can't buy as used and sell as new. Have to buy used and sell as used. Therefore, no alternative possible method.
+                                pass
+                            else:
+                                # Ebay used price is more than Amazon used price, so buy on Amazon and sell on Ebay.
+                                # Ebay used price is less than Ebay new price (if it exists), so opp is valid.
+                                books_amazon_used.append(book_amazon)
+                                books_ebay_used.append(book_ebay)
+                                profit_used.append(round(book_ebay.used_total_price[-1] - total_selling_price_to_breakeven,2))
+                                guidance_used.append("Buy from Amazon, sell on eBay at listed prices (historical eBay price supports this)")
+                    elif book_ebay.used_total_price[-1] > book_ebay.historical_used_total_price[-1]:
+                        # Listed ebay used total price is unreasonable considering Ebay sold price history, however, can
+                        # still sell at historical used total price for a profit.
+                        if book_ebay.historical_used_total_price[-1] > total_selling_price_to_breakeven:
+                            if book_ebay.new_total_price[-1] != -999 and book_ebay.historical_used_total_price[-1] >= book_ebay.new_total_price[-1]:
+                                # New Ebay price exists, and historical used price is more than new total price.
+                                # Opp is not valid as customers will buy the new book at a cheaper price than this used book.
+                                # Can used book undercut new book price? Ebay historical used price is more than Amazon used price and more than Ebay new price.
+                                # Can't buy as used and sell as new. Have to buy used and sell as used. Therefore, no alternative possible method.
+                                pass
+                            else:
+                                books_amazon_used.append(book_amazon)
+                                books_ebay_used.append(book_ebay)
+                                profit_used.append(round(decimal.Decimal(book_ebay.historical_used_total_price[-1]) - total_selling_price_to_breakeven,2))
+                                guidance_used.append(
+                                    "Buy from Amazon at £" + str(book_amazon.used_total_price[-1]) + ", sell on eBay at £"
+                                    + str(book_ebay.historical_used_total_price[-1])
+                                    + ": the historical eBay price doesn't support eBay listed price, but profit can still be " +
+                                    "made if book is sold at historical eBay price.")
 
             elif book_ebay.used_total_price[-1] < book_amazon.used_total_price[-1]:
                 # Buy on Ebay, Sell on Amazon
