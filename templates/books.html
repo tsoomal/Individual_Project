@@ -14,6 +14,13 @@
     </div>
     {% endif %}
 
+        {% if general_statement %}
+    <div class="alert alert-primary alert-dismissible fade show" role="alert">
+      <strong>{{general_statement}}</strong>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
         <!-- https://stackoverflow.com/questions/62009672/prevent-nav-item-to-a-new-line-when-reduce-page-width -->
         <!-- https://getbootstrap.com/docs/5.0/components/button-group/ -->
     <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups" style="min-width: 600px;">

@@ -384,7 +384,39 @@ def update_prices_in_database():
     t_update_db = RunUpdateDB()
     t_update_db.start()
 
-    return redirect('books')
+    if updatable_amazon and updatable_ebay:
+        updatable = True
+    else:
+        updatable = False
+
+    try:
+        num_records_amazon = db.session.query(func.count(Amazon.isbn)).scalar()
+    except Exception as e:
+        print(e)
+        print("num_records_amazon not found!")
+        db.session.rollback()
+
+    try:
+        num_records_ebay = db.session.query(func.count(Ebay.isbn)).scalar()
+    except Exception as e:
+        print(e)
+        print("num_records_ebay not found!")
+        db.session.rollback()
+
+    try:
+        books_ebay = Ebay.query.order_by(Ebay.book_name)
+        books_amazon = Amazon.query.order_by(Amazon.book_name)
+        general_statement = "Prices in database are being updated in the background!"
+        return render_template("books.html", books_ebay=books_ebay, books_amazon=books_amazon, updatable=updatable,
+                               zip=zip, num_records_ebay=num_records_ebay, num_records_amazon=num_records_amazon,
+                               general_statement=general_statement)
+    except Exception as e:
+        print(e)
+        general_statement = "Prices in database are being updated in the background!"
+        error_statement = "Error with database connection. Please refresh page!"
+        db.session.rollback()
+        return render_template("books.html", error_statement=error_statement, zip=zip, enumerate=enumerate,
+                               general_statement=general_statement)
 
 
 class UpdateAmazonBook(threading.Thread):
@@ -948,6 +980,26 @@ def opportunities():
 def sync_tables():
     # https://stackoverflow.com/questions/32938475/flask-sqlalchemy-check-if-row-exists-in-table
     try:
+        if updatable_amazon and updatable_ebay:
+            updatable = True
+        else:
+            updatable = False
+
+        try:
+            num_records_amazon = db.session.query(func.count(Amazon.isbn)).scalar()
+        except Exception as e:
+            print(e)
+            print("num_records_amazon not found!")
+            db.session.rollback()
+
+        try:
+            num_records_ebay = db.session.query(func.count(Ebay.isbn)).scalar()
+        except Exception as e:
+            print(e)
+            print("num_records_ebay not found!")
+            db.session.rollback()
+
+
         all_books_amazon = Amazon.query.order_by(Amazon.isbn)
         all_books_ebay = Ebay.query.order_by(Ebay.isbn)
 
@@ -977,12 +1029,26 @@ def sync_tables():
                 except:
                     db.session.rollback()
 
+        general_statement = "Tables synced!"
 
     except:
         db.session.rollback()
-        print("Failed to sync tables.")
+        general_statement = "Failed to sync tables."
+        print(general_statement)
 
-    return redirect('/books')
+    try:
+        books_ebay = Ebay.query.order_by(Ebay.book_name)
+        books_amazon = Amazon.query.order_by(Amazon.book_name)
+        return render_template("books.html", books_ebay=books_ebay, books_amazon=books_amazon, updatable=updatable,
+                               zip=zip, num_records_ebay=num_records_ebay, num_records_amazon=num_records_amazon,
+                               general_statement=general_statement)
+    except Exception as e:
+        print(e)
+        general_statement = "Prices in database are being updated in the background!"
+        error_statement = "Error with database connection. Please refresh page!"
+        db.session.rollback()
+        return render_template("books.html", error_statement=error_statement, zip=zip, enumerate=enumerate,
+                               general_statement=general_statement)
 
 
 if __name__ == "__main__":
