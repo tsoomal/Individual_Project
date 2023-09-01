@@ -713,7 +713,7 @@ def opportunities():
                             decimal.Decimal(amazon_selling_price) - total_selling_price_to_breakeven,
                             2))
                         guidance_new.append(
-                            "Buy from Ebay at £" + str(book_ebay.new_total_price[-1]) + ", sell on Amazon at £"
+                            "Buy from eBay at £" + str(book_ebay.new_total_price[-1]) + ", sell on Amazon at £"
                             + str(amazon_selling_price)
                             + ": currently, there is no new listing for this book on Amazon, but "
                             + "the historical eBay price supports this suggested Amazon price.")
@@ -801,7 +801,7 @@ def opportunities():
                                 decimal.Decimal(amazon_selling_price) - total_selling_price_to_breakeven,
                                 2))
                             guidance_used.append(
-                                "Buy from Ebay at £" + str(book_ebay.used_total_price[-1]) + ", sell on Amazon at £"
+                                "Buy from eBay at £" + str(book_ebay.used_total_price[-1]) + ", sell on Amazon at £"
                                 + str(amazon_selling_price)
                                 + ": currently, there is no used listing for this book on Amazon, but "
                                 + "the historical eBay price supports this suggested Amazon price.")
