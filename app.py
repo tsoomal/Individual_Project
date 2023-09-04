@@ -972,6 +972,7 @@ def opportunities():
         error_statement = "Error! This is likely due to a failed connection to the database. Please refresh!"
         number_of_new_opps = 0
         number_of_used_opps = 0
+        number_of_cross_opps = 0
 
         return render_template("opportunities.html", error_statement=error_statement, zip=zip, number_of_new_opps=number_of_new_opps,
                                number_of_used_opps=number_of_used_opps, number_of_cross_opps=number_of_cross_opps)

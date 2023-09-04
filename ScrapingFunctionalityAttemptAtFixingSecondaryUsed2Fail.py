@@ -3,6 +3,8 @@ import os
 from datetime import datetime
 import time
 import re
+
+import undetected_chromedriver
 import werkzeug
 
 #from app import Amazon, db, Ebay
@@ -19,6 +21,8 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 import requests
+
+from fake_useragent import UserAgent
 
 def scroll_to_bottom(driver):
 # https://stackoverflow.com/questions/32391303/how-to-scroll-to-the-end-of-the-page-using-selenium-in-python
@@ -436,13 +440,16 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
     number_of_rows = df.shape[0]
 
     # https://www.andressevilla.com/running-chromedriver-with-python-selenium-on-heroku/
-    service = Service(os.environ.get("CHROMEDRIVER_PATH"))
+    #service = Service(os.environ.get("CHROMEDRIVER_PATH"))
     options = webdriver.ChromeOptions()
 
+    ua = UserAgent()
+    options.add_argument(f"user-agent={ua.random}")
+
     # Settings Needed for Heroku
-    options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--no-sandbox")
+    # options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+    # options.add_argument("--disable-dev-shm-usage")
+    # options.add_argument("--no-sandbox")
 
     # https://stackoverflow.com/questions/12211781/how-to-maximize-window-in-chrome-using-webdriver-python
     #options.add_argument("--start-maximized")
@@ -491,7 +498,7 @@ def check_amazon_prices_today(file_name, only_create_new_books=False):
         print(URL)
 
         try:
-            driver = webdriver.Chrome(service=service, options=options)
+            driver = webdriver.Chrome(options=options)
         except:
             print("Error with Selenium.")
             try:
@@ -1447,13 +1454,17 @@ def update_ebay_historical_prices_in_database():
 def isbn_check_amazon_prices_today(isbn):
 
     # https://www.andressevilla.com/running-chromedriver-with-python-selenium-on-heroku/
-    service = Service(os.environ.get("CHROMEDRIVER_PATH"))
+    #service = Service(os.environ.get("CHROMEDRIVER_PATH"))
     options = webdriver.ChromeOptions()
 
+    # https://stackoverflow.com/questions/76302452/how-to-scrape-all-of-the-pages-on-amazon-from-a-search-result-with-python
+    ua = UserAgent()
+    options.add_argument(f"user-agent={ua.random}")
+
     # Settings Needed for Heroku
-    options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--no-sandbox")
+    # options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+    # options.add_argument("--disable-dev-shm-usage")
+    # options.add_argument("--no-sandbox")
 
     # https://stackoverflow.com/questions/12211781/how-to-maximize-window-in-chrome-using-webdriver-python
     # options.add_argument("--start-maximized")
@@ -1466,9 +1477,10 @@ def isbn_check_amazon_prices_today(isbn):
     options.add_experimental_option("prefs", prefs)
 
     try:
-        driver = webdriver.Chrome(service=service, options=options)
-    except:
+        driver = webdriver.Chrome(options=options)
+    except Exception as e:
         print("Error with Selenium.")
+        print(e)
         try:
             driver.quit()
         except:

@@ -4,6 +4,7 @@ from datetime import datetime
 import time
 import re
 import werkzeug
+from fake_useragent import UserAgent
 
 #from app import Amazon, db, Ebay
 # https://stackoverflow.com/questions/7336802/how-to-avoid-circular-imports-in-python
@@ -55,11 +56,10 @@ def create_blank_csv(file_name, createHeader=False):
 
 
 def setup_list_one_page_from_amazon(file_name, URL=None):
-    service = Service("..\chromedriver_win32")
     options = webdriver.ChromeOptions()
     options.add_argument("--headless=new")
     options.add_argument("--window-size=1920,1200")
-    driver = webdriver.Chrome(service=service, options=options)
+    driver = webdriver.Chrome(options=options)
     if URL == None:
         URL = "https://www.amazon.co.uk/gp/bestsellers/books"
     driver.get(URL)
@@ -594,13 +594,16 @@ def check_amazon_prices_today(file_name):
     number_of_rows = df.shape[0]
 
     # https://www.andressevilla.com/running-chromedriver-with-python-selenium-on-heroku/
-    service = Service(os.environ.get("CHROMEDRIVER_PATH"))
     options = webdriver.ChromeOptions()
 
-    # Settings Needed for Heroku
-    options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--no-sandbox")
+    # https://stackoverflow.com/questions/76302452/how-to-scrape-all-of-the-pages-on-amazon-from-a-search-result-with-python
+    ua = UserAgent()
+    options.add_argument(f"user-agent={ua.random}")
+
+    # # Settings Needed for Heroku
+    # options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+    # options.add_argument("--disable-dev-shm-usage")
+    # options.add_argument("--no-sandbox")
 
     # https://stackoverflow.com/questions/12211781/how-to-maximize-window-in-chrome-using-webdriver-python
     #options.add_argument("--start-maximized")
@@ -630,9 +633,10 @@ def check_amazon_prices_today(file_name):
         print(URL)
 
         try:
-            driver = webdriver.Chrome(service=service, options=options)
-        except:
+            driver = webdriver.Chrome(options=options)
+        except Exception as e:
             print("Error with Selenium.")
+            print(e)
             try:
                 driver.quit()
             except:
@@ -1127,13 +1131,17 @@ def check_amazon_prices_today(file_name):
 
 def check_amazon_prices_today_isbn(isbn, amazon_link, book_name, edition_format):
     # https://www.andressevilla.com/running-chromedriver-with-python-selenium-on-heroku/
-    service = Service(os.environ.get("CHROMEDRIVER_PATH"))
     options = webdriver.ChromeOptions()
 
+    # https://stackoverflow.com/questions/76302452/how-to-scrape-all-of-the-pages-on-amazon-from-a-search-result-with-python
+    ua = UserAgent()
+    options.add_argument(f"user-agent={ua.random}")
+
+
     # Settings Needed for Heroku
-    options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--no-sandbox")
+    # options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+    # options.add_argument("--disable-dev-shm-usage")
+    # options.add_argument("--no-sandbox")
 
     # https://stackoverflow.com/questions/12211781/how-to-maximize-window-in-chrome-using-webdriver-python
     #options.add_argument("--start-maximized")
@@ -1151,7 +1159,7 @@ def check_amazon_prices_today_isbn(isbn, amazon_link, book_name, edition_format)
     time1 = datetime.now()
 
     try:
-        driver = webdriver.Chrome(service=service, options=options)
+        driver = webdriver.Chrome(options=options)
     except:
         print("Error with Selenium.")
         try:
@@ -1773,36 +1781,40 @@ def end_of_item_loop(amazon_link, book_name, driver, edition_format, isbn, new_d
 
     except IntegrityError:
         app.db.session.rollback()
-        book_to_append_amazon = app.Amazon.query.get_or_404(isbn)
-
-        # If previous price was found, but not found now, then it means that the book must have sold recently.
-        # Price is set at the last known price.
         try:
-            if float(new_total_price_raw) == -999 and book_to_append_amazon.new_total_price[-1] != -999:
-                new_product_price = book_to_append_amazon.new_product_price[-1]
-                new_delivery_price = book_to_append_amazon.new_delivery_price[-1]
-                new_total_price_raw = book_to_append_amazon.new_total_price[-1]
-                print("NEW: IDENTIFIED SOLD BOOK PREVIOUSLY. COPYING PREVIOUS PRICE.")
+            book_to_append_amazon = app.Amazon.query.get_or_404(isbn)
 
-            if float(used_total_price_raw) == -999 and book_to_append_amazon.used_total_price[-1] != -999:
-                used_product_price = book_to_append_amazon.used_product_price[-1]
-                used_delivery_price = book_to_append_amazon.used_delivery_price[-1]
-                used_total_price_raw = book_to_append_amazon.used_total_price[-1]
-                print("USED: IDENTIFIED SOLD BOOK PREVIOUSLY. COPYING PREVIOUS PRICE.")
-        except Exception as e:
-            print("ERROR: Failed to set price at last known price, despite price not found now.")
-            print(e)
+            # If previous price was found, but not found now, then it means that the book must have sold recently.
+            # Price is set at the last known price.
+            try:
+                if float(new_total_price_raw) == -999 and book_to_append_amazon.new_total_price[-1] != -999:
+                    new_product_price = book_to_append_amazon.new_product_price[-1]
+                    new_delivery_price = book_to_append_amazon.new_delivery_price[-1]
+                    new_total_price_raw = book_to_append_amazon.new_total_price[-1]
+                    print("NEW: IDENTIFIED SOLD BOOK PREVIOUSLY. COPYING PREVIOUS PRICE.")
 
-        book_to_append_amazon.new_product_price = book_to_append_amazon.new_product_price + [new_product_price]
-        book_to_append_amazon.new_delivery_price = book_to_append_amazon.new_delivery_price + [new_delivery_price]
-        book_to_append_amazon.new_total_price = book_to_append_amazon.new_total_price + [new_total_price_raw]
-        book_to_append_amazon.used_product_price = book_to_append_amazon.used_product_price + [used_product_price]
-        book_to_append_amazon.used_delivery_price = book_to_append_amazon.used_delivery_price + [used_delivery_price]
-        book_to_append_amazon.used_total_price = book_to_append_amazon.used_total_price + [used_total_price_raw]
-        try:
-            app.db.session.commit()
+                if float(used_total_price_raw) == -999 and book_to_append_amazon.used_total_price[-1] != -999:
+                    used_product_price = book_to_append_amazon.used_product_price[-1]
+                    used_delivery_price = book_to_append_amazon.used_delivery_price[-1]
+                    used_total_price_raw = book_to_append_amazon.used_total_price[-1]
+                    print("USED: IDENTIFIED SOLD BOOK PREVIOUSLY. COPYING PREVIOUS PRICE.")
+            except Exception as e:
+                print("ERROR: Failed to set price at last known price, despite price not found now.")
+                print(e)
+
+            book_to_append_amazon.new_product_price = book_to_append_amazon.new_product_price + [new_product_price]
+            book_to_append_amazon.new_delivery_price = book_to_append_amazon.new_delivery_price + [new_delivery_price]
+            book_to_append_amazon.new_total_price = book_to_append_amazon.new_total_price + [new_total_price_raw]
+            book_to_append_amazon.used_product_price = book_to_append_amazon.used_product_price + [used_product_price]
+            book_to_append_amazon.used_delivery_price = book_to_append_amazon.used_delivery_price + [used_delivery_price]
+            book_to_append_amazon.used_total_price = book_to_append_amazon.used_total_price + [used_total_price_raw]
+
+            try:
+                app.db.session.commit()
+            except:
+                app.db.session.rollback()
         except:
-            app.db.session.rollback()
+            pass
     except:
         app.db.session.rollback()
     driver.quit()
@@ -2124,8 +2136,8 @@ def main():
     # Only setup CSV files. Note, deletes old files!
     # setup_database(links, new_list=True, scrape_prices=False)
 
-    check_ebay_prices_today("./scraped_database_data_ebay.csv")
-    #check_amazon_prices_today("./scraped_database_data_amazon.csv")
+    #check_ebay_prices_today("./scraped_database_data_ebay.csv")
+    check_amazon_prices_today("./scraped_database_data_amazon.csv")
 
 
 
