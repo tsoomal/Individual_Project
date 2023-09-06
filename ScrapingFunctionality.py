@@ -1140,7 +1140,7 @@ def check_amazon_prices_today_isbn(isbn, amazon_link, book_name, edition_format)
 
     # Settings Needed for Heroku
     options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
-    executable_path = os.environ.get("CHROMEDRIVER_PATH")
+    #execution_path = os.environ.get("CHROMEDRIVER_PATH")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--no-sandbox")
 
@@ -1160,7 +1160,7 @@ def check_amazon_prices_today_isbn(isbn, amazon_link, book_name, edition_format)
     time1 = datetime.now()
 
     try:
-        driver = webdriver.Chrome(service=executable_path, options=options)
+        driver = webdriver.Chrome(options=options)
     except Exception as e:
         print("Error with Selenium.")
         print(e)
