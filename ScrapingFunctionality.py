@@ -2107,11 +2107,28 @@ def update_names_in_database():
         link = book.amazon_link
         old_book_name = book.book_name
 
-        service = Service("..\chromedriver_win32")
+        # https://www.andressevilla.com/running-chromedriver-with-python-selenium-on-heroku/
         options = webdriver.ChromeOptions()
+
+        # https://stackoverflow.com/questions/76302452/how-to-scrape-all-of-the-pages-on-amazon-from-a-search-result-with-python
+        ua = UserAgent()
+        options.add_argument(f"user-agent={ua.random}")
+
+        # Settings Needed for Heroku
+        # options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+        # options.add_argument("--disable-dev-shm-usage")
+        # options.add_argument("--no-sandbox")
+
+        # https://stackoverflow.com/questions/12211781/how-to-maximize-window-in-chrome-using-webdriver-python
+        # options.add_argument("--start-maximized")
+        # https://stackoverflow.com/questions/11613869/how-to-disable-logging-using-selenium-with-python-binding
+        options.add_experimental_option("excludeSwitches", ["enable-logging"])
+        options.add_argument("--window-size=1920,1080")
         options.add_argument("--headless=new")
-        options.add_argument("--window-size=1920,1200")
-        driver = webdriver.Chrome(service=service, options=options)
+        options.add_argument('--blink-settings=imagesEnabled=false')
+        prefs = {"profile.managed_default_content_settings.images": 2}
+        options.add_experimental_option("prefs", prefs)
+        driver = webdriver.Chrome(options=options)
         driver.get(link)
 
         # Accept Cookies
