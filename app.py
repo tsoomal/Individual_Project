@@ -565,7 +565,7 @@ class AddBestsellerLinkToDB(threading.Thread):
         with app.app_context():
             setup_database(self.links, base_file_name="scraped_database_data", create_new_csv=False,
                            add_bestseller_link=True, scrape_prices=True, scrape_only_new_books=True)
-        print('Threaded task for updating Ebay prices for book has been completed')
+        print('Threaded task for adding bestseller books to database has been completed')
 
 @app.route("/add_amazon_bestseller_list_to_db", methods =['POST','GET'])
 def add_amazon_bestseller_link_to_db():
