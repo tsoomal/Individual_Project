@@ -1861,9 +1861,68 @@ def setup_database(links,base_file_name="scraped_database_data", create_new_csv=
     df = df[['Title', 'New Link', 'Used Link', 'Edition Format', 'ISBN']]
     df.to_csv("./" + base_file_name + "_ebay.csv", index=False)
 
-    if scrape_prices:
+    if scrape_prices and not add_bestseller_link:
         check_ebay_prices_today("./" + base_file_name + "_ebay.csv")
         check_amazon_prices_today("./" + base_file_name + "_amazon.csv")
+
+    if scrape_prices and add_bestseller_link:
+        df_amazon = pd.read_csv(base_file_name + "_amazon.csv")
+        number_of_rows_amazon = df_amazon.shape[0]
+
+        df_ebay = pd.read_csv(base_file_name + "_ebay.csv")
+        number_of_rows_ebay = df_ebay.shape[0]
+
+
+        for row_number in range(number_of_rows_amazon):
+            book_name = df_amazon.iloc[row_number, [0]][0]
+            amazon_link = df_amazon.iloc[row_number, [1]][0]
+            edition_format = df_amazon.iloc[row_number, [2]][0]
+            # https://stackoverflow.com/questions/27387415/how-would-i-get-everything-before-a-in-a-string-python
+            isbn = str(df_amazon.iloc[row_number, [3]][0])
+            isbn = isbn.zfill(10)
+
+            try:
+                print(book_name)
+                book_in_amazon_db = app.Amazon.query.get_or_404(isbn)
+                print()
+            except werkzeug.exceptions.NotFound:
+                print("Book not found!")
+                print(isbn)
+                print()
+                try:
+                    check_amazon_prices_today_isbn(isbn, amazon_link, book_name, edition_format)
+                except:
+                    app.db.session.rollback()
+            except Exception as e:
+                print("Other exception!")
+                print(e)
+
+
+        for row_number in range(number_of_rows_ebay):
+            book_name = df_ebay.iloc[row_number, [0]][0]
+            new_link = df_ebay.iloc[row_number, [1]][0]
+            used_link = df_ebay.iloc[row_number, [2]][0]
+            edition_format = df_ebay.iloc[row_number, [3]][0]
+            isbn = df_ebay.iloc[row_number, [4]][0]
+            # https://stackoverflow.com/questions/27387415/how-would-i-get-everything-before-a-in-a-string-python
+            isbn = str(df_ebay.iloc[row_number, [3]][0])
+            isbn = isbn.zfill(10)
+
+            try:
+                print(book_name)
+                book_in_ebay_db = app.Ebay.query.get_or_404(isbn)
+                print()
+            except werkzeug.exceptions.NotFound:
+                print("Book not found!")
+                print(isbn)
+                print()
+                try:
+                    check_ebay_prices_today_isbn(isbn, used_link, new_link, book_name, edition_format)
+                except:
+                    app.db.session.rollback()
+            except Exception as e:
+                print("Other exception!")
+                print(e)
 
 
 def get_ebay_historical_price(isbn, condition):
