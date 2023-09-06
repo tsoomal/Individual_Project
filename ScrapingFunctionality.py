@@ -1160,7 +1160,7 @@ def check_amazon_prices_today_isbn(isbn, amazon_link, book_name, edition_format)
     time1 = datetime.now()
 
     try:
-        driver = webdriver.Chrome(executable_path=executable_path, options=options)
+        driver = webdriver.Chrome(service=executable_path, options=options)
     except Exception as e:
         print("Error with Selenium.")
         print(e)
