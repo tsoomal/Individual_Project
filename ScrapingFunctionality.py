@@ -1139,9 +1139,10 @@ def check_amazon_prices_today_isbn(isbn, amazon_link, book_name, edition_format)
 
 
     # Settings Needed for Heroku
-    # options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
-    # options.add_argument("--disable-dev-shm-usage")
-    # options.add_argument("--no-sandbox")
+    options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+    executable_path = os.environ.get("CHROMEDRIVER_PATH")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--no-sandbox")
 
     # https://stackoverflow.com/questions/12211781/how-to-maximize-window-in-chrome-using-webdriver-python
     #options.add_argument("--start-maximized")
@@ -1159,9 +1160,10 @@ def check_amazon_prices_today_isbn(isbn, amazon_link, book_name, edition_format)
     time1 = datetime.now()
 
     try:
-        driver = webdriver.Chrome(options=options)
-    except:
+        driver = webdriver.Chrome(executable_path=executable_path, options=options)
+    except Exception as e:
         print("Error with Selenium.")
+        print(e)
         try:
             driver.quit()
         except:
