@@ -37,7 +37,7 @@
 
         <!-- https://getbootstrap.com/docs/5.0/forms/form-control/ -->
       <div class="mb-3 row">
-    <label for="search_all" class="col-sm-2 col-form-label">Search all opportunities (both new and used condition books):</label>
+    <label for="search_all" class="col-sm-2 col-form-label">Search all opportunities (new, used and cross condition):</label>
     <div class="col-sm-10">
       <input type="text" class="form-control" id="search_all" placeholder="">
     </div>
@@ -234,6 +234,9 @@ $(document).ready(function(){
       $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
     });
     $("#table_used tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+    $("#table_cross tr").filter(function() {
       $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
     });
   });
