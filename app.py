@@ -23,7 +23,8 @@ from sqlalchemy.types import TypeDecorator
 from ScrapingFunctionality import check_ebay_prices_today, check_amazon_prices_today, get_ebay_historical_price, check_ebay_prices_today_isbn, check_amazon_prices_today_isbn, setup_database
 import threading
 from PriceModelling import storage_ebay_to_amazon, storage_amazon_to_ebay
-
+import time
+import datetime
 
 app = Flask(__name__)
 # https://stackoverflow.com/questions/65888631/how-do-i-use-heroku-postgres-with-my-flask-sqlalchemy-app
@@ -42,6 +43,52 @@ global updatable_amazon
 updatable_amazon = True
 global updatable_ebay
 updatable_ebay = True
+
+
+# https://stackoverflow.com/questions/65116409/how-to-run-a-function-every-day-at-a-specific-time-in-python
+class UpdatePrices24Hours(threading.Thread):
+    def __init__(self):
+        super(UpdatePrices24Hours, self).__init__()
+    def run(self):
+
+        run_time = datetime.datetime(year=2023 , month=9 , day=25 ,hour=1, minute=30, second=0)
+
+        delta = datetime.timedelta(days=1)
+
+        while True:
+            if datetime.datetime.now() >= run_time:
+                # https://stackoverflow.com/questions/73999854/flask-error-runtimeerror-working-outside-of-application-context
+                with app.app_context():
+                    try:
+                        with app.app_context():
+                            check_amazon_prices_today("./scraped_database_data_amazon.csv")
+
+                        print('Threaded task for daily updating Amazon DB has been completed')
+                        globals()["updatable_amazon"] = True
+                    except:
+                        print('Threaded task for daily updating Amazon DB has FAILED')
+                        globals()["updatable_amazon"] = True
+
+                    try:
+                        with app.app_context():
+                            check_ebay_prices_today("./scraped_database_data_ebay.csv")
+
+                        print('Threaded task for daily updating Ebay DB has been completed')
+                        globals()["updatable_ebay"] = True
+                    except:
+                        print('Threaded task for daily updating Ebay DB has FAILED')
+                        globals()["updatable_ebay"] = True
+                print('Threaded task for daily update of database prices has been completed')
+                run_time += delta
+
+            # Depending on need, check frequency can be decreased
+            # 1800 seconds
+            time.sleep(1800)
+
+
+t_dailyUpdate = UpdatePrices24Hours()
+t_dailyUpdate.start()
+
 
 # Creating the database model
 class Ebay(db.Model):
