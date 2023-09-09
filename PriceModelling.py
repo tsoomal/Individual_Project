@@ -1,6 +1,5 @@
 import decimal
 
-
 def storage_ebay_to_amazon(total_source_price):
     total_source_price = float(total_source_price)
     ebay_shipping_cost = 0
@@ -59,6 +58,7 @@ def main():
     for tsp in range(1, 101):
         print(str(tsp) + "|| Price (storage_ebay_to_amazon): " + str(storage_ebay_to_amazon(tsp)))
 
+    # For intervals of 0.1:
     # xs = (x * 0.1 for x in range(1, 1010))
     # for tsp in xs:
     #     print(str(tsp) + "|| Price (storage_ebay_to_amazon): " + str(storage_ebay_to_amazon(tsp)))

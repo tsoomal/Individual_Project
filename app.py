@@ -17,8 +17,6 @@ from flask_migrate import Migrate
 from sqlalchemy.exc import IntegrityError
 # https://stackoverflow.com/questions/38111620/python-isbn-13-digit-validate
 import isbnlib
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.types import TypeDecorator
 
 from ScrapingFunctionality import check_ebay_prices_today, check_amazon_prices_today, get_ebay_historical_price, check_ebay_prices_today_isbn, check_amazon_prices_today_isbn, setup_database
 import threading

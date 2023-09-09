@@ -1731,27 +1731,6 @@ def get_used_delivery_price(index, soup):
 
 
 def main():
-    # check_amazon_prices_today_isbn("./scraped_database_data_amazon.csv", "1804990922", only_create_new_books=False)
-    # print()
-    # print()
-    # check_amazon_prices_today_isbn("./scraped_database_data_amazon.csv", "185286480X",only_create_new_books=False)
-    # print()
-    # print()
-    # check_amazon_prices_today_isbn("./scraped_database_data_amazon.csv", "0907610900", only_create_new_books=False)
-    # print()
-    # print()
-    # check_amazon_prices_today_isbn("./scraped_database_data_amazon.csv", "1852868163", only_create_new_books=False)
-    # print()
-    # print()
-    # check_amazon_prices_today_isbn("./scraped_database_data_amazon.csv", "1780926804", only_create_new_books=False)
-    # print()
-    # print()
-    # check_amazon_prices_today_isbn("./scraped_database_data_amazon.csv", "1779509529", only_create_new_books=False)
-    # print()
-    # print()
-    # check_amazon_prices_today_isbn("./scraped_database_data_amazon.csv", "0753801523", only_create_new_books=False)
-
-
     #check_amazon_prices_today_proper_test("./scraped_database_data_amazon.csv", only_create_new_books=False)
     isbn = "0857504797"
     print(round(ebay_historical_prices(isbn,"used"),2))

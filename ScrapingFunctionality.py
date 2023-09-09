@@ -15,7 +15,6 @@ import pandas as pd
 # https://www.youtube.com/watch?v=HiOtQMcI5wg
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -1655,10 +1654,6 @@ def check_amazon_prices_today_isbn(isbn, amazon_link, book_name, edition_format)
 
 
 
-
-
-
-
 def click_used_link(driver, soup):
     results = soup.find("div", id="tmmSwatches")
     results2 = results.findAll("li")
@@ -2192,8 +2187,6 @@ def update_ebay_historical_prices_in_database():
             print(e)
 
 
-
-
 def main():
     links = [
         "https://www.amazon.co.uk/Best-Sellers-Books-Role-Playing-War-Games/zgbs/books/270509/ref=zg_bs_nav_books_3_270453",
@@ -2208,10 +2201,6 @@ def main():
 
     check_ebay_prices_today("./scraped_database_data_ebay.csv")
     #check_amazon_prices_today("./scraped_database_data_amazon.csv")
-
-
-
-
 
 
 if __name__ == "__main__":
